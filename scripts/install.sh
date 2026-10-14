@@ -92,6 +92,12 @@ for ex in "$REPO"/config/quantum-moon/*.example; do
   name="$(basename "$ex" .example)"
   mode=644
   case "$name" in git-watcher.json|vpn.json|services.json) mode=600 ;; esac
+  # Secrets with a Caelestia-era counterpart are migrated (copied) by migrate-caelestia-state.sh;
+  # seeding the empty example first would make the migration skip the real file.
+  case "$name" in
+    git-watcher.json) [[ -f "$HOME/.config/caelestia/git-watcher.json" && ! -f "$QM_CFG/$name" ]] && { ok "skip seeding $name (legacy config will be migrated)"; continue; } ;;
+    vpn.json)         [[ -f "$HOME/.config/caelestia/bar-vpn.json"     && ! -f "$QM_CFG/$name" ]] && { ok "skip seeding $name (legacy config will be migrated)"; continue; } ;;
+  esac
   copy_if_missing "$ex" "$QM_CFG/$name" "$mode"
 done
 copy_if_missing "$REPO/config/quantum-moon/nautilus-sidebar-extra" "$QM_CFG/nautilus-sidebar-extra"
