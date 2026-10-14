@@ -22,8 +22,11 @@ CustomMouseArea {
     required property bool fullscreen
 
     readonly property bool sidebarAllowedOnThisOutput: Config.sidebar.enabled
-    readonly property var hoverExcludedScreens: Config.bar.hoverExcludedScreens ?? []
+    readonly property var hoverExcludedScreens: GlobalConfig.bar?.hoverExcludedScreens ?? []
     readonly property bool hoverDisabled: Strings.testRegexList(hoverExcludedScreens, screen.name)
+    readonly property var gameModeLauncherHoverExcluded: GlobalConfig.launcher?.gameModeHoverExcludedScreens ?? []
+    readonly property bool launcherHoverDisabled: GameMode.enabled && (gameModeLauncherHoverExcluded.length === 0 || Strings.testRegexList(gameModeLauncherHoverExcluded, screen.name))
+    readonly property bool launcherShowOnHover: Config.launcher.showOnHover && !launcherHoverDisabled
 
     property point dragStart
     property bool launcherShortcutActive
@@ -57,7 +60,7 @@ CustomMouseArea {
         if (!sidebarShortcutActive)
             visibilities.sidebar = false;
 
-        if (Config.launcher.showOnHover && !launcherShortcutActive && !ProtonGhosts.stickyLauncherUi(visibilities.launcher && Config.launcher.enabled, visibilities.windowPicker))
+        if (launcherShowOnHover && !launcherShortcutActive && !ProtonGhosts.stickyLauncherUi(visibilities.launcher && Config.launcher.enabled, visibilities.windowPicker))
             visibilities.launcher = false;
 
         if (!windowPickerShortcutActive && (!visibilities.windowPicker || !pickerKeepOpen(pointerX, pointerY)))
@@ -103,6 +106,15 @@ CustomMouseArea {
             return;
         }
 
+        if (launcherHoverDisabled) {
+            if (!launcherShortcutActive)
+                visibilities.launcher = false;
+            if (!windowPickerShortcutActive)
+                visibilities.windowPicker = false;
+            if (!utilitiesShortcutActive)
+                visibilities.utilities = false;
+        }
+
         if (visibilities.sidebar && sidebarAllowedOnThisOutput) {
             const inSidebar = inSidebarBounds(x, y);
             if (!sidebarShortcutActive && !inSidebar)
@@ -111,12 +123,12 @@ CustomMouseArea {
                 sidebarShortcutActive = false;
         }
 
-        if (Config.launcher.showOnHover && !visibilities.launcher && inBottomPanel(panels.launcher, x, y) && canOpenWindowPicker())
+        if (launcherShowOnHover && !visibilities.launcher && inBottomPanel(panels.launcher, x, y) && canOpenWindowPicker())
             visibilities.launcher = true;
 
         const launcherOpen = visibilities.launcher && Config.launcher.enabled;
         const pickerOpen = visibilities.windowPicker;
-        const inBottomLauncherBand = Config.launcher.showOnHover && inScreenBottomLauncherBand(y);
+        const inBottomLauncherBand = launcherShowOnHover && inScreenBottomLauncherBand(y);
         const launcherPriority = launcherOpen || pickerOpen || inBottomLauncherBand;
 
         if (launcherPriority) {
@@ -126,7 +138,7 @@ CustomMouseArea {
                 bar.isHovered = false;
         }
 
-        if (Config.launcher.showOnHover && launcherOpen && !launcherShortcutActive && !ProtonGhosts.stickyLauncherUi(launcherOpen, pickerOpen) && !isOverLauncherBounds(x, y))
+        if (launcherShowOnHover && launcherOpen && !launcherShortcutActive && !ProtonGhosts.stickyLauncherUi(launcherOpen, pickerOpen) && !isOverLauncherBounds(x, y))
             visibilities.launcher = false;
 
         if (!Config.launcher.showOnHover && pickerOpen) {
@@ -205,11 +217,11 @@ CustomMouseArea {
                 visibilities.sidebar = false;
         }
 
-        if (!Config.launcher.showOnHover && !launcherOpen && !pickerOpen && !pressed && canOpenWindowPicker()) {
+        if (!Config.launcher.showOnHover && !launcherHoverDisabled && !launcherOpen && !pickerOpen && !pressed && canOpenWindowPicker()) {
             if (!windowPickerDismissedSideways && inBottomPanel(panels.windowPicker, x, y))
                 visibilities.windowPicker = true;
         }
-        if (!Config.launcher.showOnHover && pressed && inBottomPanel(panels.launcher, dragStart.x, dragStart.y) && withinPanelWidth(panels.launcher, x, y)) {
+        if (!Config.launcher.showOnHover && !launcherHoverDisabled && pressed && inBottomPanel(panels.launcher, dragStart.x, dragStart.y) && withinPanelWidth(panels.launcher, x, y)) {
             if (dragY < -Config.launcher.dragThreshold)
                 visibilities.launcher = true;
             else if (dragY > Config.launcher.dragThreshold && !ProtonGhosts.stickyLauncherUi(launcherOpen, pickerOpen))
@@ -246,7 +258,7 @@ CustomMouseArea {
                 visibilities.quantumMoon = false;
         }
 
-        const showUtilities = inBottomPanel(panels.utilities, x, y);
+        const showUtilities = !launcherHoverDisabled && inBottomPanel(panels.utilities, x, y);
 
         if (!utilitiesShortcutActive) {
             visibilities.utilities = showUtilities;
@@ -331,13 +343,13 @@ CustomMouseArea {
     }
 
     function inScreenBottomLauncherBand(y: real): bool {
-        if (hoverDisabled)
+        if (hoverDisabled || launcherHoverDisabled)
             return false;
         return inBottomHoverBand(y);
     }
 
     function inLauncherVerticalBand(y: real): bool {
-        if (hoverDisabled)
+        if (hoverDisabled || launcherHoverDisabled)
             return false;
         const lh = bottomHoverTriggerHeight(panels.launcher);
         return y > height - lh - Config.border.rounding;
@@ -360,7 +372,7 @@ CustomMouseArea {
     }
 
     function windowPickerBottomBand(y: real): bool {
-        if (hoverDisabled)
+        if (hoverDisabled || launcherHoverDisabled)
             return false;
         return inBottomHoverBand(y);
     }
@@ -404,7 +416,7 @@ CustomMouseArea {
         const ly = event.y;
         if (bar.disabled)
             return;
-        if (lx < bar.implicitWidth && Config.launcher.showOnHover && inScreenBottomLauncherBand(ly))
+        if (lx < bar.implicitWidth && launcherShowOnHover && inScreenBottomLauncherBand(ly))
             return;
         if (lx < bar.implicitWidth) {
             const barRoot = bar.content.item as Item;
@@ -437,6 +449,21 @@ CustomMouseArea {
     onPositionChanged: event => applyPointerPosition(event.x, event.y)
 
     Connections {
+        target: GameMode
+
+        function onEnabledChanged(): void {
+            if (!GameMode.enabled)
+                return;
+            if (!root.launcherShortcutActive)
+                root.visibilities.launcher = false;
+            if (!root.windowPickerShortcutActive)
+                root.visibilities.windowPicker = false;
+            if (!root.utilitiesShortcutActive)
+                root.visibilities.utilities = false;
+        }
+    }
+
+    Connections {
         target: Hypr
 
         function onCursorMoved(gx: real, gy: real): void {
@@ -464,7 +491,7 @@ CustomMouseArea {
                 return;
             if (panels.windowPicker.pointerInside)
                 return;
-            if (Config.launcher.showOnHover || root.windowPickerShortcutActive)
+            if (root.launcherShowOnHover || root.windowPickerShortcutActive)
                 return;
             if (root.pickerKeepOpen(root.pointerX, root.pointerY))
                 return;

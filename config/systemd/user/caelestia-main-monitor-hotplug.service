@@ -1,0 +1,13 @@
+[Unit]
+Description=Caelestia main-monitor hotplug (bar + layout fallback when preferred display disconnects)
+# UWSM sessions often leave graphical-session.target inactive; bind to default.target.
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/caelestia/scripts/main-monitor-hotplug.sh watch
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

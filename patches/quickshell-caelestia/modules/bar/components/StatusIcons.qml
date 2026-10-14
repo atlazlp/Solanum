@@ -209,6 +209,34 @@ StyledRect {
             }
         }
 
+        // Game mode exit (only while game mode is on; click disables it)
+        WrappedLoader {
+            name: "gamemode"
+            active: GameMode.enabled
+
+            sourceComponent: Item {
+                implicitWidth: gmIcon.implicitWidth
+                implicitHeight: gmIcon.implicitHeight
+
+                MaterialIcon {
+                    id: gmIcon
+
+                    anchors.centerIn: parent
+                    animate: true
+                    text: "gamepad"
+                    fill: 1
+                    color: root.colour
+                }
+
+                StateLayer {
+                    anchors.fill: parent
+                    radius: Tokens.rounding.full
+                    color: root.colour
+                    onClicked: GameMode.enabled = false
+                }
+            }
+        }
+
         // Azure DevOps PR watcher
         WrappedLoader {
             name: "gitwatcher"

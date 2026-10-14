@@ -79,10 +79,12 @@ install -m644 "${ROOT}/config/wireplumber/wireplumber.conf.d/52-analog-mic-echo-
 mkdir -p "${HOME}/.config/systemd/user"
 install -m644 "${ROOT}/config/systemd/user/audio-analog-mic-setup.service" "${HOME}/.config/systemd/user/audio-analog-mic-setup.service"
 install -m644 "${ROOT}/config/systemd/user/caelestia-suspend-resume-watch.service" "${HOME}/.config/systemd/user/caelestia-suspend-resume-watch.service"
+install -m644 "${ROOT}/config/systemd/user/caelestia-main-monitor-hotplug.service" "${HOME}/.config/systemd/user/caelestia-main-monitor-hotplug.service"
 systemctl --user daemon-reload 2>/dev/null || true
 systemctl --user enable --now audio-analog-mic-setup.service 2>/dev/null || true
 systemctl --user enable --now caelestia-suspend-resume-watch.service 2>/dev/null || true
-for s in cursor-clean.sh workspace-overview-toggle.sh window-alt-tab-cycle.sh window_menu.py hypr-focus-window.sh activity-monitor.sh build-hyprspace.sh hypr-group-mouse5.sh hypr-mouse-submap-if-not-steam-game.sh hyprresume-save.sh proton-hide-ghost-windows.sh locked-sleep-after.sh suspend-resume-watch.sh qm-shuffle-if-unlocked.sh toggle-special-window.sh game-mode-resources.sh git-watcher.py init-git-watcher.sh; do
+systemctl --user enable --now caelestia-main-monitor-hotplug.service 2>/dev/null || true
+for s in cursor-clean.sh workspace-overview-toggle.sh window-alt-tab-cycle.sh window_menu.py hypr-focus-window.sh activity-monitor.sh build-hyprspace.sh hypr-group-mouse5.sh hypr-mouse-submap-if-not-steam-game.sh hyprresume-save.sh proton-hide-ghost-windows.sh locked-sleep-after.sh suspend-resume-watch.sh qm-shuffle-if-unlocked.sh toggle-special-window.sh game-mode-resources.sh git-watcher.py init-git-watcher.sh main-monitor-hotplug.sh; do
   if [[ -f "${CAE}/scripts/${s}" ]]; then
     install -m755 "${CAE}/scripts/${s}" "${DEST_C}/scripts/${s}"
   fi
@@ -96,6 +98,14 @@ if [[ -f "${XDG_STATE_HOME:-${HOME}/.local/state}/caelestia/git-watcher.pid" ]];
 fi
 rm -f "${DEST_C}/scripts/window-picker-fuzzel.sh" "${DEST_C}/scripts/qm-launcher-log.sh"
 install -m644 "${CAE}/hypr-user.conf" "${DEST_C}/hypr-user.conf"
+install -m644 "${CAE}/hypr-monitors-default.conf" "${DEST_C}/hypr-monitors-default.conf"
+if [[ ! -f "${DEST_C}/hypr-monitors-runtime.conf" ]]; then
+  install -m644 "${CAE}/hypr-monitors-runtime.conf" "${DEST_C}/hypr-monitors-runtime.conf"
+fi
+# If runtime is missing modes but default exists, seed it (do not clobber an active fallback layout blindly when state exists).
+if [[ ! -s "${DEST_C}/hypr-monitors-runtime.conf" ]]; then
+  install -m644 "${CAE}/hypr-monitors-default.conf" "${DEST_C}/hypr-monitors-runtime.conf"
+fi
 if [[ -x "${CAE}/scripts/gen-hypr-launcher-interrupts.sh" ]]; then
   "${CAE}/scripts/gen-hypr-launcher-interrupts.sh" "${DEST_C}/hypr-launcher-interrupts.conf"
 else

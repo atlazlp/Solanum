@@ -28,14 +28,7 @@ If that does not match your hardware or region:
 
 **`caelestia/hyprpaper.conf`** in the repo lists three outputs as a **static fallback** before the first **`qm-apply`**. Extra **`wallpaper { monitor = … }`** entries for missing connectors are usually harmless; after **`qm-apply`**, the file is rewritten for **currently connected** monitors only.
 
-**Important — Caelestia bar visibility:** **`shell.json`** sets **`bar.excludedScreens`** so the bar appears only on the **center** panel in the triple-head layout. If **your only connected monitor’s name appears in that list**, the bar will stay hidden on every screen. Fix:
-
-```bash
-# Edit ~/.config/caelestia/shell.json — set for example:
-# "excludedScreens": []
-```
-
-Then restart the shell (**Ctrl+Super+Alt+R**). I maintain my committed values as-is so my layout keeps working.
+**Important — Caelestia bar visibility:** **`shell.json`** sets **`bar.excludedScreens`** so the bar appears only on the **center** panel in the triple-head layout. The user unit **`caelestia-main-monitor-hotplug.service`** watches Hyprland hotplug events and keeps the bar on preferred main **`DP-2`**. If that output disconnects, it moves the bar to the **rightmost** remaining monitor, compacts layout, and focuses it; reconnecting **`DP-2`** reloads the configured triple layout and restores exclusions. Override with **`PREFERRED_MAIN`**. If you disable that service and **your only connected monitor’s name appears in `excludedScreens`**, the bar stays hidden — set **`excludedScreens`** to **`[]`** and restart the shell (**Ctrl+Super+Alt+R**).
 
 ---
 

@@ -19,8 +19,7 @@ def main() -> None:
     caps = dev.capabilities(absinfo=False)
     # Newer kernels / python-evdev reject EV_SYN codes when creating a UInput
     # device (OSError: [Errno 22] Invalid argument). UInput synthesises SYN
-    # events itself, so strip it from the advertised capabilities. (This fix is
-    # independent of the Hyprland version and must stay.)
+    # events itself, so strip it from the advertised capabilities.
     caps.pop(ecodes.EV_SYN, None)
     ui = UInput(
         events=caps,

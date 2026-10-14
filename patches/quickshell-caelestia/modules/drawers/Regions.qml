@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Caelestia.Config
 import qs.modules.bar as Bar
+import qs.services
 import qs.utils
 
 Region {
@@ -35,9 +36,11 @@ Region {
         return Math.max(revealed, LayoutTweaks.bottomHoverTriggerPx) + root.borderThickness;
     }
 
-    readonly property real launcherCutoutH: shellReceivesLauncherPointer ? 0 : bottomCutoutHeight(root.panels.launcher)
-    readonly property real pickerCutoutH: shellReceivesWindowPickerPointer ? 0 : bottomCutoutHeight(root.panels.windowPicker)
-    readonly property real utilitiesCutoutH: immersivePointer ? 0 : bottomCutoutHeight(root.panels.utilities)
+    readonly property var gameModeLauncherHoverExcluded: GlobalConfig.launcher?.gameModeHoverExcludedScreens ?? []
+    readonly property bool suppressLauncherBottomHover: GameMode.enabled && (gameModeLauncherHoverExcluded.length === 0 || Strings.testRegexList(gameModeLauncherHoverExcluded, win.screen.name))
+    readonly property real launcherCutoutH: shellReceivesLauncherPointer || suppressLauncherBottomHover ? 0 : bottomCutoutHeight(root.panels.launcher)
+    readonly property real pickerCutoutH: shellReceivesWindowPickerPointer || suppressLauncherBottomHover ? 0 : bottomCutoutHeight(root.panels.windowPicker)
+    readonly property real utilitiesCutoutH: immersivePointer || suppressLauncherBottomHover ? 0 : bottomCutoutHeight(root.panels.utilities)
 
     R {
         panel: root.panels.dashboard

@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Caelestia.Config
 import qs.components
 import qs.services
+import qs.utils
 
 WlSessionLockSurface {
     id: root
@@ -13,7 +14,7 @@ WlSessionLockSurface {
     required property WlSessionLock lock
     required property Pam pam
 
-    readonly property bool showLockUi: GlobalConfig.sidebar.enabled && contentItem.Config.sidebar.enabled
+    readonly property bool showLockUi: !Strings.testRegexList(Config.bar.excludedScreens ?? [], screen.name)
 
     readonly property bool unlocking: unlockAnim.running || quickUnlock.running
 
