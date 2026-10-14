@@ -1,0 +1,191 @@
+pragma Singleton
+
+import QtQuick
+import Quickshell
+
+// Icon name helpers (Material Symbols names and desktop icon lookups).
+Singleton {
+    id: root
+
+    readonly property var categoryIcons: ({
+            WebBrowser: "web",
+            Printing: "print",
+            Security: "security",
+            Network: "chat",
+            Archiving: "archive",
+            Compression: "archive",
+            Development: "code",
+            IDE: "code",
+            TextEditor: "edit_note",
+            Audio: "music_note",
+            Music: "music_note",
+            Player: "music_note",
+            Recorder: "mic",
+            Game: "sports_esports",
+            FileTools: "files",
+            FileManager: "files",
+            Filesystem: "files",
+            FileTransfer: "files",
+            Settings: "settings",
+            DesktopSettings: "settings",
+            HardwareSettings: "settings",
+            TerminalEmulator: "terminal",
+            ConsoleOnly: "terminal",
+            Utility: "build",
+            Monitor: "monitor_heart",
+            Midi: "graphic_eq",
+            Mixer: "graphic_eq",
+            AudioVideoEditing: "video_settings",
+            AudioVideo: "music_video",
+            Video: "videocam",
+            Building: "construction",
+            Graphics: "photo_library",
+            "2DGraphics": "photo_library",
+            RasterGraphics: "photo_library",
+            TV: "tv",
+            System: "host",
+            Office: "content_paste"
+        })
+
+    readonly property var weatherIcons: ({
+            "0": "clear_day",
+            "1": "clear_day",
+            "2": "partly_cloudy_day",
+            "3": "cloud",
+            "45": "foggy",
+            "48": "foggy",
+            "51": "rainy",
+            "53": "rainy",
+            "55": "rainy",
+            "56": "rainy",
+            "57": "rainy",
+            "61": "rainy",
+            "63": "rainy",
+            "65": "rainy",
+            "66": "rainy",
+            "67": "rainy",
+            "71": "cloudy_snowing",
+            "73": "cloudy_snowing",
+            "75": "snowing_heavy",
+            "77": "cloudy_snowing",
+            "80": "rainy",
+            "81": "rainy",
+            "82": "rainy",
+            "85": "cloudy_snowing",
+            "86": "snowing_heavy",
+            "95": "thunderstorm",
+            "96": "thunderstorm",
+            "99": "thunderstorm"
+        })
+
+    // Desktop-entry icon path for an app class/name, or `fallback` (icon name) when unknown.
+    function getAppIcon(name: string, fallback: string): string {
+        const entry = DesktopEntries.heuristicLookup(name ?? "");
+        const icon = entry?.icon ?? "";
+        if (fallback !== undefined && fallback !== "")
+            return Quickshell.iconPath(icon, fallback);
+        return Quickshell.iconPath(icon, true);
+    }
+
+    function getAppCategoryIcon(name: string, fallback: string): string {
+        const categories = DesktopEntries.heuristicLookup(name ?? "")?.categories;
+        if (categories)
+            for (const [key, value] of Object.entries(categoryIcons))
+                if (categories.includes(key))
+                    return value;
+        return fallback;
+    }
+
+    function getNetworkIcon(strength: int, isSecure: bool): string {
+        if (isSecure) {
+            if (strength >= 80) return "network_wifi_locked";
+            if (strength >= 60) return "network_wifi_3_bar_locked";
+            if (strength >= 40) return "network_wifi_2_bar_locked";
+            if (strength >= 20) return "network_wifi_1_bar_locked";
+            return "signal_wifi_0_bar";
+        }
+        if (strength >= 80) return "network_wifi";
+        if (strength >= 60) return "network_wifi_3_bar";
+        if (strength >= 40) return "network_wifi_2_bar";
+        if (strength >= 20) return "network_wifi_1_bar";
+        return "signal_wifi_0_bar";
+    }
+
+    function getBluetoothIcon(icon: string): string {
+        icon = icon ?? "";
+        if (icon.includes("headset") || icon.includes("headphones")) return "headphones";
+        if (icon.includes("audio")) return "speaker";
+        if (icon.includes("phone")) return "smartphone";
+        if (icon.includes("mouse")) return "mouse";
+        if (icon.includes("keyboard")) return "keyboard";
+        return "bluetooth";
+    }
+
+    function getWeatherIcon(code: string): string {
+        return weatherIcons[code] ?? "air";
+    }
+
+    function getNotifIcon(summary: string, critical: bool): string {
+        summary = (summary ?? "").toLowerCase();
+        if (summary.includes("reboot")) return "restart_alt";
+        if (summary.includes("recording")) return "screen_record";
+        if (summary.includes("battery")) return "power";
+        if (summary.includes("screenshot")) return "screenshot_monitor";
+        if (summary.includes("welcome")) return "waving_hand";
+        if (summary.includes("time") || summary.includes("a break")) return "schedule";
+        if (summary.includes("installed")) return "download";
+        if (summary.includes("update")) return "update";
+        if (summary.includes("unable to")) return "deployed_code_alert";
+        if (summary.includes("profile")) return "person";
+        if (summary.includes("file")) return "folder_copy";
+        if (critical) return "release_alert";
+        return "chat";
+    }
+
+    function getVolumeIcon(volume: real, isMuted: bool): string {
+        if (isMuted) return "no_sound";
+        if (volume >= 0.5) return "volume_up";
+        if (volume > 0) return "volume_down";
+        return "volume_mute";
+    }
+
+    function getMicVolumeIcon(volume: real, isMuted: bool): string {
+        return (!isMuted && volume > 0) ? "mic" : "mic_off";
+    }
+
+    function getBrightnessIcon(value: real): string {
+        return `brightness_${Math.max(1, Math.min(7, Math.round(value * 6) + 1))}`;
+    }
+
+    function getSpecialWsIcon(name: string): string {
+        name = (name ?? "").toLowerCase().replace(/^special:/, "");
+        if (name === "special") return "star";
+        if (name === "communication") return "forum";
+        if (name === "music") return "music_cast";
+        if (name === "todo") return "checklist";
+        if (name === "sysmon") return "monitor_heart";
+        return name.length ? name[0].toUpperCase() : "star";
+    }
+
+    // Resolve a StatusNotifierItem icon string (handles the "name?path=dir" form).
+    function getTrayIcon(icon: string): string {
+        icon = icon ?? "";
+        if (icon.includes("?path=")) {
+            const [name, path] = icon.split("?path=");
+            return Qt.resolvedUrl(`${path}/${name.slice(name.lastIndexOf("/") + 1)}`);
+        }
+        return icon;
+    }
+
+    function getBatteryIcon(charge: int): string {
+        if (charge > 0 && charge < 5) return "battery_0_bar";
+        if (charge >= 5 && charge < 20) return "battery_1_bar";
+        if (charge >= 20 && charge < 35) return "battery_2_bar";
+        if (charge >= 35 && charge < 50) return "battery_3_bar";
+        if (charge >= 50 && charge < 65) return "battery_4_bar";
+        if (charge >= 65 && charge < 80) return "battery_5_bar";
+        if (charge >= 80 && charge < 95) return "battery_6_bar";
+        if (charge >= 95) return "battery_full";
+        return "battery_alert";
+    }
+}

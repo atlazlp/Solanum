@@ -1,0 +1,7 @@
+module qs.modules.drawers
+Drawers 1.0 Drawers.qml
+DrawerWindow 1.0 DrawerWindow.qml
+Panels 1.0 Panels.qml
+Regions 1.0 Regions.qml
+HoverStrips 1.0 HoverStrips.qml
+Toasts 1.0 Toasts.qml

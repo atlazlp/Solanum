@@ -1,0 +1,6 @@
+module qs.modules.bar.popouts
+PopoutHost 1.0 PopoutHost.qml
+AudioPopout 1.0 AudioPopout.qml
+NetworkPopout 1.0 NetworkPopout.qml
+TrayMenu 1.0 TrayMenu.qml
+ActiveWindowPopout 1.0 ActiveWindowPopout.qml

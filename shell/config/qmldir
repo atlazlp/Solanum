@@ -1,0 +1,6 @@
+module qs.config
+singleton Config 1.0 Config.qml
+singleton Paths 1.0 Paths.qml
+singleton Screens 1.0 Screens.qml
+singleton DevFlags 1.0 DevFlags.qml
+Defaults 1.0 Defaults.js

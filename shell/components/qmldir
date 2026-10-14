@@ -1,0 +1,22 @@
+module qs.components
+GlyphText 1.0 GlyphText.qml
+GlyphIcon 1.0 GlyphIcon.qml
+GlyphReveal 1.0 GlyphReveal.qml
+NomaiFrame 1.0 NomaiFrame.qml
+HexButton 1.0 HexButton.qml
+HexSegment 1.0 HexSegment.qml
+NomaiSlider 1.0 NomaiSlider.qml
+NomaiSwitch 1.0 NomaiSwitch.qml
+NomaiTextField 1.0 NomaiTextField.qml
+NomaiList 1.0 NomaiList.qml
+NomaiDivider 1.0 NomaiDivider.qml
+NomaiTooltip 1.0 NomaiTooltip.qml
+NomaiMenu 1.0 NomaiMenu.qml
+NomaiMenuItem 1.0 NomaiMenuItem.qml
+Popout 1.0 Popout.qml
+Modal 1.0 Modal.qml
+AppIcon 1.0 AppIcon.qml
+ProgressArc 1.0 ProgressArc.qml
+Sparkline 1.0 Sparkline.qml
+LevelBars 1.0 LevelBars.qml
+SectionHeader 1.0 SectionHeader.qml
