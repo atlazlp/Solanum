@@ -1,0 +1,3 @@
+module qs.modules.shiplog
+ShipLog 1.0 ShipLog.qml
+ShipLogDetail 1.0 ShipLogDetail.qml

@@ -1,0 +1,4 @@
+module qs.modules.notifications
+NotificationServer 1.0 NotificationServer.qml
+Popups 1.0 Popups.qml
+Popup 1.0 Popup.qml

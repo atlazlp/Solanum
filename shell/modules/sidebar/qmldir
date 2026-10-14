@@ -1,0 +1,4 @@
+module qs.modules.sidebar
+Sidebar 1.0 Sidebar.qml
+NotifGroup 1.0 NotifGroup.qml
+Notif 1.0 Notif.qml

@@ -66,7 +66,14 @@ function defaults() {
                 inhibitWhenAudio: true,
                 lockTimeout: 1800,
                 suspendTimeout: 2100,
-                lockedSleepAfter: 300
+                lockedSleepAfter: 300,
+                lockBeforeSleep: true,
+                // Idle monitors: idleAction is "lock", "dpms off" (hyprctl dispatch) or an argv list.
+                // When absent, lockTimeout/suspendTimeout above are used instead.
+                timeouts: [
+                    { timeout: 1800, idleAction: "lock" },
+                    { timeout: 2100, idleAction: ["systemctl", "suspend"] }
+                ]
             },
             showOverFullscreen: true,
             lockOnLogin: true
@@ -75,9 +82,23 @@ function defaults() {
             enabled: true,
             showOnHover: false,
             maxResults: 40,
-            prefixes: { apps: "", windows: "w:", clip: "c:", emoji: "e:", calc: "=" },
+            maxShown: 10,
+            width: 640,
+            prefixes: { actions: ">", windows: ":w ", clip: ":c ", emoji: ":e ", calc: "=" },
             favourites: [],
-            hidden: []
+            hidden: [],
+            emojiColumns: 8,
+            actions: [
+                { name: "Lock", description: "Lock the session", icon: "lock", command: ["qs", "-c", "quantum-moon", "ipc", "call", "lock", "lock"] },
+                { name: "Session", description: "Power menu", icon: "power_settings_new", command: ["qs", "-c", "quantum-moon", "ipc", "call", "drawers", "open", "session"] },
+                { name: "Settings", description: "Shell settings", icon: "settings", command: ["qs", "-c", "quantum-moon", "ipc", "call", "drawers", "open", "settings"] },
+                { name: "Ship log", description: "Open the ship log", icon: "history", command: ["qs", "-c", "quantum-moon", "ipc", "call", "drawers", "open", "shipLog"] },
+                { name: "Windows", description: "Switch to window mode", icon: "select_window", command: ["mode", "windows"] },
+                { name: "Clipboard", description: "Switch to clipboard mode", icon: "content_paste", command: ["mode", "clip"] },
+                { name: "Emoji", description: "Switch to emoji mode", icon: "mood", command: ["mode", "emoji"] },
+                { name: "Calculator", description: "Switch to calculator mode", icon: "calculate", command: ["mode", "calc"] },
+                { name: "Wipe clipboard", description: "cliphist wipe", icon: "delete_sweep", command: ["cliphist", "wipe"] }
+            ]
         },
         notifs: {
             enabled: true,
@@ -95,8 +116,8 @@ function defaults() {
         session: {
             enabled: true,
             commands: {
-                lock: ["qs", "-c", "quantum-moon", "ipc", "call", "lock", "lock"],
-                logout: ["loginctl", "terminate-user", ""],
+                lock: ["qm-lock"],
+                logout: ["qm-lock"],
                 suspend: ["systemctl", "suspend"],
                 hibernate: ["systemctl", "hibernate"],
                 reboot: ["systemctl", "reboot"],
@@ -115,12 +136,31 @@ function defaults() {
                 numLockChanged: false,
                 kbLayoutChanged: false,
                 nowPlaying: false
+            },
+            recorder: {
+                fps: 60,
+                audioSource: "default_output"
+            }
+        },
+        dashboard: {
+            enabled: true,
+            showOnHover: true,
+            resourceUpdateInterval: 3000,
+            historyLength: 30,
+            weather: {
+                location: "",
+                useFahrenheit: false,
+                useTwelveHourClock: false
             }
         },
         quantumMoon: {
             enabled: true,
             showOnHover: true,
-            shuffleOnIdle: true
+            shuffleOnIdle: true,
+            background: {
+                enabled: true,
+                desktopClock: { enabled: false, position: "bottom-right" }
+            }
         },
         audio: {
             increment: 0.1,
@@ -142,10 +182,23 @@ function defaults() {
             retentionDays: 30
         },
         updates: {
-            interval: 3600
+            interval: 1800,
+            checkOnResume: true,
+            toast: true,
+            command: ""
+        },
+        git: {
+            spawnDaemon: true
         },
         qm: {
             root: ""
+        },
+        lock: {
+            enableFprint: true,
+            maxFprintTries: 3,
+            hideNotifs: false,
+            blur: 48,
+            scrim: 0.45
         }
     };
 }

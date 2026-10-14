@@ -5,3 +5,4 @@ Panels 1.0 Panels.qml
 Regions 1.0 Regions.qml
 HoverStrips 1.0 HoverStrips.qml
 Toasts 1.0 Toasts.qml
+QmFadeOverlay 1.0 QmFadeOverlay.qml

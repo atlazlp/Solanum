@@ -20,3 +20,9 @@ ProgressArc 1.0 ProgressArc.qml
 Sparkline 1.0 Sparkline.qml
 LevelBars 1.0 LevelBars.qml
 SectionHeader 1.0 SectionHeader.qml
+ShipLogNode 1.0 ShipLogNode.qml
+ShipLogEdge 1.0 ShipLogEdge.qml
+ShipLogCanvas 1.0 ShipLogCanvas.qml
+NomaiTabs 1.0 NomaiTabs.qml
+NomaiCombo 1.0 NomaiCombo.qml
+NomaiNumber 1.0 NomaiNumber.qml

@@ -4,3 +4,6 @@ AudioPopout 1.0 AudioPopout.qml
 NetworkPopout 1.0 NetworkPopout.qml
 TrayMenu 1.0 TrayMenu.qml
 ActiveWindowPopout 1.0 ActiveWindowPopout.qml
+GitWatcherPopout 1.0 GitWatcherPopout.qml
+GitWatcherConfig 1.0 GitWatcherConfig.qml
+UpdatesPopout 1.0 UpdatesPopout.qml

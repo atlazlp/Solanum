@@ -67,7 +67,7 @@ Item {
         id: notifications
         name: "notifications"
         source: "../notifications/Popups.qml"
-        open: Screens.isEnabled("notifications", root.screen.name) && Notifs.count > 0 && !root.visibilities.sidebar
+        open: Screens.isEnabled("notifications", root.screen.name) && Notifs.popupCount > 0 && !root.visibilities.sidebar
         edge: "right"
         anchors.right: parent.right
         anchors.top: quantumMoon.visible ? quantumMoon.bottom : parent.top

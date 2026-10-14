@@ -1,0 +1,4 @@
+module qs.modules.windowpicker
+WindowPicker 1.0 WindowPicker.qml
+WindowList 1.0 WindowList.qml
+KillConfirm 1.0 KillConfirm.qml

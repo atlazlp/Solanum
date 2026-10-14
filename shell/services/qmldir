@@ -22,3 +22,16 @@ singleton Lock 1.0 Lock.qml
 singleton Screenshot 1.0 Screenshot.qml
 singleton Notifs 1.0 Notifs.qml
 singleton QuantumMoon 1.0 QuantumMoon.qml
+singleton QuantumMoonWallpaper 1.0 QuantumMoonWallpaper.qml
+NotifData 1.0 NotifData.qml
+singleton ShipLog 1.0 ShipLog.qml
+singleton Weather 1.0 Weather.qml
+singleton SystemUsage 1.0 SystemUsage.qml
+singleton NetworkUsage 1.0 NetworkUsage.qml
+singleton AppIndex 1.0 AppIndex.qml
+singleton LauncherItemOverrides 1.0 LauncherItemOverrides.qml
+singleton Clipboard 1.0 Clipboard.qml
+singleton Emoji 1.0 Emoji.qml
+singleton Calc 1.0 Calc.qml
+singleton Logind 1.0 Logind.qml
+singleton Services 1.0 Services.qml

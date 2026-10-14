@@ -50,7 +50,7 @@ Singleton {
     readonly property color text: col("onSurface", "#e8e6df")
     readonly property color textDim: col("onSurfaceVariant", "#a8a69c")
     readonly property color textOnLine: col("onPrimary", "#1a1300")
-    readonly property color ember: col("peach", "#e9a23b")
+    readonly property color ember: "#e9a23b"  // Nomai orange, fixed: palettes map "peach" to arbitrary hues
     readonly property color spark: col("tertiary", "#7fc8ff")
     readonly property color danger: col("error", "#ff6b6b")
     readonly property color onDanger: col("onError", "#2a0000")

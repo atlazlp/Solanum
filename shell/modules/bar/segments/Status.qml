@@ -51,6 +51,7 @@ HexSegment {
             onEntered: root.popout("audio", this)
             onExited: root.leave("audio")
             onClicked: Audio.toggleMute()
+            onRightClicked: Visibilities.toggle("audio", root.bar?.visibilities ?? null)
             onWheel: event => {
                 if (event.angleDelta.y > 0)
                     Audio.incrementVolume(0);
@@ -104,7 +105,12 @@ HexSegment {
             accent: Theme.spark
             badge: Updates.count
             tooltip: `${Updates.count} updates`
-            onClicked: Visibilities.toggle("updates", root.bar?.visibilities ?? null)
+            onEntered: root.popout("updates", this)
+            onExited: root.leave("updates")
+            onClicked: {
+                root.bar?.popouts?.hide();
+                Visibilities.toggle("updates", root.bar?.visibilities ?? null);
+            }
         }
 
         StatusGlyph {
@@ -161,6 +167,7 @@ HexSegment {
             accent: KvmCapture.active ? Theme.ember : Theme.textDim
             tooltip: KvmCapture.active ? "KVM: captured" : "KVM daemon"
             onClicked: Visibilities.toggle("kvm", root.bar?.visibilities ?? null)
+            onRightClicked: Visibilities.toggle("kvm", root.bar?.visibilities ?? null)
         }
     }
 
@@ -180,6 +187,7 @@ HexSegment {
         signal entered()
         signal exited()
         signal clicked()
+        signal rightClicked()
         signal wheel(var event)
 
         visible: shown
@@ -213,7 +221,8 @@ HexSegment {
 
         TapHandler {
             gesturePolicy: TapHandler.ReleaseWithinBounds
-            onTapped: glyph.clicked()
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onTapped: (point, button) => button === Qt.RightButton ? glyph.rightClicked() : glyph.clicked()
         }
 
         WheelHandler {

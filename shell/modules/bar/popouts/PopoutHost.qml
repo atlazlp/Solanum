@@ -100,6 +100,8 @@ Item {
                 case "network": return networkComp;
                 case "tray": return trayComp;
                 case "activewindow": return activeWindowComp;
+                case "gitwatcher": return gitWatcherComp;
+                case "updates": return updatesComp;
                 }
                 return null;
             }
@@ -124,4 +126,6 @@ Item {
     Component { id: networkComp; NetworkPopout {} }
     Component { id: trayComp; TrayMenu {} }
     Component { id: activeWindowComp; ActiveWindowPopout {} }
+    Component { id: gitWatcherComp; GitWatcherPopout {} }
+    Component { id: updatesComp; UpdatesPopout {} }
 }

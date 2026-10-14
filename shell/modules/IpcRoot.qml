@@ -2,8 +2,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services
+import qs.modules.launcher
 
-// `launcher` and `controlCenter` IPC targets (the launcher panel reads Launcher.requestedMode).
+// `launcher` and `controlCenter` IPC targets (the launcher panel reads LauncherState.requestedMode).
 Scope {
     id: root
 
@@ -16,11 +17,13 @@ Scope {
 
         function toggle(): void {
             root.requestedMode = "";
+            LauncherState.request("");
             Visibilities.toggle("launcher", null);
         }
 
         function open(mode: string): void {
             root.requestedMode = mode ?? "";
+            LauncherState.request(mode ?? "");
             Visibilities.open("launcher", null);
         }
 
@@ -30,6 +33,7 @@ Scope {
 
         function interrupt(): void {
             root.interrupted = true;
+            LauncherState.interrupted = true;
         }
 
         function mode(): string {

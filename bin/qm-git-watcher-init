@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# init-git-watcher.sh — Create ~/.config/caelestia/git-watcher.json
+# qm-git-watcher-init — Create ~/.config/quantum-moon/git-watcher.json
 #
 # Usage:
-#   ./init-git-watcher.sh <PAT> [org-url] [my-identity]
+#   qm-git-watcher-init <PAT> [org-url] [my-identity]
 #
 # Defaults:
 #   org-url     https://dev.azure.com/comexport
@@ -29,7 +29,7 @@ if [[ -z "$PAT" ]]; then
     exit 1
 fi
 
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/caelestia"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quantum-moon"
 CONFIG_FILE="$CONFIG_DIR/git-watcher.json"
 
 mkdir -p "$CONFIG_DIR"
@@ -63,4 +63,4 @@ JSON
 chmod 600 "$CONFIG_FILE"
 echo "GitWatcher config written to $CONFIG_FILE"
 echo "Open the bar's GitWatcher config to select which repos to watch."
-echo "Reload the shell or run: kill -HUP \$(cat ~/.local/state/caelestia/git-watcher.pid)"
+echo "Reload the shell or run: systemctl --user restart quantum-moon-git-watcher.service"

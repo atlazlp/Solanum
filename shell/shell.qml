@@ -43,6 +43,7 @@ ShellRoot {
         void Lock.locked;
         void Screenshot;
         void Notifs.count;
+        void ShipLog.entries;
         void QuantumMoon.slug;
         if (Config.utilities.toasts.configLoaded)
             Toaster.toast("Shell started", DevFlags.dev ? "dev mode" : "", "rocket_launch", "info", 0);
@@ -51,37 +52,37 @@ ShellRoot {
     // ---- Placeholders (filled by later phases) ----
     Loader {
         id: backgrounds
-        active: false
+        active: true
         source: Qt.resolvedUrl("modules/background/Backgrounds.qml")
     }
 
     Loader {
         id: qmFadeOverlay
-        active: false
+        active: true
         source: Qt.resolvedUrl("modules/drawers/QmFadeOverlay.qml")
     }
 
     Loader {
         id: areaPicker
-        active: false
+        active: true
         source: Qt.resolvedUrl("modules/areapicker/AreaPicker.qml")
     }
 
     Loader {
         id: notifications
-        active: false && DevFlags.notificationServer
+        active: DevFlags.notificationServer
         source: Qt.resolvedUrl("modules/notifications/NotificationServer.qml")
     }
 
     Loader {
         id: lock
-        active: false && DevFlags.sessionLock
+        active: DevFlags.sessionLock
         source: Qt.resolvedUrl("modules/lock/Lock.qml")
     }
 
     Loader {
         id: idleMonitors
-        active: false && DevFlags.idleMonitors
+        active: DevFlags.idleMonitors
         source: Qt.resolvedUrl("modules/IdleMonitors.qml")
     }
 }

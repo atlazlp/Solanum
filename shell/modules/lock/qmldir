@@ -1,0 +1,12 @@
+module qs.modules.lock
+Lock 1.0 Lock.qml
+Pam 1.0 Pam.qml
+LockSurface 1.0 LockSurface.qml
+LockContent 1.0 LockContent.qml
+LockPreview 1.0 LockPreview.qml
+LockCenter 1.0 LockCenter.qml
+LockMedia 1.0 LockMedia.qml
+LockNotifs 1.0 LockNotifs.qml
+LockResources 1.0 LockResources.qml
+LockWeather 1.0 LockWeather.qml
+LockFetch 1.0 LockFetch.qml

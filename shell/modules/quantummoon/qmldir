@@ -1,0 +1,4 @@
+module qs.modules.quantummoon
+QmPanel 1.0 QmPanel.qml
+QmArc 1.0 QmArc.qml
+QmScoutLock 1.0 QmScoutLock.qml

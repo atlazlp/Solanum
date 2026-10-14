@@ -22,7 +22,7 @@ Row {
             readonly property bool lit: root.level * root.bars > index
             width: root.barWidth
             height: root.barHeight
-            anchors.verticalCenter: parent.verticalCenter
+            y: (root.height - height) / 2
             color: lit ? (index >= root.bars - 2 ? Theme.ember : root.accent) : Theme.alpha(Theme.lineDim, 0.5)
 
             Behavior on color {

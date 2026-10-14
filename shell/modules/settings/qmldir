@@ -1,0 +1,12 @@
+module qs.modules.settings
+singleton SettingsStore 1.0 SettingsStore.qml
+JsonStore 1.0 JsonStore.qml
+SettingRow 1.0 SettingRow.qml
+SwitchRow 1.0 SwitchRow.qml
+TextRow 1.0 TextRow.qml
+NumberRow 1.0 NumberRow.qml
+ComboRow 1.0 ComboRow.qml
+ListRow 1.0 ListRow.qml
+ArgvRow 1.0 ArgvRow.qml
+SettingsPane 1.0 SettingsPane.qml
+Settings 1.0 Settings.qml

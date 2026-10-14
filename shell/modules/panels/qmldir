@@ -1,0 +1,4 @@
+module qs.modules.panels
+ServicesPanel 1.0 ServicesPanel.qml
+KvmPanel 1.0 KvmPanel.qml
+AudioPanel 1.0 AudioPanel.qml

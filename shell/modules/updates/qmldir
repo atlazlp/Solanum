@@ -1,0 +1,2 @@
+module qs.modules.updates
+UpdatesPanel 1.0 UpdatesPanel.qml

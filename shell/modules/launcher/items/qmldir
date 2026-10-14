@@ -1,0 +1,8 @@
+module qs.modules.launcher.items
+AppItem 1.0 AppItem.qml
+WindowItem 1.0 WindowItem.qml
+ClipItem 1.0 ClipItem.qml
+EmojiItem 1.0 EmojiItem.qml
+CalcItem 1.0 CalcItem.qml
+ActionItem 1.0 ActionItem.qml
+RowBase 1.0 RowBase.qml

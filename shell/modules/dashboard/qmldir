@@ -1,0 +1,8 @@
+module qs.modules.dashboard
+Dashboard 1.0 Dashboard.qml
+DateTime 1.0 DateTime.qml
+Calendar 1.0 Calendar.qml
+Media 1.0 Media.qml
+Resources 1.0 Resources.qml
+Performance 1.0 Performance.qml
+WeatherPane 1.0 WeatherPane.qml
