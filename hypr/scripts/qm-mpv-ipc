@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Talk to the quantum-moon mpvpaper instance over its JSON IPC socket.
+
+usage: qm-mpv-ipc pause true|false
+
+Writes {"command": ["set_property", "pause", <bool>]} to $XDG_RUNTIME_DIR/quantum-moon-mpvpaper.sock.
+Exits 0 silently when the socket is missing (no video wallpaper running).
+"""
+from __future__ import annotations
+
+import json
+import os
+import socket
+import sys
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 3 or argv[1] != "pause" or argv[2] not in ("true", "false"):
+        print("usage: qm-mpv-ipc pause true|false", file=sys.stderr)
+        return 2
+
+    runtime = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
+    sock_path = os.path.join(runtime, "quantum-moon-mpvpaper.sock")
+    try:
+        if not os.path.exists(sock_path):
+            return 0
+        msg = json.dumps({"command": ["set_property", "pause", argv[2] == "true"]}) + "\n"
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+            s.settimeout(1.0)
+            s.connect(sock_path)
+            s.sendall(msg.encode())
+    except OSError:
+        return 0
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

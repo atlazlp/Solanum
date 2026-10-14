@@ -2,11 +2,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-QM_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=qm-lib.sh
+source "${SCRIPT_DIR}/qm-lib.sh"
+QM_ROOT="$(qm_resolve_root "$(cd "${SCRIPT_DIR}/.." && pwd)")"
 STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/quantum-moon"
 CAELESTIA_STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/caelestia"
 SHELL_JSON="${HOME}/.config/caelestia/shell.json"
 SCHEME_JSON="${CAELESTIA_STATE_DIR}/scheme.json"
+# Mirrors for the Lua Hyprland config / new shell (the live Caelestia shell keeps reading SCHEME_JSON until cutover)
+QM_SCHEME_JSON="${STATE_DIR}/scheme.json"
+QM_SCHEME_LUA="${STATE_DIR}/scheme.lua"
+HYPR_LUA="${HOME}/.config/hypr/hyprland.lua"
 HYPRPAPER_CONF="${HOME}/.config/hypr/hyprpaper.conf"
 MODES_DIR="${QM_ROOT}/modes"
 BASE_SCHEME="${QM_ROOT}/palettes/base-scheme.json"
@@ -48,11 +54,15 @@ write_scheme() {
   [[ -f "${BASE_SCHEME}" ]] || { echo "Missing base scheme: ${BASE_SCHEME}" >&2; exit 1; }
   [[ -f "${palette}" ]] || { echo "Missing palette: ${palette}" >&2; exit 1; }
 
-  mkdir -p "${CAELESTIA_STATE_DIR}"
+  mkdir -p "${STATE_DIR}"
   local tmp
-  tmp="$(mktemp "${SCHEME_JSON}.tmp.XXXXXX")"
+  tmp="$(mktemp "${QM_SCHEME_JSON}.tmp.XXXXXX")"
   jq -s '.[0] * .[1]' "${BASE_SCHEME}" "${palette}" >"${tmp}"
-  mv "${tmp}" "${SCHEME_JSON}"
+  mv "${tmp}" "${QM_SCHEME_JSON}"
+  # Legacy mirror: the live Caelestia shell reads ~/.local/state/caelestia/scheme.json until cutover
+  if [[ -d "${CAELESTIA_STATE_DIR}" ]]; then
+    cp -f "${QM_SCHEME_JSON}" "${SCHEME_JSON}.tmp" && mv "${SCHEME_JSON}.tmp" "${SCHEME_JSON}"
+  fi
 }
 
 record_random_walk_history() {
@@ -138,26 +148,26 @@ apply_slug() {
   [[ -f "${logo}" ]] || { echo "Missing logo: ${logo}" >&2; exit 1; }
   local logo_abs
   logo_abs="$(realpath "${logo}")"
-  [[ -f "${SHELL_JSON}" ]] || { echo "Missing ${SHELL_JSON}" >&2; exit 1; }
-  local tmp
-  tmp="$(mktemp)"
-  jq --arg l "${logo_abs}" '.general.logo = $l' "${SHELL_JSON}" >"${tmp}"
-  install -m644 "${tmp}" "${SHELL_JSON}"
-  rm -f "${tmp}"
-
-  local vpn_merge
-  vpn_merge="$(dirname "${QM_ROOT}")/caelestia/scripts/merge-shell-vpn-local.sh"
-  if [[ -x "${vpn_merge}" ]]; then
-    "${vpn_merge}" "$(dirname "${QM_ROOT}")/caelestia" || true
+  # Caelestia shell logo (only while that shell/config still exists)
+  if [[ -f "${SHELL_JSON}" ]]; then
+    local tmp
+    tmp="$(mktemp)"
+    jq --arg l "${logo_abs}" '.general.logo = $l' "${SHELL_JSON}" >"${tmp}"
+    install -m644 "${tmp}" "${SHELL_JSON}"
+    rm -f "${tmp}"
   fi
 
   write_scheme "${mode_dir}/palette.json"
-  if ! python3 "${SCRIPT_DIR}/qm-sync-file-manager-theme.py" "${SCHEME_JSON}"; then
+  if ! python3 "${SCRIPT_DIR}/qm-sync-file-manager-theme.py" "${QM_SCHEME_JSON}"; then
     echo "quantum-moon: qm-sync-file-manager-theme.py failed (GTK/Nautilus/kitty/Qt sync skipped)" >&2
+  fi
+  # Lua scheme table for hypr/lib/scheme.lua (atomic tmp + mv inside the emitter)
+  if ! python3 "${SCRIPT_DIR}/qm-sync-file-manager-theme.py" --emit-lua "${QM_SCHEME_LUA}" --meta "${meta}" "${QM_SCHEME_JSON}"; then
+    echo "quantum-moon: scheme.lua emit failed" >&2
   fi
 
   mkdir -p "${STATE_DIR}"
-  jq -n --arg slug "${slug}" --arg dn "${display}" '{slug: $slug, displayName: $dn}' >"${STATE_DIR}/current.json"
+  jq -n --arg slug "${slug}" --arg dn "${display}" --arg logo "${logo_abs}" '{slug: $slug, displayName: $dn, logo: $logo}' >"${STATE_DIR}/current.json"
 
   if [[ "${prev_slug}" != "${slug}" ]]; then
     record_random_walk_history "${slug}"
@@ -165,6 +175,12 @@ apply_slug() {
 
   sleep 0.35
   "${SCRIPT_DIR}/qm-video-restart" "${slug}" || true
+
+  # Lua Hyprland config: re-evaluate so borders/groupbar/shadow/night temperature pick up scheme.lua
+  # (the hyprlang path reloads from qm-sync-file-manager-theme.py instead).
+  if [[ -f "${HYPR_LUA}" ]]; then
+    hyprctl reload >/dev/null 2>&1 || true
+  fi
 }
 
 slug="${1:-}"

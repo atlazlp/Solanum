@@ -1,0 +1,16 @@
+[Unit]
+Description=Lan Mouse — daemon + tray (Hyprland host)
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /home/lpacheco/Projects/lan-kvm-hyprland/arch-hyprland/scripts/lan-mouse-session.sh
+Environment=LAN_MOUSE_LOG_LEVEL=info
+Slice=session.slice
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,20 @@
+# ~/.config/uwsm/env-hyprland  (sourced by uwsm for the hyprland desktop before the
+# compositor starts; exported to the systemd user manager + D-Bus activation env).
+# Shell syntax, no `export` needed. NEVER set PATH or XDG_SESSION_* here: uwsm manages
+# those and overriding them breaks the session units. WAYLAND_DISPLAY/HYPRLAND_INSTANCE_SIGNATURE
+# are pushed later by `uwsm finalize` from hypr/autostart.lua.
+QT_QPA_PLATFORMTHEME=qt6ct
+QT_QPA_PLATFORM=wayland;xcb
+QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+QT_AUTO_SCREEN_SCALE_FACTOR=1
+GDK_BACKEND=wayland,x11,*
+SDL_VIDEODRIVER=wayland,x11
+CLUTTER_BACKEND=wayland
+ELECTRON_OZONE_PLATFORM_HINT=auto
+_JAVA_AWT_WM_NONREPARENTING=1
+XCURSOR_THEME=capitaine-cursors
+XCURSOR_SIZE=24
+MOZ_ENABLE_WAYLAND=1
+NIXOS_OZONE_WL=1
+# variables to export when the compositor runs `uwsm finalize`
+UWSM_FINALIZE_VARNAMES="${UWSM_FINALIZE_VARNAMES}${UWSM_FINALIZE_VARNAMES:+ }HYPRLAND_INSTANCE_SIGNATURE XCURSOR_THEME XCURSOR_SIZE"

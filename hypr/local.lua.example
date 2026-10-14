@@ -1,0 +1,20 @@
+-- Machine-local Hyprland overrides (port of ~/.config/caelestia/hypr-user-local.conf).
+-- Copy to hypr/local.lua (gitignored); it is loaded last so hl.config here wins.
+-- Default kb_layout br keeps ABNT2 dead keys; do not set kb_variant = "nodeadkeys" unless you want that.
+hl.config({
+  input = {
+    kb_layout = "br",
+    follow_mouse = 1,
+  },
+  cursor = {
+    no_hardware_cursors = true,
+  },
+  group = {
+    drag_into_group = 1,
+  },
+})
+
+-- Other knobs you may want to flip here:
+-- QM.monitors.preferred_main = "DP-2"            -- bar/video host (features/hotplug.lua)
+-- QM.features.launcher.tap_ms = 400              -- Super tap window
+-- QM.features.night.start_hour, end_hour = 19, 7 -- night light schedule

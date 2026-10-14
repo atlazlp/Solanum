@@ -1,0 +1,16 @@
+[Unit]
+Description=Local LLM tray (Ollama / Open WebUI control) until the Services panel replaces it
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+ConditionPathExists=/home/lpacheco/Projects/gemma4-heretic/llm-tray-session.sh
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /home/lpacheco/Projects/gemma4-heretic/llm-tray-session.sh
+Slice=session.slice
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

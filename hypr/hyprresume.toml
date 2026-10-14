@@ -1,0 +1,26 @@
+# Hyprland session restore — lives in <repo>/hypr/hyprresume.toml (~/.config/hypr/hyprresume.toml once linked)
+# Started from hypr/autostart.lua: hyprresume -c ~/.config/hypr/hyprresume.toml
+
+[general]
+save_interval = 120
+session_dir = "~/.local/share/hyprresume"
+restore_on_start = true
+per_window_launch = true
+restore_geometry = true
+restore_layout = true
+
+[rules]
+exclude = [
+    "^xdg-desktop-portal.*",
+    "^org\\.kde\\.polkit.*",
+    "^cursor$",
+    "^org\\.quickshell$",
+    "^mpvpaper$",
+    "^hyprpaper$",
+    "^org\\.gnome\\.Shell$",
+    "^swappy$",
+]
+
+[overrides]
+# Uncomment if restore launches plain nautilus instead of the GVfs-friendly wrapper:
+# "org.gnome.Nautilus" = "bash $HOME/.config/hypr/scripts/nautilus-wrap.sh"

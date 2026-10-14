@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# qm-record: toggle a gpu-screen-recorder capture of the focused monitor.
+#   qm-record [--sound] [--region]
+#   First call starts recording (~/Videos/Recordings/<timestamp>.mp4, 60 fps);
+#   second call stops it (SIGINT, so the file is finalised).
+#   --sound   also capture the default audio output
+#   --region  record an area selected with slurp
+set -euo pipefail
+sound=0; region=0
+for a in "$@"; do
+  case "$a" in
+    -h|--help) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --sound|-s) sound=1 ;;
+    --region|-r) region=1 ;;
+    *) echo "qm-record: unknown argument '$a'" >&2; exit 2 ;;
+  esac
+done
+
+notify() { # level title msg
+  if command -v qm-toast >/dev/null 2>&1; then qm-toast "$1" "$2" "${3:-}" "videocam" || true
+  elif command -v notify-send >/dev/null 2>&1; then notify-send -a quantum-moon "$2" "${3:-}" || true; fi
+}
+
+runtime="${XDG_RUNTIME_DIR:-/tmp}"
+pidfile="$runtime/quantum-moon-record.pid"
+pathfile="$runtime/quantum-moon-record.path"
+
+if [[ -f "$pidfile" ]]; then
+  pid="$(cat "$pidfile" 2>/dev/null || true)"
+  if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+    kill -INT "$pid" 2>/dev/null || true
+    for _ in $(seq 1 40); do kill -0 "$pid" 2>/dev/null || break; sleep 0.25; done
+    rm -f "$pidfile"
+    file="$(cat "$pathfile" 2>/dev/null || true)"; rm -f "$pathfile"
+    notify success "Recording stopped" "${file:+$(basename "$file")}"
+    exit 0
+  fi
+  rm -f "$pidfile" "$pathfile" # stale
+fi
+
+command -v gpu-screen-recorder >/dev/null 2>&1 || { notify error "Recording failed" "gpu-screen-recorder is not installed"; exit 1; }
+outdir="${XDG_VIDEOS_DIR:-$HOME/Videos}/Recordings"
+mkdir -p "$outdir"
+file="$outdir/$(date +%Y-%m-%d_%H-%M-%S).mp4"
+
+args=(-f 60 -o "$file")
+if [[ "$region" -eq 1 ]]; then
+  command -v slurp >/dev/null 2>&1 || { notify error "Recording failed" "slurp is not installed"; exit 1; }
+  geom="$(slurp -f '%wx%h+%x+%y')" || exit 0
+  args+=(-w region -region "$geom")
+else
+  mon="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
+  [[ -n "$mon" ]] || mon=screen
+  args+=(-w "$mon")
+fi
+[[ "$sound" -eq 1 ]] && args+=(-a default_output)
+
+setsid gpu-screen-recorder "${args[@]}" >/dev/null 2>&1 < /dev/null &
+pid=$!
+echo "$pid" > "$pidfile"
+echo "$file" > "$pathfile"
+sleep 0.5
+if ! kill -0 "$pid" 2>/dev/null; then
+  rm -f "$pidfile" "$pathfile"
+  notify error "Recording failed" "gpu-screen-recorder exited immediately"
+  exit 1
+fi
+notify info "Recording started" "$(basename "$file")"

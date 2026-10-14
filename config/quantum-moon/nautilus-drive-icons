@@ -1,0 +1,4 @@
+# Per-mount sidebar icons (Adwaita symbolic icon names, no .svg).
+# Applied with: gio set PATH metadata::custom-icon-name ICON
+/mnt/Backup drive-harddisk-symbolic
+/mnt/Data500 drive-harddisk-solidstate-symbolic

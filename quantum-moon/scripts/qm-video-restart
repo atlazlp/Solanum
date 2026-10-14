@@ -11,7 +11,7 @@ if [[ -z "${slug}" ]]; then
   exit 1
 fi
 
-if [[ -f "${XDG_RUNTIME_DIR:-/tmp}/caelestia-game-mode.active" ]]; then
+if qm_game_mode_active; then
   exit 0
 fi
 

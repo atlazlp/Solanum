@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# qm-update: system updates (pacman + AUR) for the shell's updates indicator.
+#   qm-update          open a kitty window running pacman -Syu && yay -Sua
+#   qm-update --check  print pending updates as JSON: {"repo":N,"aur":M,"packages":[...]}
+set -euo pipefail
+case "${1:-}" in
+  -h|--help) sed -n '2,4p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  --check)
+    repo_list=""; aur_list=""
+    if command -v checkupdates >/dev/null 2>&1; then
+      repo_list="$(checkupdates 2>/dev/null || true)"
+    fi
+    if command -v yay >/dev/null 2>&1; then
+      aur_list="$(yay -Qua 2>/dev/null || true)"
+    fi
+    jq -cn --arg repo "$repo_list" --arg aur "$aur_list" '
+      def lines: split("\n") | map(select(length > 0));
+      ($repo | lines) as $r | ($aur | lines) as $a |
+      {repo: ($r | length), aur: ($a | length),
+       packages: (($r | map({name: (split(" ")[0]), from: (split(" ")[1] // ""), to: (split(" ")[3] // ""), source: "repo"}))
+                + ($a | map({name: (split(" ")[0]), from: (split(" ")[1] // ""), to: (split(" ")[3] // ""), source: "aur"})))}'
+    ;;
+  "")
+    cmd='sudo pacman -Syu; yay -Sua; echo; read -rp "done, press enter"'
+    if command -v kitty >/dev/null 2>&1; then
+      exec kitty --class qm-updates -e sh -c "$cmd"
+    else
+      exec sh -c "$cmd"
+    fi
+    ;;
+  *) echo "qm-update: unknown argument '$1'" >&2; exit 2 ;;
+esac

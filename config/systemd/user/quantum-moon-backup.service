@@ -1,0 +1,10 @@
+[Unit]
+Description=Quantum Moon borg backup of $HOME to /mnt/Backup
+ConditionPathIsMountPoint=/mnt/Backup
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/qm-backup run
+Nice=19
+IOSchedulingClass=idle
+Environment=BORG_RELOCATED_REPO_ACCESS_IS_OK=yes

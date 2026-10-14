@@ -1,4 +1,5 @@
 {
   "slug": "dark-bramble",
-  "displayName": "Dark Bramble"
+  "displayName": "Dark Bramble",
+  "nightTemperature": 4500
 }

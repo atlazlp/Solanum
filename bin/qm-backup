@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# qm-backup: borg backups of $HOME (+ a few system files) to /mnt/Backup.
+#   qm-backup <init|run|list|mount <dir>|umount <dir>|check|prune|info> [--dry-run]
+#   init     create the repository (unencrypted) at /mnt/Backup/borg/home-<hostname>
+#   run      borg create (zstd,3, excludes from ~/.config/quantum-moon/backup-patterns.txt),
+#            then prune (7 daily / 4 weekly / 6 monthly) and, on Sundays, compact
+#   list     list archives            check   verify the repository
+#   mount    FUSE-mount the repo      umount  unmount it
+#   prune    prune + compact now      info    repository statistics
+#   --dry-run  show what borg would do (create/prune) without writing
+# Env: QM_BACKUP_ROOT (default /mnt/Backup), QM_BACKUP_REPO (default $QM_BACKUP_ROOT/borg/home-<host>).
+set -euo pipefail
+
+usage() { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; }
+
+ROOT="${QM_BACKUP_ROOT:-/mnt/Backup}"
+HOST="$(hostname -s 2>/dev/null || hostname)"
+REPO="${QM_BACKUP_REPO:-$ROOT/borg/home-$HOST}"
+PATTERNS="${XDG_CONFIG_HOME:-$HOME/.config}/quantum-moon/backup-patterns.txt"
+SOURCES=("$HOME" /var/lib/quantum-moon /etc/sddm.conf /etc/sddm.conf.d /etc/modprobe.d /etc/pacman.d/hooks)
+export BORG_RELOCATED_REPO_ACCESS_IS_OK=yes
+export BORG_REPO="$REPO"
+
+cmd=""; dry=0; arg=""
+for a in "$@"; do
+  case "$a" in
+    -h|--help) usage; exit 0 ;;
+    --dry-run|-n) dry=1 ;;
+    init|run|list|mount|umount|check|prune|info) [[ -z "$cmd" ]] && cmd="$a" || arg="$a" ;;
+    *) [[ -n "$cmd" && -z "$arg" ]] && arg="$a" || { echo "qm-backup: unknown argument '$a'" >&2; usage >&2; exit 2; } ;;
+  esac
+done
+[[ -n "$cmd" ]] || { usage >&2; exit 2; }
+
+fail() { # msg
+  echo "qm-backup: $*" >&2
+  if command -v qm-toast >/dev/null 2>&1; then qm-toast error "Backup failed" "$*" "backup" || true
+  elif command -v notify-send >/dev/null 2>&1; then notify-send -a quantum-moon -u critical "Backup failed" "$*" || true; fi
+  exit 1
+}
+
+command -v borg >/dev/null 2>&1 || fail "borg is not installed (pacman -S borg)"
+mountpoint -q "$ROOT" || fail "$ROOT is not a mountpoint; refusing to run"
+
+case "$cmd" in
+  init)
+    if [[ -f "$REPO/config" ]]; then echo "repository already exists: $REPO"; exit 0; fi
+    mkdir -p "$(dirname "$REPO")"
+    borg init --encryption=none "$REPO"
+    echo "initialised $REPO"
+    ;;
+  run)
+    [[ -f "$REPO/config" ]] || fail "repository missing: run 'qm-backup init' first"
+    existing=()
+    for s in "${SOURCES[@]}"; do [[ -e "$s" ]] && existing+=("$s"); done
+    pat=()
+    if [[ -f "$PATTERNS" ]]; then pat=(--patterns-from "$PATTERNS"); else echo "qm-backup: no $PATTERNS, backing up everything" >&2; fi
+    dr=(); [[ "$dry" -eq 1 ]] && dr=(--dry-run --list)
+    name="$HOST-$(date +%Y-%m-%dT%H-%M-%S)"
+    rc=0
+    borg create --stats --show-rc --compression zstd,3 --exclude-caches \
+        --filter AME "${dr[@]}" "${pat[@]}" "::$name" "${existing[@]}" || rc=$?
+    if [[ $rc -eq 1 ]]; then echo "qm-backup: finished with warnings" >&2
+    elif [[ $rc -gt 1 ]]; then fail "borg create exited $rc"; fi
+    if [[ "$dry" -eq 0 ]]; then
+      borg prune --list --glob-archives "$HOST-*" --keep-daily 7 --keep-weekly 4 --keep-monthly 6 || fail "borg prune failed"
+      if [[ "$(date +%u)" == "7" ]]; then borg compact || fail "borg compact failed"; fi
+      if command -v qm-toast >/dev/null 2>&1; then qm-toast success "Backup done" "$name" "backup" || true; fi
+    else
+      borg prune --dry-run --list --glob-archives "$HOST-*" --keep-daily 7 --keep-weekly 4 --keep-monthly 6 || true
+    fi
+    ;;
+  list) borg list ;;
+  info) borg info ;;
+  check) borg check --verify-data ;;
+  prune)
+    dr=(); [[ "$dry" -eq 1 ]] && dr=(--dry-run)
+    borg prune --list "${dr[@]}" --glob-archives "$HOST-*" --keep-daily 7 --keep-weekly 4 --keep-monthly 6
+    [[ "$dry" -eq 0 ]] && borg compact
+    ;;
+  mount)
+    [[ -n "$arg" ]] || { echo "qm-backup mount <dir>" >&2; exit 2; }
+    mkdir -p "$arg"; borg mount "$REPO" "$arg"; echo "mounted $REPO at $arg (qm-backup umount $arg)"
+    ;;
+  umount)
+    [[ -n "$arg" ]] || { echo "qm-backup umount <dir>" >&2; exit 2; }
+    borg umount "$arg"
+    ;;
+esac

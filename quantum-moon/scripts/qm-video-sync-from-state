@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root_file="${HOME}/.config/caelestia/quantum-moon-root"
-[[ -f "${root_file}" ]] || exit 0
-read -r QM < "${root_file}"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+# shellcheck source=qm-lib.sh
+source "${SCRIPT_DIR}/qm-lib.sh"
+QM="$(qm_resolve_root "$(cd "${SCRIPT_DIR}/.." && pwd)")"
 [[ -n "${QM}" && -f "${QM}/scripts/qm-video-restart" ]] || exit 0
-state="${XDG_STATE_HOME:-${HOME}/.local/state}/quantum-moon/current.json"
+# shellcheck source=qm-video-lib.sh
+source "${QM}/scripts/qm-video-lib.sh"
+state="$(qm_state_dir)/current.json"
 [[ -f "${state}" ]] || exit 0
 slug="$(jq -r '.slug // empty' "${state}")"
 [[ -n "${slug}" ]] || exit 0
-[[ -f "${XDG_RUNTIME_DIR:-/tmp}/caelestia-game-mode.active" ]] && exit 0
+qm_game_mode_active && exit 0
 exec "${QM}/scripts/qm-video-restart" "${slug}"

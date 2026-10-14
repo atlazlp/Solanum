@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# qm-toast: show a toast in the Quantum Moon shell (falls back to notify-send).
+#   qm-toast <info|success|warn|error> <title> [message] [icon]
+set -euo pipefail
+usage() { sed -n '2,3p' "$0" | sed 's/^# \{0,1\}//'; }
+case "${1:-}" in
+  -h|--help|"") usage; exit 0 ;;
+  info|success|warn|error) ;;
+  *) echo "qm-toast: unknown level '${1}'" >&2; usage >&2; exit 2 ;;
+esac
+level="$1"; title="${2:-}"; msg="${3:-}"; icon="${4:-}"
+if [[ -z "$title" ]]; then echo "qm-toast: title required" >&2; exit 2; fi
+if qs -c quantum-moon ipc call toast "$level" "$title" "$msg" "$icon" >/dev/null 2>&1; then
+  exit 0
+fi
+if command -v notify-send >/dev/null 2>&1; then
+  urgency=normal
+  case "$level" in error) urgency=critical ;; info|success) urgency=low ;; esac
+  notify-send -a quantum-moon -u "$urgency" ${icon:+-i "$icon"} "$title" "$msg"
+else
+  echo "[$level] $title: $msg" >&2
+fi

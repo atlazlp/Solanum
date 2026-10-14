@@ -1,0 +1,9 @@
+# Packages install.sh never installs but the cleanup scripts must never remove
+# (keep list, diff-checked by uninstall-caelestia.sh / cleanup-leftovers.sh together with pacman.txt + aur.txt).
+# lib32-* packages are protected by name prefix and need not be listed.
+shelly
+code
+go
+rust
+nm-connection-editor
+network-manager-applet

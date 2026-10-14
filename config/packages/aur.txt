@@ -1,0 +1,6 @@
+# AUR packages (yay -S --needed --asexplicit). mpvpaper is in the CachyOS repo and lives in pacman.txt; on vanilla Arch move it here.
+app2unit
+hyprresume
+ttf-rubik
+ttf-rubik-vf
+ttf-orbitron

@@ -2,7 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
-QM_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=qm-lib.sh
+source "${SCRIPT_DIR}/qm-lib.sh"
+QM_ROOT="$(qm_resolve_root "$(cd "${SCRIPT_DIR}/.." && pwd)")"
 
 pick="$(python3 "${SCRIPT_DIR}/qm-random-walk.py" pick)"
-exec "${SCRIPT_DIR}/qm-apply" "${pick}"
+exec "${QM_ROOT}/scripts/qm-apply" "${pick}"

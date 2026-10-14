@@ -1,0 +1,13 @@
+{
+  "llm": {
+    "controlScript": "/home/lpacheco/Projects/gemma4-heretic/llm-control.sh",
+    "ollamaUrl": "http://127.0.0.1:11434",
+    "webuiUrl": "http://127.0.0.1:8080",
+    "composeDir": "/home/lpacheco/Projects/gemma4-heretic"
+  },
+  "kvm": {
+    "launchScript": "/home/lpacheco/Projects/lan-kvm-hyprland/arch-hyprland/scripts/lan-mouse-launch.sh",
+    "clipboardScript": "/home/lpacheco/Projects/lan-kvm-hyprland/scripts/clipboard-sync.sh",
+    "logPath": "~/.local/state/lan-kvm-hyprland/uniclip.log"
+  }
+}

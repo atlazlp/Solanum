@@ -1,0 +1,16 @@
+[Unit]
+Description=hyprsunset night light (temperature driven by Quantum Moon)
+Documentation=https://wiki.hyprland.org/Hypr-Ecosystem/hyprsunset/
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/hyprsunset
+Slice=session.slice
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

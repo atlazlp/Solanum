@@ -1,9 +1,18 @@
 # Shared helpers for quantum-moon video wallpaper (sourced by other scripts).
 
 SCRIPT_DIR_LIB="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")" && pwd)"
-QM_ROOT="$(cd "${SCRIPT_DIR_LIB}/.." && pwd)"
+# shellcheck source=qm-lib.sh
+source "${SCRIPT_DIR_LIB}/qm-lib.sh"
+QM_ROOT="$(qm_resolve_root "$(cd "${SCRIPT_DIR_LIB}/.." && pwd)")"
 STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/quantum-moon"
 MODES_DIR="${QM_ROOT}/modes"
+
+# Game mode marker (features/gamemode.lua, game-mode-resources.sh). The legacy caelestia-* name is still
+# written by the live Caelestia shell until the Phase 3 cutover.
+qm_game_mode_active() {
+  local rt="${XDG_RUNTIME_DIR:-/tmp}"
+  [[ -f "${rt}/quantum-moon-game-mode.active" || -f "${rt}/caelestia-game-mode.active" ]]
+}
 
 qm_video_sock() {
   printf '%s' "${XDG_RUNTIME_DIR:-/tmp}/quantum-moon-mpvpaper.sock"

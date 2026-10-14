@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# qm-fetch-videos: pull the per-planet center.mp4 wallpapers from Git LFS.
+#   qm-fetch-videos [--help]
+# The repo is found via ~/.config/quantum-moon/root (written by scripts/install.sh),
+# falling back to the directory this script lives in.
+set -euo pipefail
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//'; exit 0; fi
+root_file="${XDG_CONFIG_HOME:-$HOME/.config}/quantum-moon/root"
+if [[ -s "$root_file" ]]; then
+  qm_root="$(head -n1 "$root_file")"
+  repo="$(cd "$qm_root/.." && pwd)"
+else
+  repo="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+fi
+if ! command -v git-lfs >/dev/null 2>&1 && ! git lfs version >/dev/null 2>&1; then
+  echo "qm-fetch-videos: git-lfs is not installed (pacman -S git-lfs)" >&2; exit 1
+fi
+[[ -d "$repo/.git" ]] || { echo "qm-fetch-videos: $repo is not a git checkout" >&2; exit 1; }
+echo "Pulling center.mp4 wallpapers into $repo (Git LFS; counts against the LFS quota)..."
+git -C "$repo" lfs pull --include='quantum-moon/modes/*/wallpapers/center.mp4'

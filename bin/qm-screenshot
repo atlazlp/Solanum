@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# qm-screenshot: take a screenshot with grim/slurp, hand it to swappy, notify through the shell.
+#   qm-screenshot [full|region|window|freeze] [--clip]
+#   full    whole focused output (default)
+#   region  select an area; uses the shell's area picker when the shell is running, else slurp
+#   freeze  like region, but the shell freezes the screen first (slurp fallback)
+#   window  pick a window from the hyprctl client list via slurp
+#   --clip  copy to the clipboard only (no file, no editor)
+# Files go to ~/Pictures/Screenshots/<timestamp>.png and open in swappy when it is installed.
+set -euo pipefail
+mode=full; clip=0
+for a in "$@"; do
+  case "$a" in
+    -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    full|region|window|freeze) mode="$a" ;;
+    --clip|-c) clip=1 ;;
+    *) echo "qm-screenshot: unknown argument '$a'" >&2; exit 2 ;;
+  esac
+done
+
+notify() { # level title msg
+  if command -v qm-toast >/dev/null 2>&1; then qm-toast "$1" "$2" "${3:-}" "photo_camera" || true
+  elif command -v notify-send >/dev/null 2>&1; then notify-send -a quantum-moon "$2" "${3:-}" || true; fi
+}
+
+for t in grim; do command -v "$t" >/dev/null 2>&1 || { notify error "Screenshot failed" "$t is not installed"; exit 1; }; done
+
+# region/freeze: let the shell's picker handle everything when it is up.
+if [[ "$mode" == "region" || "$mode" == "freeze" ]]; then
+  fn=open; [[ "$mode" == "freeze" ]] && fn=openFreeze
+  [[ "$clip" -eq 1 ]] && fn="${fn}Clip"
+  if qs -c quantum-moon ipc call picker "$fn" >/dev/null 2>&1; then
+    exit 0
+  fi
+fi
+
+outdir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+mkdir -p "$outdir"
+file="$outdir/$(date +%Y-%m-%d_%H-%M-%S).png"
+
+geom=""
+case "$mode" in
+  region|freeze)
+    command -v slurp >/dev/null 2>&1 || { notify error "Screenshot failed" "slurp is not installed"; exit 1; }
+    geom="$(slurp -d)" || exit 0 ;;
+  window)
+    command -v slurp >/dev/null 2>&1 || { notify error "Screenshot failed" "slurp is not installed"; exit 1; }
+    geom="$(hyprctl clients -j | jq -r '.[] | select(.workspace.id >= 0 and .mapped) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1]) \(.title)"' | slurp -r)" || exit 0 ;;
+  full)
+    out="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
+    [[ -n "$out" ]] && geom="output:$out" ;;
+esac
+
+grab() {
+  if [[ "$geom" == output:* ]]; then grim -o "${geom#output:}" "$@"
+  elif [[ -n "$geom" ]]; then grim -g "$geom" "$@"
+  else grim "$@"; fi
+}
+
+if [[ "$clip" -eq 1 ]]; then
+  grab - | wl-copy --type image/png
+  notify success "Screenshot copied" "Image is on the clipboard"
+  exit 0
+fi
+
+grab "$file"
+if command -v swappy >/dev/null 2>&1; then
+  notify success "Screenshot saved" "$(basename "$file")"
+  swappy -f "$file" -o "$file" >/dev/null 2>&1 &
+else
+  wl-copy --type image/png < "$file" 2>/dev/null || true
+  notify success "Screenshot saved" "$(basename "$file") (copied to clipboard)"
+fi

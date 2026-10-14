@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# hyprland.start: lock the session as soon as the shell answers IPC (pairs with SDDM autologin).
+# QM_SHELL_IPC defaults to the Caelestia shell until the Phase 3 cutover sets "qs -c quantum-moon ipc call".
+set -eu
+command -v qs >/dev/null 2>&1 || exit 1
+if [ "${QM_SKIP_BOOT_LOCK:-${CAELESTIA_SKIP_BOOT_LOCK:-}}" = 1 ]; then
+	exit 0
+fi
+ipc="${QM_SHELL_IPC:-qs -c caelestia ipc call}"
+t=0
+while [ "$t" -lt 150 ]; do
+	# shellcheck disable=SC2086
+	if ${ipc} lock lock >/dev/null 2>&1; then
+		exit 0
+	fi
+	t=$((t + 1))
+	sleep 0.1
+done
+exit 1

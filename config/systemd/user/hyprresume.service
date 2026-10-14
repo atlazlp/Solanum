@@ -1,0 +1,15 @@
+[Unit]
+Description=hyprresume (restore window layout after suspend/resume)
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/hyprresume -c %h/.config/hypr/hyprresume.toml
+Slice=session.slice
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

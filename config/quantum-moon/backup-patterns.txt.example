@@ -1,0 +1,24 @@
+# borg patterns for qm-backup (see `borg help patterns`). Paths are absolute.
+# Prefix: R = root, - = exclude, + = include, ! = exclude and do not recurse.
+# Edit ~/.config/quantum-moon/backup-patterns.txt (this file is only the seed).
+! /home/*/.cache
+! /home/*/.local/share/Steam
+! /home/*/.steam
+! /home/*/.ollama
+! /home/*/.local/share/Trash
+! /home/*/.local/share/docker
+! /home/*/.docker
+! /home/*/.npm
+! /home/*/.nvm
+! /home/*/.cargo
+! /home/*/.rustup
+! /home/*/go
+! /home/*/.local/share/containers
+! /home/*/.var/app/*/cache
+! /home/*/.mozilla/firefox/*/cache2
+- /home/*/Projects/**/node_modules
+- /home/*/Projects/**/target
+- /home/*/Projects/**/.venv
+- /home/*/Projects/Quantum-Moon/.git/lfs
+- /home/*/Projects/**/__pycache__
+- /home/*/.local/state/quantum-moon/mpvpaper.log

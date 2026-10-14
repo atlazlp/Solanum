@@ -14,15 +14,25 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 
-SCHEME_FILE = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "caelestia" / "scheme.json"
+_STATE_HOME = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state"))
+QM_STATE_DIR = _STATE_HOME / "quantum-moon"
+LEGACY_STATE_DIR = _STATE_HOME / "caelestia"
+SCHEME_FILE = QM_STATE_DIR / "scheme.json"
+if not SCHEME_FILE.is_file() and (LEGACY_STATE_DIR / "scheme.json").is_file():
+    SCHEME_FILE = LEGACY_STATE_DIR / "scheme.json"
 HYPR_SCHEME_CONF = (
     Path.home() / ".local" / "share" / "caelestia" / "hypr" / "scheme" / "current.conf"
 )
 HYPR_GROUPBAR_CONF = HYPR_SCHEME_CONF.parent / "groupbar.conf"
 HYPR_SHADOW_CONF = HYPR_SCHEME_CONF.parent / "shadow.conf"
-KDE_SCHEME_KEY = "CaelestiaQM"
+# Transition: new names are primary, the Caelestia-era names are kept until the Phase 3/5 cleanup.
+KDE_SCHEME_KEY = "QuantumMoon"
 KDE_SCHEME_FILE = KDE_SCHEME_KEY + ".colors"
-GENERATED_CSS = Path.home() / ".config" / "caelestia" / "generated" / "qm-libadwaita.css"
+LEGACY_KDE_SCHEME_KEY = "CaelestiaQM"
+LEGACY_KDE_SCHEME_FILE = LEGACY_KDE_SCHEME_KEY + ".colors"
+GENERATED_DIR = Path.home() / ".config" / "quantum-moon" / "generated"
+LEGACY_GENERATED_DIR = Path.home() / ".config" / "caelestia" / "generated"  # written only while it exists
+GENERATED_CSS = GENERATED_DIR / "qm-libadwaita.css"
 GTK4_BLOCK_BEGIN = "/* BEGIN quantum-moon-gtk4 */"
 GTK4_BLOCK_END = "/* END quantum-moon-gtk4 */"
 GTK4_USER_BLOCK_RE = re.compile(
@@ -33,9 +43,12 @@ GTK4_LEGACY_IMPORT = re.compile(
     r"^\s*/\*\s*quantum-moon:\s*libadwaita\s*sync\s*\*/\s*\n\s*@import\s+url\([^)]*qm-libadwaita\.css[^)]*\)\s*;\s*\n?",
     re.MULTILINE | re.IGNORECASE,
 )
-GTK3_IMPORT_LINE = '/* quantum-moon: gtk3 sync */\n@import url("../caelestia/generated/qm-gtk3.css");\n'
+GTK3_IMPORT_LINE = '/* quantum-moon: gtk3 sync */\n@import url("../quantum-moon/generated/qm-gtk3.css");\n'
 
-KITTY_LISTEN_SOCK_NAME = "kitty-caelestia-qm.sock"
+KITTY_LISTEN_SOCK_NAME = "kitty-quantum-moon.sock"
+LEGACY_KITTY_LISTEN_SOCK_NAME = "kitty-caelestia-qm.sock"
+KITTY_COLORS_FILE = "colors-quantum-moon.conf"
+LEGACY_KITTY_COLORS_FILE = "colors-caelestia-qm.conf"
 LISTEN_ON_RE = re.compile(r"^\s*listen_on\s+(.+)$", re.IGNORECASE | re.MULTILINE)
 
 
@@ -120,7 +133,8 @@ def kitty_rc_candidate_addresses(kitty_conf: Path) -> list[str]:
         if v := env.get("KITTY_LISTEN_ON"):
             add(v)
         if xdg := env.get("XDG_RUNTIME_DIR"):
-            add(f"unix:{Path(xdg) / KITTY_LISTEN_SOCK_NAME}")
+            for name in (KITTY_LISTEN_SOCK_NAME, LEGACY_KITTY_LISTEN_SOCK_NAME):
+                add(f"unix:{Path(xdg) / name}")
 
     if kitty_conf.is_file():
         m = LISTEN_ON_RE.search(kitty_conf.read_text(encoding="utf-8"))
@@ -128,8 +142,13 @@ def kitty_rc_candidate_addresses(kitty_conf: Path) -> list[str]:
             add(m.group(1).strip())
 
     add(default_qm_kitty_listen_address())
-    add(f"unix:{Path(f'/run/user/{os.getuid()}') / KITTY_LISTEN_SOCK_NAME}")
-    return order
+    rd = Path(os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}")
+    for name in (KITTY_LISTEN_SOCK_NAME, LEGACY_KITTY_LISTEN_SOCK_NAME):
+        add(f"unix:{rd / name}")
+        add(f"unix:{Path(f'/run/user/{os.getuid()}') / name}")
+    # whichever socket actually exists goes first
+    existing = [a for a in order if a.startswith("unix:/") and Path(a[5:]).exists()]
+    return existing + [a for a in order if a not in existing]
 
 
 def norm_hex(s: str) -> str:
@@ -287,60 +306,85 @@ def hypr_shadow_decoration_conf() -> str:
 """
 
 
-def hypr_groupbar_conf(colours: dict[str, str]) -> str:
-    active_bg, active_fg = best_pair(
-        colours,
-        ("primary", "primaryFixed", "primaryContainer", "primaryDim"),
-        ("onPrimaryContainer", "onPrimary", "onPrimaryFixed"),
-        "255b58",
-        "0d4845",
-        lighter_background=True,
-    )
-    inactive_bg, inactive_fg = best_pair(
-        colours,
-        (
-            "outlineVariant",
-            "surfaceBright",
-            "surfaceContainerHigh",
-            "surfaceVariant",
-            "surfaceContainer",
-            "surfaceContainerHighest",
-        ),
+GROUPBAR_PAIRS = (
+    ("active", ("primary", "primaryFixed", "primaryContainer", "primaryDim"), ("onPrimaryContainer", "onPrimary", "onPrimaryFixed"), "255b58", "0d4845"),
+    (
+        "inactive",
+        ("outlineVariant", "surfaceBright", "surfaceContainerHigh", "surfaceVariant", "surfaceContainer", "surfaceContainerHighest"),
         ("onSurface", "onSurfaceVariant", "onBackground"),
         "1d2827",
         "dce8e6",
-        lighter_background=True,
-    )
-    locked_active_bg, locked_active_fg = best_pair(
-        colours,
-        ("tertiary", "tertiaryFixed", "tertiaryContainer", "tertiaryDim"),
-        ("onTertiaryContainer", "onTertiary", "onTertiaryFixed"),
-        "b6e3fe",
-        "255369",
-        lighter_background=True,
-    )
-    locked_inactive_bg, locked_inactive_fg = best_pair(
-        colours,
-        ("secondary", "secondaryFixed", "secondaryContainer", "secondaryDim"),
-        ("onSecondaryContainer", "onSecondary", "onSecondaryFixed"),
-        "27403e",
-        "a9c5c2",
-        lighter_background=True,
-    )
+    ),
+    ("locked_active", ("tertiary", "tertiaryFixed", "tertiaryContainer", "tertiaryDim"), ("onTertiaryContainer", "onTertiary", "onTertiaryFixed"), "b6e3fe", "255369"),
+    ("locked_inactive", ("secondary", "secondaryFixed", "secondaryContainer", "secondaryDim"), ("onSecondaryContainer", "onSecondary", "onSecondaryFixed"), "27403e", "a9c5c2"),
+)
+
+
+def groupbar_pairs(colours: dict[str, str]) -> dict[str, str]:
+    """Groupbar role -> scheme colour KEY ({active_bg, active_fg, inactive_bg, ...}), contrast checked."""
+    out: dict[str, str] = {}
+    for role, bg_keys, on_keys, bg_fb, on_fb in GROUPBAR_PAIRS:
+        bg, fg = best_pair(colours, bg_keys, on_keys, bg_fb, on_fb, lighter_background=True)
+        out[f"{role}_bg"] = bg
+        out[f"{role}_fg"] = fg
+    return out
+
+
+def hypr_groupbar_conf(colours: dict[str, str]) -> str:
+    p = groupbar_pairs(colours)
     return f"""group {{
     groupbar {{
-        text_color = rgb(${active_fg})
-        text_color_inactive = rgb(${inactive_fg})
-        text_color_locked_active = rgb(${locked_active_fg})
-        text_color_locked_inactive = rgb(${locked_inactive_fg})
+        text_color = rgb(${p["active_fg"]})
+        text_color_inactive = rgb(${p["inactive_fg"]})
+        text_color_locked_active = rgb(${p["locked_active_fg"]})
+        text_color_locked_inactive = rgb(${p["locked_inactive_fg"]})
 
-        col.active = {hypr_rgba_var(active_bg, "f5")}
-        col.inactive = {hypr_rgba_var(inactive_bg, "f5")}
-        col.locked_active = {hypr_rgba_var(locked_active_bg, "f5")}
-        col.locked_inactive = {hypr_rgba_var(locked_inactive_bg, "f5")}
+        col.active = {hypr_rgba_var(p["active_bg"], "f5")}
+        col.inactive = {hypr_rgba_var(p["inactive_bg"], "f5")}
+        col.locked_active = {hypr_rgba_var(p["locked_active_bg"], "f5")}
+        col.locked_inactive = {hypr_rgba_var(p["locked_inactive_bg"], "f5")}
     }}
 }}
 """
+
+
+_LUA_IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def lua_quote(value: str) -> str:
+    return '"' + str(value).replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def lua_key(key: str) -> str:
+    return key if _LUA_IDENT.match(key) else f"[{lua_quote(key)}]"
+
+
+def scheme_lua(colours: dict[str, str], slug: str, night_temperature: int) -> str:
+    """Lua table loaded by hypr/lib/scheme.lua via pcall(dofile): slug, night_temperature, colours, shadow_tint, groupbar."""
+    lines = [
+        "-- Generated by quantum-moon qm-apply (qm-sync-file-manager-theme.py --emit-lua); do not edit.",
+        "return {",
+        f"  slug = {lua_quote(slug)},",
+        f"  night_temperature = {int(night_temperature)},",
+        f"  shadow_tint = {lua_quote(hypr_shadow_tint_hex(colours))},",
+        "  colours = {",
+    ]
+    for key in sorted(colours):
+        lines.append(f"    {lua_key(key)} = {lua_quote(colours[key])},")
+    lines.append("  },")
+    lines.append("  groupbar = {")
+    for role, key in sorted(groupbar_pairs(colours).items()):
+        lines.append(f"    {role} = {lua_quote(key)},")
+    lines.append("  },")
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+def write_scheme_lua(path: Path, colours: dict[str, str], slug: str, night_temperature: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(scheme_lua(colours, slug, night_temperature), encoding="utf-8")
+    tmp.replace(path)
 
 
 def hypr_theme_overrides_conf(colours: dict[str, str]) -> str:
@@ -456,14 +500,16 @@ def write_qtct_colors(c: dict[str, str]) -> Path:
     col_dir = root / "colors"
     col_dir.mkdir(parents=True, exist_ok=True)
     path = col_dir / f"{KDE_SCHEME_KEY}.conf"
+    legacy_path = col_dir / f"{LEGACY_KDE_SCHEME_KEY}.conf"
     a, i, d = qt_palette_strings(c)
-    path.write_text(
+    body = (
         "[ColorScheme]\n"
         f"active_colors={a}\n"
         f"inactive_colors={i}\n"
-        f"disabled_colors={d}\n",
-        encoding="utf-8",
+        f"disabled_colors={d}\n"
     )
+    path.write_text(body, encoding="utf-8")
+    legacy_path.write_text(body, encoding="utf-8")
     cfgp = configparser.ConfigParser(interpolation=None)
     cfgp.optionxform = str
     conf = root / conf_name
@@ -474,7 +520,10 @@ def write_qtct_colors(c: dict[str, str]) -> Path:
     if not str(app.get("style", "")).strip():
         app["style"] = "Fusion"
     app["custom_palette"] = "true"
-    app["color_scheme_path"] = str(path.resolve())
+    # Point qt6ct at the new scheme only when unset or still on the Caelestia-era one (respect other choices).
+    current = str(app.get("color_scheme_path", "")).strip()
+    if not current or Path(current).name == legacy_path.name:
+        app["color_scheme_path"] = str(path.resolve())
     with conf.open("w", encoding="utf-8") as f:
         cfgp.write(f, space_around_delimiters=False)
     return path
@@ -508,7 +557,7 @@ def kitty_conf_from_scheme(c: dict[str, str]) -> str:
 def ensure_kitty_include(kitty_dir: Path) -> None:
     kitty_dir.mkdir(parents=True, exist_ok=True)
     dest = kitty_dir / "kitty.conf"
-    inc = "include colors-caelestia-qm.conf\n"
+    inc = f"include {KITTY_COLORS_FILE}\n"
     rc = "allow_remote_control socket\n"
     lo = f"listen_on unix:${{XDG_RUNTIME_DIR}}/{KITTY_LISTEN_SOCK_NAME}\n"
     intro = (
@@ -522,7 +571,7 @@ def ensure_kitty_include(kitty_dir: Path) -> None:
             prefix += rc
         if LISTEN_ON_RE.search(body) is None:
             prefix += lo
-        if "colors-caelestia-qm.conf" not in body:
+        if KITTY_COLORS_FILE not in body and LEGACY_KITTY_COLORS_FILE not in body:
             prefix += inc
         if prefix:
             dest.write_text(intro + prefix + body, encoding="utf-8")
@@ -998,7 +1047,7 @@ def ensure_gtk3_import(gtk3_dir: Path) -> None:
     marker = "quantum-moon: gtk3 sync"
     if dest.is_file():
         body = dest.read_text(encoding="utf-8")
-        if marker in body or "qm-gtk3.css" in body:
+        if marker in body or "qm-gtk3.css" in body:  # either generated dir counts
             return
         dest.write_text(GTK3_IMPORT_LINE + body, encoding="utf-8")
     else:
@@ -1473,6 +1522,8 @@ def stop_nautilus_for_theme_reload() -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("scheme_json", nargs="?", type=Path, default=SCHEME_FILE)
+    ap.add_argument("--emit-lua", type=Path, default=None, help="write the Lua scheme table (hypr/lib/scheme.lua input) to PATH and exit")
+    ap.add_argument("--meta", type=Path, default=None, help="modes/<slug>/meta.json providing slug + nightTemperature for --emit-lua")
     args = ap.parse_args()
     path: Path = args.scheme_json
     if not path.is_file():
@@ -1481,23 +1532,33 @@ def main() -> None:
 
     c = load_colours(path)
 
+    if args.emit_lua is not None:
+        slug, night = "unknown", 4500
+        if args.meta is not None and args.meta.is_file():
+            meta = json.loads(args.meta.read_text(encoding="utf-8"))
+            slug = str(meta.get("slug") or args.meta.parent.name)
+            night = int(meta.get("nightTemperature") or 4500)
+        write_scheme_lua(args.emit_lua, c, slug, night)
+        return
+
     kde_dir = Path.home() / ".local" / "share" / "color-schemes"
     kde_dir.mkdir(parents=True, exist_ok=True)
-    (kde_dir / KDE_SCHEME_FILE).write_text(kde_colors_ini(c), encoding="utf-8")
+    kde_ini = kde_colors_ini(c)
+    (kde_dir / KDE_SCHEME_FILE).write_text(kde_ini, encoding="utf-8")
+    (kde_dir / LEGACY_KDE_SCHEME_FILE).write_text(kde_ini, encoding="utf-8")
 
-    GENERATED_CSS.parent.mkdir(parents=True, exist_ok=True)
-    GENERATED_CSS.write_text(
+    libadwaita_css = (
         "/* Generated by quantum-moon qm-sync-file-manager-theme — do not edit */\n"
         + libadwaita_root_block(c)
-        + nautilus_surfaces_css(c),
-        encoding="utf-8",
+        + nautilus_surfaces_css(c)
     )
-
-    gtk3_path = GENERATED_CSS.parent / "qm-gtk3.css"
-    gtk3_path.write_text(
-        "/* Generated by quantum-moon — GTK3 companion */\n" + gtk3_block(c),
-        encoding="utf-8",
-    )
+    gtk3_css = "/* Generated by quantum-moon — GTK3 companion */\n" + gtk3_block(c)
+    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+    for gen_dir in (GENERATED_DIR, LEGACY_GENERATED_DIR):
+        if gen_dir != GENERATED_DIR and not gen_dir.is_dir():
+            continue  # legacy dir only while it exists (gtk.css import is rewritten by the migration script)
+        (gen_dir / "qm-libadwaita.css").write_text(libadwaita_css, encoding="utf-8")
+        (gen_dir / "qm-gtk3.css").write_text(gtk3_css, encoding="utf-8")
 
     cfg_home = Path.home() / ".config"
     sync_gtk4_everywhere(cfg_home, c, path)
@@ -1506,8 +1567,11 @@ def main() -> None:
     set_kde_color_scheme(cfg_home / "kdeglobals")
 
     kdir = cfg_home / "kitty"
-    kitty_colors = kdir / "colors-caelestia-qm.conf"
-    kitty_colors.write_text(kitty_conf_from_scheme(c), encoding="utf-8")
+    kitty_conf_text = kitty_conf_from_scheme(c)
+    kitty_colors = kdir / KITTY_COLORS_FILE
+    kdir.mkdir(parents=True, exist_ok=True)
+    kitty_colors.write_text(kitty_conf_text, encoding="utf-8")
+    (kdir / LEGACY_KITTY_COLORS_FILE).write_text(kitty_conf_text, encoding="utf-8")
     ensure_kitty_include(kdir)
     reload_kitty_terminals(kitty_colors)
 
@@ -1521,6 +1585,9 @@ def main() -> None:
             subprocess.run(cmd, check=False, capture_output=True, timeout=5)
 
     stop_nautilus_for_theme_reload()
+    if (Path.home() / ".config" / "hypr" / "hyprland.lua").exists():
+        # Lua config: colours come from scheme.lua (qm-apply --emit-lua + hyprctl reload); hyprlang writers are skipped.
+        return
     sync_hypr_scheme(c)
 
 

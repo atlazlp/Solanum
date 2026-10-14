@@ -1,4 +1,5 @@
 {
   "slug": "timber-hearth",
-  "displayName": "Timber Hearth"
+  "displayName": "Timber Hearth",
+  "nightTemperature": 4300
 }

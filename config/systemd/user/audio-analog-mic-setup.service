@@ -5,7 +5,7 @@ PartOf=pipewire-pulse.service
 
 [Service]
 Type=oneshot
-ExecStart=%h/.config/caelestia/scripts/audio-setup-analog-mic.sh --quiet
+ExecStart=%h/.config/hypr/scripts/audio-setup-analog-mic.sh --quiet
 RemainAfterExit=yes
 
 [Install]

@@ -1,6 +1,13 @@
+# local / generated
+hypr/local.lua
+hypr/hyprpaper.conf
+*.local.json
+*.local.lua
+config/quantum-moon/git-watcher.json
+config/quantum-moon/vpn.json
+config/quantum-moon/shell.ui.json
+backup/
 backup/*.zip
-caelestia/shell-vpn.local.json
-caelestia/git-watcher.local.json
 backup/*.tar.gz
 **/.DS_Store
 __pycache__/

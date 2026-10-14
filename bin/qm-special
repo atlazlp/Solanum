@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# qm-special: toggle a Hyprland special workspace.
+#   qm-special <name>
+set -euo pipefail
+if [[ $# -ne 1 || "$1" == "-h" || "$1" == "--help" ]]; then sed -n '2,3p' "$0" | sed 's/^# \{0,1\}//'; exit "$([[ $# -eq 1 ]] && echo 0 || echo 2)"; fi
+exec hyprctl dispatch togglespecialworkspace "$1"

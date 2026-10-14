@@ -1,0 +1,3 @@
+# Default applications merged into ~/.config/mimeapps.list by scripts/install.sh
+# (one `xdg-mime default <desktop> <mime>` per line; existing user choices win unless --force-mime).
+inode/directory=org.gnome.Nautilus.desktop

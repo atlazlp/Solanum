@@ -11,21 +11,34 @@ last_restart=0
 watchdog_tick=0
 
 game_mode_active() {
-  [[ -f "${XDG_RUNTIME_DIR:-/tmp}/caelestia-game-mode.active" ]]
+  qm_game_mode_active
+}
+
+# Pause/resume through hypr/scripts/qm-mpv-ipc when the repo ships it, else the lib helper (same JSON command).
+set_pause() {
+  local want="$1" ipc sock
+  ipc="$(qm_repo_root)/hypr/scripts/qm-mpv-ipc"
+  if [[ -x "${ipc}" ]]; then
+    "${ipc}" pause "${want}"
+    return
+  fi
+  sock="$(qm_video_sock)"
+  qm_mpv_set_pause "${sock}" "${want}"
 }
 
 sync_pause() {
   local want sock
+  sock="$(qm_video_sock)"
+  [[ -S "${sock}" ]] || { last=""; return 0; }
+
+  # Game mode: keep mpvpaper alive but paused (features/gamemode.lua also pauses it); resume on exit.
   if game_mode_active; then
-    if qm_mpvpaper_running; then
-      qm_video_stop
-      last="game-mode-stopped"
+    if [[ "${last}" != "game-mode-paused" ]]; then
+      set_pause true && last="game-mode-paused" || last=""
     fi
     return 0
   fi
-
-  sock="$(qm_video_sock)"
-  [[ -S "${sock}" ]] || { last=""; return 0; }
+  [[ "${last}" == "game-mode-paused" ]] && last=""
 
   if qm_desktop_visible_on_center; then
     want="false"
@@ -34,7 +47,7 @@ sync_pause() {
   fi
 
   if [[ "${want}" != "${last}" ]]; then
-    qm_mpv_set_pause "${sock}" "${want}" && last="${want}" || last=""
+    set_pause "${want}" && last="${want}" || last=""
   fi
 }
 

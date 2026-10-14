@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# qm-emoji: open the emoji picker (shell launcher mode, fuzzel fallback).
+#   qm-emoji [-p]
+#   -p  paste the chosen emoji into the focused window (wtype or ydotool) in fallback mode
+set -euo pipefail
+paste=0
+for a in "$@"; do
+  case "$a" in
+    -h|--help) sed -n '2,4p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -p|--paste) paste=1 ;;
+    *) echo "qm-emoji: unknown argument '$a'" >&2; exit 2 ;;
+  esac
+done
+if qs -c quantum-moon ipc call launcher open emoji >/dev/null 2>&1; then exit 0; fi
+
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send -a quantum-moon "$@" || echo "$*" >&2; }
+shell_dir="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/quantum-moon"
+list="$shell_dir/assets/emoji.txt"
+if [[ ! -f "$list" ]] || ! command -v fuzzel >/dev/null 2>&1; then
+  notify "Emoji picker" "The Quantum Moon shell is required (no fallback emoji list/fuzzel)"
+  exit 1
+fi
+sel="$(fuzzel --dmenu -p 'emoji > ' < "$list")" || exit 0
+emoji="${sel%% *}"
+[[ -n "$emoji" ]] || exit 0
+printf '%s' "$emoji" | wl-copy
+if [[ "$paste" -eq 1 ]]; then
+  if command -v wtype >/dev/null 2>&1; then wtype -- "$emoji"
+  elif command -v ydotool >/dev/null 2>&1; then ydotool type -- "$emoji"
+  else notify "Emoji copied" "$emoji (install wtype or ydotool to paste)"; fi
+fi

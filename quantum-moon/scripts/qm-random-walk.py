@@ -13,6 +13,16 @@ def _state_dir() -> Path:
 
 
 def _qm_root() -> Path:
+    """~/.config/quantum-moon/root, then the legacy ~/.config/caelestia/quantum-moon-root, else this tree."""
+    home = Path.home()
+    cfg = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
+    for f in (cfg / "quantum-moon" / "root", home / ".config" / "caelestia" / "quantum-moon-root"):
+        try:
+            root = Path(f.read_text(encoding="utf-8").strip())
+        except OSError:
+            continue
+        if root and (root / "scripts" / "qm-apply").is_file():
+            return root
     return Path(__file__).resolve().parent.parent
 
 

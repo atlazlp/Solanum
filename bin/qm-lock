@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# qm-lock: lock the session through the Quantum Moon shell.
+#   qm-lock [--help]
+set -euo pipefail
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then sed -n '2,3p' "$0" | sed 's/^# \{0,1\}//'; exit 0; fi
+exec qs -c quantum-moon ipc call lock lock

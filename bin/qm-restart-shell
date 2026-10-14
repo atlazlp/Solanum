@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# qm-restart-shell: restart the Quantum Moon shell (and hyprpaper) without leaving duplicates.
+#   qm-restart-shell [--lock]
+# Under UWSM the systemd units are restarted; otherwise the processes are re-executed directly.
+# Ensures exactly one hyprpaper, then re-syncs the mpvpaper video. --lock locks afterwards.
+set -euo pipefail
+lock=0
+for a in "$@"; do
+  case "$a" in
+    -h|--help) sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --lock) lock=1 ;;
+    *) echo "qm-restart-shell: unknown argument '$a'" >&2; exit 2 ;;
+  esac
+done
+
+if systemctl --user is-active --quiet quantum-moon-shell.service 2>/dev/null; then
+  systemctl --user restart quantum-moon-shell.service
+  if systemctl --user is-active --quiet hyprpaper.service 2>/dev/null; then
+    systemctl --user restart hyprpaper.service
+  fi
+else
+  qs -c quantum-moon kill >/dev/null 2>&1 || true
+  sleep 0.3
+  setsid qs -c quantum-moon >/dev/null 2>&1 < /dev/null &
+fi
+
+# exactly one hyprpaper
+n="$(pgrep -cx hyprpaper || true)"
+if [[ "$n" -gt 1 ]]; then
+  # keep the newest (systemd-managed or just started), kill older ones
+  for pid in $(pgrep -x hyprpaper | sort -n | head -n -1); do kill "$pid" 2>/dev/null || true; done
+elif [[ "$n" -eq 0 ]]; then
+  if systemctl --user is-enabled --quiet hyprpaper.service 2>/dev/null && systemctl --user is-active --quiet graphical-session.target 2>/dev/null; then
+    systemctl --user start hyprpaper.service
+  else
+    setsid hyprpaper >/dev/null 2>&1 < /dev/null &
+  fi
+fi
+
+if command -v qm-video-sync-from-state >/dev/null 2>&1; then
+  sleep 0.5
+  qm-video-sync-from-state >/dev/null 2>&1 || true
+fi
+
+if [[ "$lock" -eq 1 ]]; then
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    qs -c quantum-moon ipc call lock lock >/dev/null 2>&1 && exit 0
+    sleep 0.5
+  done
+  echo "qm-restart-shell: shell did not answer, lock not applied" >&2
+  exit 1
+fi

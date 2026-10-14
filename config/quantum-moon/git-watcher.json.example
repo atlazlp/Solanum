@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "organizationUrl": "https://dev.azure.com/your-org",
+  "pat": "",
+  "myIdentity": "",
+  "pollIntervalSeconds": 60,
+  "watchedRepos": [],
+  "notifications": {
+    "newPr": true,
+    "overdueMinutes": 60,
+    "prComment": true,
+    "prMention": true
+  },
+  "colors": {
+    "overdue": "#ff9500",
+    "mention": "#e53935"
+  },
+  "discordFirst": {
+    "enabled": false,
+    "token": "",
+    "channels": []
+  }
+}

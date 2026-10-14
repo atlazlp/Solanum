@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Kill Wine `explorer.exe /desktop` processes that belong to a Proton prefix (they spawn the ghost windows
+# features/proton_ghosts.lua closes). Extracted from proton-hide-ghost-windows.sh.
+set -uo pipefail
+
+for pid in $(pgrep -f 'explorer\.exe /desktop' 2>/dev/null); do
+  cwd=$(readlink -f "/proc/${pid}/cwd" 2>/dev/null || true)
+  case "$cwd" in
+    */steamapps/compatdata/*/pfx/*) kill "$pid" 2>/dev/null || true ;;
+  esac
+done
+exit 0

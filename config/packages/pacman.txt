@@ -1,0 +1,73 @@
+# Repo packages for Quantum Moon (pacman -S --needed --asexplicit). One per line, # comments allowed.
+# compositor + shell
+hyprland
+quickshell
+hyprpaper
+hyprsunset
+hyprpolkitagent
+hyprpicker
+uwsm
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+xorg-xwayland
+# terminal, files
+kitty
+nautilus
+gvfs
+udisks2
+# screenshots / recording / clipboard
+grim
+slurp
+swappy
+satty
+cliphist
+wl-clipboard
+gpu-screen-recorder
+# launcher helpers
+libqalculate
+fuzzel
+cava
+# fonts
+ttf-material-symbols-variable
+ttf-jetbrains-mono-nerd
+ttf-cascadia-code-nerd
+noto-fonts
+noto-fonts-emoji
+# media / hardware
+playerctl
+brightnessctl
+ddcutil
+lm_sensors
+power-profiles-daemon
+pipewire
+wireplumber
+networkmanager
+# tooling
+jq
+python
+python-pillow
+borg
+rsync
+trash-cli
+fish
+git
+git-lfs
+libnotify
+inotify-tools
+pacman-contrib
+# theming
+adw-gtk-theme
+papirus-icon-theme
+capitaine-cursors
+qt6ct
+qt6-wayland
+# input
+ydotool
+wtype
+# extras used by binds / panels
+lan-mouse
+btop
+eza
+starship
+fastfetch
+mpvpaper
