@@ -9,9 +9,10 @@ Historical page for machines that ran the Caelestia-based version (tag `v0-caele
    ```sh
    ./scripts/hypr-verify.sh
    cp -L ~/.config/hypr/hyprpaper.conf ~/Projects/Quantum-Moon/hypr/hyprpaper.conf
-   ln -sfn ~/Projects/Quantum-Moon/hypr ~/.config/hypr && hyprctl reload
+   ln -sfn ~/Projects/Quantum-Moon/hypr ~/.config/hypr
+   # then log out and back in: the config manager (hyprlang vs Lua) is chosen at startup, not on reload
    ```
-   Rollback: `ln -sfn ~/.local/share/caelestia/hypr ~/.config/hypr && hyprctl reload`. Checks are listed in `hypr/README.md`.
+   Rollback: `ln -sfn ~/.local/share/caelestia/hypr ~/.config/hypr` and log out/in. If a reload was issued by mistake (emergency binds only), relink the old dir and `hyprctl reload` restores the hyprlang session instantly. Checks are listed in `hypr/README.md`.
 3. **Shell side by side**: `./scripts/shell-dev.sh` runs `qs -c quantum-moon` with dev flags (no notification server, no session lock, bar reserves no space). For a full test: `qs -c caelestia kill; qs -c quantum-moon`, then `caelestia shell -d` to go back.
 4. **Cutover**: `./scripts/install.sh --migrate-caelestia --units` (copies state and config, never deletes), flip `hypr/lib/shell.lua` to the quantum-moon block, log out and in. Rollback: flip the block back, re-enable `caelestia-suspend-resume-watch.service`, restore the two autostart files from the baseline.
 5. **UWSM**: `./scripts/system-steps.sh --run --sddm-uwsm`, log out. Rollback: restore `/etc/sddm.conf` and `caelestia-autologin.conf` from the baseline.
