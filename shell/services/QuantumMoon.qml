@@ -10,7 +10,7 @@ import qs.config
 //  - current planet from state/current.json (`slug`, `displayName`, `logoPath`)
 //  - request queue (<= 2 pending) of random picks / explicit slugs
 //  - selector wheel spin (500 ms InOutQuint, 46.5 deg per planet, zero index 2, +0.5 deg, eye = 180 deg)
-//  - post-spin timer -> 1000 ms InOutQuad fade to black -> `qm-apply <slug>` -> fade back -> drain queue
+//  - post-spin timer -> 1000 ms fade to black -> `qm-apply <slug>` -> fade back -> drain queue
 //  - `startInstantThen(cb)`: `qm-random` without fade (idle monitor before lock)
 //  - scout lock (engage/release, marker placement rules) persisted to state/state.json
 Singleton {
@@ -421,6 +421,24 @@ Singleton {
             cb();
     }
 
+    function _pulseSun(dir: string): void {
+        sunPulse.running = false;
+        sunPulse.command = ["qm-godot-ipc", "sun-pulse", dir, String(root.fadeDurationMs), String(Date.now())];
+        sunPulse.running = true;
+    }
+
+    function _launchApply(): void {
+        spinBlendAnim.stop();
+        root.spinBlend = 0;
+        const slug = root.pendingApplySlug;
+        root.pendingApplySlug = "";
+        if (slug.length)
+            proc.command = ["bash", `${Paths.qmRoot}/scripts/qm-apply`, slug];
+        else
+            proc.command = ["bash", `${Paths.qmRoot}/scripts/qm-random`];
+        proc.running = true;
+    }
+
     function applyPlanetSlug(slug: string): void {
         if (root.planetLocked)
             return;
@@ -434,11 +452,16 @@ Singleton {
 
     // ---- processes ----
     Process {
+        id: sunPulse
+    }
+
+    Process {
         id: proc
 
         onExited: function (exitCode, exitStatus) {
             if (exitCode !== 0)
                 console.warn("QuantumMoon: apply exited with", exitCode);
+            root._pulseSun("in");
             fadeIn.start();
         }
     }
@@ -484,6 +507,7 @@ Singleton {
 
         onTriggered: {
             root.active = true;
+            root._pulseSun("out");
             fadeOut.start();
         }
     }
@@ -497,18 +521,7 @@ Singleton {
         to: 1
         duration: root.fadeDurationMs
         easing.type: Easing.InOutQuad
-        onFinished: {
-            // Screen is fully black here: reset the frame tint so it does not snap later.
-            spinBlendAnim.stop();
-            root.spinBlend = 0;
-            const slug = root.pendingApplySlug;
-            root.pendingApplySlug = "";
-            if (slug.length)
-                proc.command = ["bash", `${Paths.qmRoot}/scripts/qm-apply`, slug];
-            else
-                proc.command = ["bash", `${Paths.qmRoot}/scripts/qm-random`];
-            proc.running = true;
-        }
+        onFinished: root._launchApply()
     }
 
     NumberAnimation {

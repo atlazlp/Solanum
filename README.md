@@ -1,6 +1,6 @@
-# Quantum Moon
+# Solanum
 
-**[Quantum Moon](https://github.com/atlazlp/Quantum-Moon)** is a standalone **Hyprland** desktop by **[atlazlp](https://github.com/atlazlp)**: an *Outer Wilds* homage with its own **Quickshell** shell (`quantum-moon`), a native **Lua** Hyprland config, and a planet engine that re-themes the whole desktop (wallpapers, the centre-monitor video, Hyprland colours, GTK, Qt, kitty) every time the Quantum Moon moves.
+**[Solanum](https://github.com/atlazlp/Quantum-Moon)** (formerly Quantum Moon) is a standalone **Hyprland** desktop by **[atlazlp](https://github.com/atlazlp)**: an *Outer Wilds* homage with its own **Quickshell** shell (`solanum`), a native **Lua** Hyprland config, and a planet engine that re-themes the whole desktop (wallpapers, the centre-monitor video, Hyprland colours, GTK, Qt, kitty, Firefox via Pywalfox) every time Solanum moves.
 
 The visual language is Nomai: angular hexagons and chamfered frames, thin glowing lines in the planet's colour, ship-log node-and-edge layouts, quick glyph "write-in" reveals. No rounded pills, no jelly.
 
@@ -8,23 +8,23 @@ The visual language is Nomai: angular hexagons and chamfered frames, thin glowin
 
 This setup uses *Outer Wilds* art, names and motifs that **reveal major story beats and places**. *Outer Wilds* is a game you only get to discover once. **Play it before installing this theme** if you have not finished it and want to stay unspoiled.
 
-The on-shell **Quantum Moon** control surfaces **five** planetary stops on the selector ring. **Six** full modes in the repo cover every world that moon can visit, each with its own palette, per-monitor wallpapers and an optional centre-monitor video.
+The on-shell **Solanum** control surfaces **five** planetary stops on the selector ring. **Six** full modes in the repo cover every world that moon can visit, each with its own palette, per-monitor wallpapers and an optional centre-monitor video.
 
 ## Preview
 
 > Screenshots in `docs/screenshots/` are being retaken for the new shell; the ones below still show the layout of the planet system (wallpapers, panel, scout lock).
 
-### Random planet: the Quantum Moon button
+### Random planet: the Solanum button
 
 Click the small moon beside the selector ring to jump to a **random** planet. Click a planet to go there directly.
 
 <p align="center">
-  <img src="docs/screenshots/QMButton.png" alt="Quantum Moon button on the shell widget" width="220" />
+  <img src="docs/screenshots/QMButton.png" alt="Solanum button on the shell widget" width="220" />
 </p>
 
 ### Lock your world: the scout indicator
 
-Use your **scout** to take a picture and **lock** the planet you are on. While locked the desktop stays on that world; unlocked, the Quantum Moon can still **change planets when you are not looking** (idle, before lock, before sleep).
+Use your **scout** to take a picture and **lock** the planet you are on. While locked the desktop stays on that world; unlocked, Solanum can still **change planets when you are not looking** (idle, before lock, before sleep).
 
 <p align="center">
   <img src="docs/screenshots/ScoutIndicator.png" alt="Scout indicator showing a locked planet" width="280" />
@@ -39,8 +39,8 @@ Use your **scout** to take a picture and **lock** the planet you are on. While l
 ## What is in the box
 
 - **Hyprland config in Lua** (`hypr/`): every keybind, rule and animation, plus in-process features that used to be shell scripts: Alt-Tab cycling, scratchpad toggle, Super-tap launcher, thumb-button submaps with a Steam-game guard, Proton ghost-window hiding, monitor hotplug re-layout, game-mode detection (pauses the wallpaper video), Telegram fullscreen fix, per-planet night light.
-- **The `quantum-moon` shell** (`shell/`): top hex-segment bar, launcher with app / window / clipboard / emoji / calculator modes, notifications with a persistent **ship-log** history, sidebar, dashboard, OSD, session menu, lock screen, Quantum Moon panel, window picker, utilities (recorder, screenshots, idle inhibit, night light), updates indicator, Docker/Ollama/Open WebUI panel, KVM (lan-mouse) panel, audio device panel, settings window, VPN toggle, Azure DevOps PR watcher.
-- **The planet engine** (`quantum-moon/`): modes, palettes, `qm-apply`, `qm-random`, video helpers.
+- **The `solanum` shell** (`shell/`): left hex-segment bar, launcher with app / window / clipboard / emoji / calculator modes, notifications with a persistent **ship-log** history, sidebar, dashboard, OSD, session menu, lock screen, Solanum panel, window picker, utilities (recorder, screenshots, idle inhibit, night light), updates indicator, Docker/Ollama/Open WebUI panel, KVM (lan-mouse) panel, audio device panel, settings window, VPN toggle, Azure DevOps PR watcher.
+- **The planet engine** (`solanum/`): modes, palettes, `qm-apply`, `qm-random`, video helpers.
 - **User commands** (`bin/`): `qm-apply`, `qm-random`, `qm-lock`, `qm-screenshot`, `qm-record`, `qm-clip`, `qm-emoji`, `qm-update`, `qm-backup`, `qm-restart-shell`, `qm-shell` (IPC), `qm-toast`, `qm-fetch-videos`.
 - **System glue** (`config/`): user units for a UWSM session, uwsm env, pacman package-list hook, borg backup timer, GTK/kitty/mime defaults, package lists.
 
@@ -64,8 +64,8 @@ Then log out and pick **Hyprland (uwsm)**. After install: **[docs/post-install.m
 | Path | Purpose |
 |------|---------|
 | [`hypr/`](hypr/) | Hyprland Lua config, `features/`, kept bash helpers in `scripts/` |
-| [`shell/`](shell/) | Quickshell config `quantum-moon` (config, theme, components, services, modules) |
-| [`quantum-moon/`](quantum-moon/) | Planet engine: `modes/<slug>/` (palette, meta, logo, wallpapers, video), `palettes/`, `scripts/` |
+| [`shell/`](shell/) | Quickshell config `solanum` (config, theme, components, services, modules) |
+| [`solanum/`](solanum/) | Planet engine: `modes/<slug>/` (palette, meta, logo, wallpapers, video), `palettes/`, `scripts/` |
 | [`bin/`](bin/) | `qm-*` user commands (symlinked into `~/.local/bin`) |
 | [`config/`](config/) | Config templates, systemd user units, uwsm env, pacman hook, GTK/kitty/mime defaults, package lists |
 | [`scripts/`](scripts/) | `install.sh`, `system-steps.sh`, `migrate-caelestia-state.sh`, `uninstall-caelestia.sh`, `cleanup-leftovers.sh`, `backup-baseline.sh`, `shell-dev.sh`, `hypr-verify.sh` |

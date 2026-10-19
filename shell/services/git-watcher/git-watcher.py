@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-Azure DevOps PR watcher daemon for the quantum-moon bar.
+Azure DevOps PR watcher daemon for the solanum bar.
 
 Polls configured Azure DevOps project for active PRs across all enabled repos,
-writes state to ~/.local/state/quantum-moon/git-watcher-state.json, and sends
+writes state to ~/.local/state/solanum/git-watcher-state.json, and sends
 desktop notifications for new PRs, overdue PRs (> threshold), and PR comments
 or mentions targeting the configured identity.
 
-Config: ~/.config/quantum-moon/git-watcher.json
-State:  ~/.local/state/quantum-moon/git-watcher-state.json
-Repos:  ~/.local/state/quantum-moon/git-watcher-repos.json
-PID:    ~/.local/state/quantum-moon/git-watcher.pid
+Config: ~/.config/solanum/git-watcher.json
+State:  ~/.local/state/solanum/git-watcher-state.json
+Repos:  ~/.local/state/solanum/git-watcher-repos.json
+PID:    ~/.local/state/solanum/git-watcher.pid
 
-Legacy fallback: when the quantum-moon config does not exist but
+Legacy fallback: when the solanum config does not exist but
 ~/.config/caelestia/git-watcher.json does, the caelestia config/state/pid
-paths are used instead (set GW_PROFILE=quantum-moon|caelestia to force one).
+paths are used instead (set GW_PROFILE=solanum|caelestia to force one).
 """
 
 import base64
@@ -40,13 +40,13 @@ _XDG_STATE = os.environ.get("XDG_STATE_HOME") or os.path.join(HOME, ".local", "s
 
 def _profile() -> str:
     forced = os.environ.get("GW_PROFILE", "")
-    if forced in ("quantum-moon", "caelestia"):
+    if forced in ("solanum", "caelestia"):
         return forced
-    qm = os.path.join(_XDG_CONFIG, "quantum-moon", "git-watcher.json")
+    qm = os.path.join(_XDG_CONFIG, "solanum", "git-watcher.json")
     legacy = os.path.join(_XDG_CONFIG, "caelestia", "git-watcher.json")
     if not os.path.exists(qm) and os.path.exists(legacy):
         return "caelestia"
-    return "quantum-moon"
+    return "solanum"
 
 
 PROFILE = _profile()

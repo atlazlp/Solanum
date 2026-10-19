@@ -5,7 +5,7 @@
 #
 #   scripts/uninstall-caelestia.sh [--dry-run] [--yes] [--skip-backup]
 #
-# Guards: refuses unless quantum-moon-shell.service is active and ~/.config/hypr resolves into this repo,
+# Guards: refuses unless solanum-shell.service is active and ~/.config/hypr resolves into this repo,
 # and unless scripts/migrate-caelestia-state.sh --verify passes. Never removes shelly/code/go/rust/lib32-*.
 set -euo pipefail
 # shellcheck source=lib/common.sh
@@ -25,11 +25,11 @@ export DRY YES
 
 log "guards"
 if [[ "$DRY" == "0" ]]; then
-  systemctl --user is-active --quiet quantum-moon-shell.service || die "quantum-moon-shell.service is not active; finish Phase 4 first"
+  systemctl --user is-active --quiet solanum-shell.service || die "solanum-shell.service is not active; finish Phase 4 first"
   [[ "$(readlink -f "$CFG/hypr")" == "$REPO/hypr" ]] || die "~/.config/hypr does not resolve into $REPO/hypr"
   "$REPO/scripts/migrate-caelestia-state.sh" --verify || die "state migration incomplete"
 else
-  systemctl --user is-active --quiet quantum-moon-shell.service || warn "(dry) quantum-moon-shell.service is not active"
+  systemctl --user is-active --quiet solanum-shell.service || warn "(dry) solanum-shell.service is not active"
   [[ "$(readlink -f "$CFG/hypr")" == "$REPO/hypr" ]] || warn "(dry) ~/.config/hypr -> $(readlink -f "$CFG/hypr")"
   "$REPO/scripts/migrate-caelestia-state.sh" --verify || warn "(dry) state migration incomplete"
 fi

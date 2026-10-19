@@ -167,6 +167,7 @@ Column {
             icon: "skip_previous"
             shape: "hex"
             flat: true
+            padding: Theme.spaceMd
             enabled: root.player?.canGoPrevious ?? false
             onClicked: Players.previous()
         }
@@ -176,7 +177,7 @@ Column {
             shape: "hex"
             glow: root.playing
             active: root.playing
-            padding: Theme.spaceMd
+            padding: Theme.spaceLg
             enabled: root.player?.canTogglePlaying ?? false
             onClicked: Players.playPause()
         }
@@ -185,6 +186,7 @@ Column {
             icon: "skip_next"
             shape: "hex"
             flat: true
+            padding: Theme.spaceMd
             enabled: root.player?.canGoNext ?? false
             onClicked: Players.next()
         }

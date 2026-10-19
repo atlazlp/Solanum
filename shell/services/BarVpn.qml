@@ -6,7 +6,7 @@ import Quickshell.Io
 import qs.config
 import qs.services
 
-// nmcli VPN toggle. Reads ~/.config/quantum-moon/vpn.json { enabled, connectionName, displayName }.
+// nmcli VPN toggle. Reads ~/.config/solanum/vpn.json { enabled, connectionName, displayName }.
 Singleton {
     id: root
 

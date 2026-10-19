@@ -6,9 +6,9 @@ import qs.theme
 import qs.components
 import qs.services
 
-// Lives in the drawers window directly under the bar. Bar segments call
-// show(name, absX, width, data, sticky) with the segment's absolute x on the screen; the popout
-// is centred under it. Hover popouts hide shortly after the pointer leaves both; sticky ones
+// Lives in the drawers window to the right of the left bar. Bar segments call
+// show(name, absY, height, data, sticky) with the segment's absolute y on the screen; the popout
+// is centred beside it. Hover popouts hide shortly after the pointer leaves both; sticky ones
 // (click-opened menus) stay until hide(), Escape or a long pointer absence.
 Item {
     id: root
@@ -19,21 +19,23 @@ Item {
     property string currentName: ""
     property bool hasCurrent: false
     property bool sticky: false
-    property real anchorX: 0
-    property real anchorWidth: 0
+    property real anchorY: 0
+    property real anchorHeight: 0
     property var payload: null   // (never name this `data`: it would shadow Item.data and orphan the children)
     readonly property bool hovered: hover.hovered
 
-    height: hasCurrent ? frame.implicitHeight + Theme.spaceSm : 0
+    // Keep a stable hit region while open so Regions.qml can mask the frame.
+    width: parent?.width ?? 0
+    height: parent?.height ?? 0
     z: Theme.zPopout
 
     Component.onCompleted: Visibilities.registerPopout(screen.name, this)
 
-    function show(name: string, absX: real, w: real, payloadValue: var, stickyOpen: bool): void {
+    function show(name: string, absY: real, h: real, payloadValue: var, stickyOpen: bool): void {
         hideTimer.stop();
         currentName = name;
-        anchorX = absX;
-        anchorWidth = w;
+        anchorY = absY;
+        anchorHeight = h;
         root.payload = payloadValue ?? null;
         sticky = !!stickyOpen;
         hasCurrent = true;
@@ -74,10 +76,10 @@ Item {
     Popout {
         id: frame
 
-        readonly property real desiredX: root.anchorX + root.anchorWidth / 2 - width / 2
-        x: Math.max(Theme.spaceSm, Math.min(root.width - width - Theme.spaceSm, desiredX))
-        y: Theme.spaceSm
-        anchorCenterX: root.anchorX + root.anchorWidth / 2
+        readonly property real desiredY: root.anchorY + root.anchorHeight / 2 - height / 2
+        x: Theme.spaceSm
+        y: Math.max(Theme.spaceSm, Math.min(root.height - height - Theme.spaceSm, desiredY))
+        anchorCenterY: root.anchorY + root.anchorHeight / 2
         visible: root.hasCurrent
         opacity: root.hasCurrent ? 1 : 0
         implicitWidth: loader.item?.implicitWidth ?? 0
@@ -97,6 +99,7 @@ Item {
             sourceComponent: {
                 switch (root.currentName) {
                 case "audio": return audioComp;
+                case "mic": return micComp;
                 case "network": return networkComp;
                 case "tray": return trayComp;
                 case "activewindow": return activeWindowComp;
@@ -123,6 +126,7 @@ Item {
     }
 
     Component { id: audioComp; AudioPopout {} }
+    Component { id: micComp; MicPopout {} }
     Component { id: networkComp; NetworkPopout {} }
     Component { id: trayComp; TrayMenu {} }
     Component { id: activeWindowComp; ActiveWindowPopout {} }

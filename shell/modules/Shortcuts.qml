@@ -84,7 +84,7 @@ Scope {
 
     Qm {
         name: "quantumMoon"
-        description: "Toggle Quantum Moon panel"
+        description: "Toggle Solanum panel"
         onPressed: root.toggleDrawer("quantumMoon")
     }
 

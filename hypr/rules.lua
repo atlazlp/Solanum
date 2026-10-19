@@ -59,6 +59,20 @@ rule({
 -- Creative software
 rule({ name = "opaque-creative", match = { class = "krita|gimp|inkscape|darktable|resolve|kdenlive|shotcut|blender|godot" }, opaque = true })
 
+-- Godot solar-system wallpaper (hyprwinwrap class must match exactly: qm-solar-wallpaper)
+rule({
+  name = "qm-solar-wallpaper",
+  match = { class = "qm-solar-wallpaper" },
+  float = true,
+  pin = true,
+  no_focus = true,
+  no_anim = true,
+  border_size = 0,
+  rounding = 0,
+  opacity = "1.0 override 1.0 override",
+  opaque = true,
+})
+
 -- Ueberzugpp
 rule({ name = "ueberzugpp", match = { class = "^(ueberzugpp_.*)$" }, float = true, no_initial_focus = true })
 
@@ -106,15 +120,15 @@ for _, ns in ipairs({ "hyprpicker", "logout_dialog", "selection", "wayfreeze" })
   layer({ name = "fade-" .. ns, match = { namespace = ns }, animation = "fade" })
 end
 
--- Launcher / Fuzzel (transition; dropped once the quantum-moon launcher exists)
+-- Launcher / Fuzzel (transition; dropped once the solanum launcher exists)
 layer({ name = "launcher", match = { namespace = "launcher" }, animation = "popin 80%", blur = true })
 layer({ name = "fuzzel", match = { namespace = "fuzzel" }, animation = "popin 80%", blur = true })
 
 -- Wallpaper video
 layer({ name = "mpvpaper", match = { namespace = "mpvpaper" }, no_anim = true })
 
--- Shell layers: caelestia (Phase 1) and quantum-moon (Phase 2+) namespaces
+-- Shell layers: caelestia (Phase 1) and solanum (Phase 2+) namespaces
 layer({ name = "caelestia-noanim", match = { namespace = "caelestia-(border-exclusion|area-picker)" }, no_anim = true })
 layer({ name = "caelestia-fade", match = { namespace = "caelestia-(drawers|background)" }, animation = "fade" })
-layer({ name = "qm-noanim", match = { namespace = "quantum-moon-(border-exclusion|area-picker|fade)" }, no_anim = true })
-layer({ name = "qm-fade", match = { namespace = "quantum-moon-(drawers|background)" }, animation = "fade" })
+layer({ name = "qm-noanim", match = { namespace = "solanum-(border-exclusion|area-picker|fade)" }, no_anim = true })
+layer({ name = "qm-fade", match = { namespace = "solanum-(drawers|background)" }, animation = "fade" })

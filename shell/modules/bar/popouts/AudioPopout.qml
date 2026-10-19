@@ -108,7 +108,7 @@ Column {
             text: "Mixer"
             padding: Theme.spaceXs
             onClicked: {
-                Visibilities.toggle("audio", null);
+                Visibilities.open("audioMixer", null);
                 root.host?.hide();
             }
         }

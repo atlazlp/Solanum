@@ -29,10 +29,11 @@ Item {
     readonly property alias services: services
     readonly property alias kvm: kvm
     readonly property alias audio: audio
+    readonly property alias audioMixer: audioMixer
     readonly property alias updates: updates
     readonly property alias settings: settings
 
-    readonly property list<Item> slots: [dashboard, quantumMoon, notifications, osd, session, sidebar, utilities, launcher, windowPicker, shipLog, services, kvm, audio, updates, settings]
+    readonly property list<Item> slots: [dashboard, quantumMoon, notifications, osd, session, sidebar, utilities, launcher, windowPicker, shipLog, services, kvm, audio, audioMixer, updates, settings]
 
     function slotFor(name: string): Item {
         return slots.find(s => s.name === name) ?? null;
@@ -168,8 +169,18 @@ Item {
     PanelSlot {
         id: audio
         name: "audio"
-        source: "../panels/AudioPanel.qml"
+        source: "../panels/VolumeStrip.qml"
         open: root.visibilities.audio
+        edge: "right"
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+    }
+
+    PanelSlot {
+        id: audioMixer
+        name: "audioMixer"
+        source: "../panels/AudioPanel.qml"
+        open: root.visibilities.audioMixer
         edge: "center"
         anchors.centerIn: parent
     }
@@ -255,6 +266,16 @@ Item {
 
         HoverHandler {
             id: hover
+        }
+
+        // Absorb clicks on empty panel chrome so the dismiss catcher underneath never sees them.
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            acceptedButtons: Qt.AllButtons
+            onPressed: mouse => {
+                mouse.accepted = true;
+            }
         }
     }
 }

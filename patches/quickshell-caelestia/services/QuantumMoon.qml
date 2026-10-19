@@ -45,7 +45,7 @@ Singleton {
 
     readonly property bool wheelRingSpinning: wheelRingSpin.running
 
-    readonly property string lockStateFile: Paths.home + "/.local/state/quantum-moon/state.json"
+    readonly property string lockStateFile: Paths.home + "/.local/state/solanum/state.json"
 
     readonly property real lockMarkerBarHeight: 40
     readonly property real lockMarkerBarWidth: lockMarkerBarHeight * 16 / 9
@@ -476,7 +476,7 @@ Singleton {
 
     function persistLockState(): void {
         root._ignoreLockStateFileOnce = true;
-        const dir = Paths.home + "/.local/state/quantum-moon";
+        const dir = Paths.home + "/.local/state/solanum";
         const path = dir + "/state.json";
         let body = "{\"planetLocked\":" + (root.planetLocked ? "true" : "false");
         if (root.planetLocked) {

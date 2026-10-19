@@ -12,7 +12,7 @@ for a in "$@"; do
   esac
 done
 mode=clip; [[ "$delete" -eq 1 ]] && mode=clipDelete
-if qs -c quantum-moon ipc call launcher open "$mode" >/dev/null 2>&1; then exit 0; fi
+if qs -c solanum ipc call launcher open "$mode" >/dev/null 2>&1; then exit 0; fi
 
 for t in cliphist fuzzel; do command -v "$t" >/dev/null 2>&1 || { echo "qm-clip: $t not installed and the shell is not running" >&2; exit 1; }; done
 if [[ "$delete" -eq 1 ]]; then

@@ -21,7 +21,7 @@ HexSegment {
     function popout(name: string, item: Item): void {
         const host = root.bar?.popouts;
         if (host && Config.bar.popouts.statusIcons !== false)
-            host.show(name, item.mapToItem(null, 0, 0).x, item.width, null, false);
+            host.show(name, item.mapToItem(null, 0, 0).y, item.height, null, false);
     }
 
     function leave(name: string): void {
@@ -30,10 +30,12 @@ HexSegment {
             host.scheduleHide();
     }
 
-    Row {
+    padding: Theme.spaceSm
+
+    Column {
         id: iconRow
         spacing: Theme.spaceSm
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
 
         StatusGlyph {
             name: "network"
@@ -46,12 +48,13 @@ HexSegment {
         StatusGlyph {
             name: "audio"
             shown: root.st.showAudio !== false
-            icon: Icons.getVolumeIcon(Audio.volume, Audio.muted)
-            dim: Audio.muted
-            onEntered: root.popout("audio", this)
-            onExited: root.leave("audio")
+            icon: Icons.getVolumeIcon(Audio.volume, Audio.muted || Audio.volume <= 0)
+            dim: Audio.muted || Audio.volume <= 0
+            accent: Audio.muted || Audio.volume <= 0 ? Theme.textDim : Theme.text
+            tooltip: Audio.muted || Audio.volume <= 0 ? "Muted" : "Volume"
+            // No hover popout — right-edge VolumeStrip is the mixer UI.
             onClicked: Audio.toggleMute()
-            onRightClicked: Visibilities.toggle("audio", root.bar?.visibilities ?? null)
+            onRightClicked: Visibilities.toggle("audioMixer", root.bar?.visibilities ?? null)
             onWheel: event => {
                 if (event.angleDelta.y > 0)
                     Audio.incrementVolume(0);
@@ -63,10 +66,12 @@ HexSegment {
         StatusGlyph {
             name: "microphone"
             shown: root.st.showMicrophone !== false
-            icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
-            dim: Audio.sourceMuted
-            tooltip: "Click to reload the microphone"
-            onClicked: Audio.reloadMicrophone()
+            icon: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted || Audio.sourceVolume <= 0)
+            dim: Audio.sourceMuted || Audio.sourceVolume <= 0
+            accent: Audio.sourceMuted || Audio.sourceVolume <= 0 ? Theme.textDim : Theme.text
+            tooltip: Audio.sourceMuted || Audio.sourceVolume <= 0 ? "Muted" : "Microphone"
+            onClicked: Audio.toggleSourceMute()
+            onRightClicked: Audio.reloadMicrophone()
             onWheel: event => {
                 if (event.angleDelta.y > 0)
                     Audio.incrementSourceVolume(0);
@@ -99,6 +104,16 @@ HexSegment {
         }
 
         StatusGlyph {
+            name: "gamemode"
+            shown: root.st.showGameMode !== false
+            icon: "sports_esports"
+            fill: GameMode.enabled ? 1 : 0
+            accent: GameMode.enabled ? Theme.ember : Theme.textDim
+            tooltip: GameMode.enabled ? "Game mode on (click to disable)" : "Game mode off (click to enable)"
+            onClicked: GameMode.toggle()
+        }
+
+        StatusGlyph {
             name: "updates"
             shown: root.st.showUpdates !== false && Updates.count > 0
             icon: "system_update_alt"
@@ -114,13 +129,15 @@ HexSegment {
         }
 
         StatusGlyph {
-            name: "gamemode"
-            shown: root.st.showGameMode !== false && GameMode.enabled
-            icon: "gamepad"
-            fill: 1
-            accent: Theme.ember
-            tooltip: "Game mode on (click to disable)"
-            onClicked: GameMode.toggle()
+            name: "settings"
+            shown: root.st.showSettings !== false
+            icon: "settings"
+            accent: Theme.spark
+            tooltip: "Solanum config"
+            onClicked: {
+                root.bar?.popouts?.hide();
+                Visibilities.toggle("settings", root.bar?.visibilities ?? null);
+            }
         }
 
         StatusGlyph {
@@ -191,13 +208,15 @@ HexSegment {
         signal wheel(var event)
 
         visible: shown
-        width: visible ? Theme.sizeIcon * 1.35 : 0
-        height: root.height - Theme.spaceSm * 2
-        anchors.verticalCenter: parent.verticalCenter
+        width: Theme.sizeIcon * 1.05
+        height: visible ? Theme.sizeIcon * 1.2 : 0
+        implicitWidth: width
+        implicitHeight: height
 
         GlyphIcon {
             anchors.centerIn: parent
             icon: glyph.icon
+            size: Theme.sizeIcon * 0.88
             fill: glyph.fill
             animate: true
             color: glyph.dim ? Theme.textDim : (hh.hovered ? Theme.line : glyph.accent)
@@ -232,9 +251,8 @@ HexSegment {
         NomaiTooltip {
             text: glyph.tooltip
             show: glyph.tooltip !== "" && hh.hovered
-            anchors.top: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: Theme.spaceSm
+            place: "right"
+            gap: Theme.spaceSm
         }
     }
 }

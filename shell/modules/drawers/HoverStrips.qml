@@ -17,14 +17,20 @@ Item {
     readonly property alias topCentre: topCentre
     readonly property alias topRight: topRight
     readonly property alias bottomCentre: bottomCentre
+    readonly property alias bottomRight: bottomRight
     readonly property alias rightEdge: rightStrip
 
     readonly property int thickness: 3
     readonly property bool blocked: GameMode.enabled || KvmCapture.active || Hypr.hasFullscreenOn(screen)
     property var hoverOpened: ({})
 
+    // Drawers opened intentionally (shortcut / button) — hover strips must not steal focus from them.
+    readonly property list<string> stickyOpen: ["shipLog", "settings", "session", "services", "kvm", "updates", "audioMixer", "windowPicker"]
+
     function hoverOpen(name: string): void {
         if (root.visibilities[name])
+            return;
+        if (root.stickyOpen.some(n => n !== name && root.visibilities[n]))
             return;
         Visibilities.open(name, root.visibilities);
         const next = Object.assign({}, hoverOpened);
@@ -37,9 +43,14 @@ Item {
         case "dashboard": return topCentre;
         case "quantumMoon": return topRight;
         case "launcher": return bottomCentre;
-        case "sidebar": return rightStrip;
+        case "sidebar": return bottomRight;
+        case "audio": return rightStrip;
         }
         return null;
+    }
+
+    function wasHoverOpened(name: string): bool {
+        return !!root.hoverOpened[name];
     }
 
     // While something was opened by hover, poll whether the pointer is still over it or its strip.
@@ -100,10 +111,22 @@ Item {
         height: root.thickness
     }
 
+    // Bottom-right: Signals (sidebar)
     Strip {
-        id: rightStrip
+        id: bottomRight
         drawer: "sidebar"
         enabled: !root.blocked && Screens.isEnabled("hover.sidebar", root.screen.name) && Config.getFor(root.screen.name, "sidebar.showOnHover", false) === true
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: parent.width / 5
+        height: root.thickness
+    }
+
+    // Right-middle: volume / audio panel
+    Strip {
+        id: rightStrip
+        drawer: "audio"
+        enabled: !root.blocked && Screens.isEnabled("hover.audio", root.screen.name) && Config.getFor(root.screen.name, "audio.showOnHover", true) !== false
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         width: root.thickness

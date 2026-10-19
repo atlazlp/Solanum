@@ -1,120 +1,187 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Shapes
 import Quickshell
 import Quickshell.Hyprland
 import qs.config
 import qs.theme
 import qs.components
 import qs.services
-import "../../../theme/Glyphs.js" as Glyphs
 
-// Hex pips for this monitor's workspaces (occupied / active / urgent). Scroll switches, click dispatches.
+// Replaces workspace hex pips: unread notifications + special-workspace (scratchpad) indicator.
 HexSegment {
     id: root
 
     property var screen: null
     property var bar: null
 
+    interactive: false
+    padding: Theme.spaceXs
+    readonly property real iconSize: Theme.sizeIcon * 1.1
+
+    readonly property int unread: ShipLog.unreadCount
     readonly property HyprlandMonitor monitor: screen ? Hypr.monitorFor(screen) : null
-    readonly property int shown: Config.bar.workspaces.shown ?? 5
-    readonly property bool perMonitor: Config.bar.workspaces.perMonitorWorkspaces !== false
-    readonly property int activeId: monitor?.activeWorkspace?.id ?? -1
 
-    // Workspace ids to show: existing (non-special) workspaces on this monitor, padded to `shown`.
-    readonly property list<int> ids: {
+    readonly property var specialWs: {
         void Hypr.workspaces.values;
-        const mine = Hypr.workspaces.values.filter(w => w.id > 0 && (!perMonitor || w.monitor?.name === monitor?.name)).map(w => w.id).sort((a, b) => a - b);
-        const out = mine.slice();
-        let next = out.length ? out[out.length - 1] + 1 : 1;
-        if (!perMonitor && out.length === 0)
-            next = 1;
-        while (out.length < shown) {
-            if (!out.includes(next))
-                out.push(next);
-            next++;
-        }
-        return out;
+        return Hypr.workspaces.values.find(w => {
+            const n = w.name ?? "";
+            return n === "special:special" || n === "special";
+        }) ?? null;
     }
 
-    function workspaceOf(id: int): HyprlandWorkspace {
-        return Hypr.workspaces.values.find(w => w.id === id) ?? null;
+    readonly property int specialCount: {
+        void Hypr.workspaces.values;
+        void Hypr.toplevels.values;
+        const ws = root.specialWs;
+        if (!ws)
+            return 0;
+        const ipc = ws.lastIpcObject?.windows;
+        if (typeof ipc === "number")
+            return ipc;
+        return ws.toplevels?.values?.length ?? 0;
     }
 
-    function go(id: int): void {
-        if (monitor)
-            Hypr.dispatch(`focusmonitor ${monitor.name}`);
-        Hypr.dispatch(`workspace ${id}`);
+    readonly property bool specialOpen: {
+        const m = root.monitor;
+        if (!m)
+            return false;
+        const n = m.lastIpcObject?.specialWorkspace?.name
+            ?? m.activeSpecialWorkspace?.name
+            ?? "";
+        return n === "special:special" || n === "special" || String(n).startsWith("special:");
     }
 
-    onWheel: event => {
-        if (!monitor)
-            return;
-        Hypr.dispatch(`focusmonitor ${monitor.name}`);
-        if (event.angleDelta.y < 0)
-            Hypr.dispatch("workspace r+1");
-        else if (event.angleDelta.y > 0)
-            Hypr.dispatch("workspace r-1");
-    }
-
-    Row {
-        id: pips
+    Column {
         spacing: Theme.spaceSm
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
 
-        Repeater {
-            model: root.ids
+        // Unread ship-log / notifications
+        Item {
+            id: notifBtn
+            width: root.iconSize
+            height: width
+            anchors.horizontalCenter: parent.horizontalCenter
 
-            Item {
-                id: pip
+            GlyphIcon {
+                anchors.centerIn: parent
+                icon: root.unread > 0 ? "notifications_active" : "notifications"
+                size: Theme.sizeIcon
+                fill: root.unread > 0 ? 1 : 0
+                color: notifHover.hovered || root.unread > 0 ? Theme.spark : Theme.textDim
+                animate: true
+            }
 
-                required property int modelData
-                readonly property HyprlandWorkspace ws: root.workspaceOf(modelData)
-                readonly property bool exists: ws !== null
-                readonly property bool occupied: exists && ((ws.lastIpcObject?.windows ?? 0) > 0 || ws.toplevels.values.length > 0)
-                readonly property bool active: modelData === root.activeId
-                readonly property bool urgent: exists && ws.urgent
-                readonly property real rad: (Theme.hexPip + (active ? 3 : 0)) / 2
-
-                width: Theme.hexPip + 6
-                height: Theme.hexPip + 6
-                anchors.verticalCenter: parent.verticalCenter
-
-                Shape {
-                    anchors.fill: parent
-                    preferredRendererType: Shape.CurveRenderer
-
-                    ShapePath {
-                        fillColor: pip.active ? Theme.line : (pip.occupied ? Theme.alpha(Theme.line, 0.3) : "transparent")
-                        strokeColor: pip.urgent ? Theme.ember : (pip.active || pip.occupied ? Theme.line : Theme.lineDim)
-                        strokeWidth: pip.urgent ? 1.5 : 1
-                        joinStyle: ShapePath.MiterJoin
-                        PathSvg { path: Glyphs.hexPip(pip.width / 2, pip.height / 2, pip.rad) }
-
-                        Behavior on fillColor {
-                            ColorAnimation { duration: Motion.fast }
-                        }
-                    }
-                }
+            Rectangle {
+                visible: root.unread > 0
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: -6
+                anchors.topMargin: -4
+                width: Math.max(15, badgeText.implicitWidth + 7)
+                height: 15
+                radius: 2
+                // High contrast against spark/ember icons: dark chip + bright count.
+                color: Theme.ink0
+                border.width: 1
+                border.color: Theme.line
 
                 GlyphText {
+                    id: badgeText
                     anchors.centerIn: parent
-                    visible: hh.hovered
-                    text: pip.modelData
+                    text: root.unread > 99 ? "99+" : `${root.unread}`
                     role: "label"
                     font.letterSpacing: 0
-                    color: pip.active ? Theme.textOnLine : Theme.text
+                    font.pointSize: 9
+                    font.weight: Font.Bold
+                    color: Theme.line
                 }
+            }
 
-                HoverHandler {
-                    id: hh
-                    cursorShape: Qt.PointingHandCursor
-                }
+            HoverHandler {
+                id: notifHover
+                cursorShape: Qt.PointingHandCursor
+            }
 
-                TapHandler {
-                    onTapped: root.go(pip.modelData)
+            TapHandler {
+                onTapped: {
+                    root.bar?.popouts?.hide();
+                    Visibilities.toggle("shipLog", root.bar?.visibilities ?? null);
                 }
+            }
+
+            NomaiTooltip {
+                text: root.unread > 0 ? `${root.unread} unread` : "Ship log"
+                show: notifHover.hovered
+                place: "right"
+                gap: Theme.spaceSm
+            }
+        }
+
+        // Special workspace / scratchpad (Super+S, Ctrl+Super+Space)
+        Item {
+            id: specialBtn
+            width: root.iconSize
+            height: width
+            anchors.horizontalCenter: parent.horizontalCenter
+            opacity: root.specialCount > 0 || root.specialOpen || specialHover.hovered ? 1 : 0.35
+
+            GlyphIcon {
+                anchors.centerIn: parent
+                icon: root.specialOpen ? "flip_to_front" : "layers"
+                size: Theme.sizeIcon
+                fill: root.specialOpen || root.specialCount > 0 ? 1 : 0
+                color: {
+                    if (root.specialOpen)
+                        return Theme.spark;
+                    if (root.specialCount > 0)
+                        return Theme.secondary;
+                    return specialHover.hovered ? Theme.spark : Theme.textDim;
+                }
+                animate: true
+            }
+
+            Rectangle {
+                visible: root.specialCount > 0
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: -1
+                anchors.bottomMargin: -1
+                width: Math.max(12, specialBadge.implicitWidth + 5)
+                height: 12
+                color: root.specialOpen ? Theme.spark : Theme.secondary
+
+                GlyphText {
+                    id: specialBadge
+                    anchors.centerIn: parent
+                    text: root.specialCount > 9 ? "9+" : `${root.specialCount}`
+                    role: "label"
+                    font.letterSpacing: 0
+                    font.pointSize: 8
+                    color: Theme.ink0
+                }
+            }
+
+            HoverHandler {
+                id: specialHover
+                cursorShape: Qt.PointingHandCursor
+            }
+
+            TapHandler {
+                onTapped: {
+                    if (root.monitor)
+                        Hypr.dispatch(`focusmonitor ${root.monitor.name}`);
+                    Hypr.dispatch("togglespecialworkspace special");
+                }
+            }
+
+            NomaiTooltip {
+                text: root.specialCount > 0
+                    ? `Special · ${root.specialCount} window${root.specialCount === 1 ? "" : "s"}`
+                    : "Special workspace"
+                show: specialHover.hovered
+                place: "right"
+                gap: Theme.spaceSm
             }
         }
     }

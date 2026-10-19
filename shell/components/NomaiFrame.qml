@@ -26,8 +26,22 @@ Item {
     readonly property real inset: lineWidth / 2
     readonly property string pathData: shape === "hex" ? Glyphs.hexagon(width, height, hexCut < 0 ? undefined : hexCut, inset) : Glyphs.chamferRect(width, height, chamfer, corners, inset)
 
-    implicitWidth: inner.implicitWidth + padding * 2
-    implicitHeight: inner.implicitHeight + padding * 2
+    // Regular flat-top hex: width = height × 2/√3 so every side is the same length.
+    implicitWidth: {
+        const w = inner.implicitWidth + padding * 2;
+        const h = inner.implicitHeight + padding * 2;
+        if (shape !== "hex")
+            return w;
+        const side = Math.max(w / Theme.hexAspect, h);
+        return side * Theme.hexAspect;
+    }
+    implicitHeight: {
+        const w = inner.implicitWidth + padding * 2;
+        const h = inner.implicitHeight + padding * 2;
+        if (shape !== "hex")
+            return h;
+        return Math.max(w / Theme.hexAspect, h);
+    }
 
     Shape {
         id: glowShape
@@ -70,8 +84,9 @@ Item {
         ShapePath {
             fillColor: "transparent"
             strokeColor: root.lineColor
-            strokeWidth: 1
+            strokeWidth: Theme.tickWidth
             capStyle: ShapePath.FlatCap
+            joinStyle: ShapePath.BevelJoin
             PathSvg { path: Glyphs.cornerTicks(root.width, root.height, Theme.tickLength, root.inset) }
         }
     }

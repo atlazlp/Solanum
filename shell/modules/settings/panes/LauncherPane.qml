@@ -5,6 +5,7 @@ import qs.config
 import qs.theme
 import qs.components
 import qs.modules.settings
+import "../Validators.js" as Validators
 
 SettingsPane {
     SwitchRow {
@@ -15,7 +16,7 @@ SettingsPane {
     SwitchRow {
         key: "launcher.showOnHover"
         label: "Open on hover"
-        description: "Hovering the bottom edge opens the launcher (see Screens > hover.launcher)"
+        description: "Hovering the bottom edge opens the launcher. Which screens do this is under Screens."
     }
 
     NumberRow {
@@ -65,7 +66,7 @@ SettingsPane {
             required property string modelData
             key: "launcher.prefixes." + modelData
             label: SettingsStore.humanize(modelData)
-            description: "Typed prefix that switches to " + modelData + " mode"
+            description: "What you type to open " + SettingsStore.humanize(modelData).toLowerCase()
             fieldWidth: 120
             mono: true
         }
@@ -90,5 +91,6 @@ SettingsPane {
         description: "Regular expressions matched against desktop ids; matches are never listed"
         placeholder: "regex..."
         mono: true
+        validateItem: t => Validators.regex(t)
     }
 }

@@ -6,6 +6,9 @@ SettingRow {
 
     property bool fallback: false
 
+    activatesLabel: true
+    onLabelActivated: sw.toggle()
+
     NomaiSwitch {
         id: sw
         checked: row.current === undefined ? row.fallback : row.current === true

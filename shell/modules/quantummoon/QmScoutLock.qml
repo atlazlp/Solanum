@@ -47,7 +47,7 @@ Item {
         shape: "chamfer"
         chamfer: Theme.chamferSm
         fill: hover.hovered ? Theme.ink2 : Theme.alpha(Theme.ink0, 0.75)
-        lineColor: root.locked ? Theme.ember : Theme.line
+        lineColor: Theme.moon
         lineOpacity: root.locked || hover.hovered ? 1 : 0.55
         glow: root.locked
         padding: 0
@@ -84,8 +84,8 @@ Item {
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
-                fillColor: Theme.alpha(Theme.text, 0.95)
-                strokeColor: Theme.ember
+                fillColor: Theme.moon
+                strokeColor: Theme.moon
                 strokeWidth: 1
                 PathSvg { path: Glyphs.hexPip(root.markerSize * 0.5, root.markerSize * 0.5, root.markerSize * 0.5) }
             }
@@ -109,8 +109,6 @@ Item {
     NomaiTooltip {
         text: root.locked ? "Scout lock engaged: click to release" : "Lock the current planet"
         show: hover.hovered
-        anchors.top: parent.bottom
-        anchors.right: parent.right
-        anchors.topMargin: Theme.spaceXs
+        align: "end"
     }
 }

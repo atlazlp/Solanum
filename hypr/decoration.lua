@@ -3,7 +3,8 @@ local S = QM.scheme
 
 hl.config({
   decoration = {
-    rounding = 15,
+    -- Angular Nomai chrome (matches shell chamfer language; Hyprland cannot draw true chamfers).
+    rounding = 2,
 
     blur = {
       enabled = true,
@@ -19,10 +20,11 @@ hl.config({
 
     shadow = {
       enabled = true,
-      range = 28,
-      render_power = 2,
-      offset = { 0, 8 },
-      color = "rgba(" .. S.shadow_tint .. "1a)",
+      range = 20,
+      render_power = 3,
+      offset = { 0, 4 },
+      -- Soft glow like NomaiFrame's outer line bloom.
+      color = "rgba(" .. S.shadow_tint .. "33)",
     },
   },
 })

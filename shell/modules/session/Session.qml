@@ -5,9 +5,7 @@ import qs.theme
 import qs.components
 import qs.services
 
-// Power menu ("session" drawer, right centre): vertical column of 72 px HexButtons. Arrows / Tab
-// move, Enter runs, Esc closes. Destructive entries (logout, reboot, shutdown) need a second press
-// within 2 s. Commands come from Config.session.commands and run via Quickshell.execDetached.
+// Power menu ("session" drawer, right centre): vertical column of equal hex buttons.
 Item {
     id: root
 
@@ -15,7 +13,8 @@ Item {
     property var visibilities: null
     property var slot: null
 
-    readonly property int buttonSize: 72
+    readonly property int buttonHeight: 72
+    readonly property real buttonWidth: Theme.hexWidth(buttonHeight)
     property int current: 0
     property int pendingIndex: -1
 
@@ -110,16 +109,13 @@ Item {
 
     Timer {
         id: confirmTimer
-
         interval: 2000
         onTriggered: root.pendingIndex = -1
     }
 
-    // Backdrop: dims the whole screen 40 % behind the column (visual only; input stays on the slot).
     Rectangle {
         readonly property real sw: root.screen?.width ?? 4096
         readonly property real sh: root.screen?.height ?? 4096
-
         x: -sw
         y: -sh
         width: sw * 2
@@ -139,16 +135,18 @@ Item {
         fill: Theme.alpha(Theme.ink1, 0.96)
         glow: true
         ticks: true
+        // Don't clip tooltips that sit to the left of the column.
+        clip: false
 
         GlyphReveal {
             id: reveal
-
             autoTrigger: false
 
             Column {
                 id: column
-
                 spacing: Theme.spaceSm
+                // Let raised rows paint tooltips over neighbours.
+                z: 0
 
                 Repeater {
                     model: root.entries
@@ -161,23 +159,26 @@ Item {
 
                         readonly property bool armed: root.pendingIndex === index
                         readonly property bool focused: root.current === index
+                        readonly property bool tipUp: button.hovered || entry.armed || entry.focused
 
-                        width: root.buttonSize
-                        height: root.buttonSize
+                        width: root.buttonWidth
+                        height: root.buttonHeight
+                        z: tipUp ? (1000 - index) : 0
 
                         HexButton {
                             id: button
 
-                            anchors.fill: parent
+                            width: root.buttonWidth
+                            height: root.buttonHeight
                             icon: entry.armed ? "priority_high" : entry.modelData.icon
-                            iconSize: 26
-                            padding: 0
+                            iconSize: 28
+                            padding: Theme.spaceMd
                             shape: "hex"
                             glow: entry.focused || entry.armed
                             active: entry.focused && !entry.armed
                             danger: entry.modelData.destructive && (entry.armed || hovered)
                             accent: entry.armed ? Theme.ember : (entry.modelData.destructive && hovered ? Theme.danger : Theme.line)
-                            tooltip: entry.armed ? `${entry.modelData.label}: again to confirm` : entry.modelData.label
+                            tooltip: ""
                             onHoveredChanged: {
                                 if (hovered)
                                     root.current = entry.index;
@@ -188,24 +189,21 @@ Item {
                             }
                         }
 
-                        // Armed fill: ember behind the icon.
+                        NomaiTooltip {
+                            anchorItem: button
+                            text: entry.armed ? `${entry.modelData.label}: again to confirm` : entry.modelData.label
+                            show: button.hovered || entry.armed
+                            delay: entry.armed ? 0 : 120
+                            place: "left"
+                            gap: Theme.spaceMd
+                        }
+
                         Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: 6
+                            anchors.fill: button
+                            anchors.margins: 8
                             color: Theme.alpha(Theme.ember, 0.22)
                             visible: entry.armed
                             z: -1
-                        }
-
-                        // Confirmation hint, to the left of the column.
-                        GlyphText {
-                            anchors.right: parent.left
-                            anchors.rightMargin: Theme.spaceLg
-                            anchors.verticalCenter: parent.verticalCenter
-                            role: "label"
-                            text: `${entry.modelData.label} · again to confirm`
-                            color: Theme.ember
-                            visible: entry.armed
                         }
                     }
                 }
@@ -213,7 +211,6 @@ Item {
         }
     }
 
-    // Focus landing: the drawers window flips to OnDemand focus when the session drawer is open.
     focus: true
     Component.onCompleted: forceActiveFocus()
 }

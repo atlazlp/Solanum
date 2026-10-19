@@ -48,7 +48,7 @@ SettingsPane {
 
     SettingRow {
         label: "Status"
-        description: vpn.loaded ? "~/.config/quantum-moon/vpn.json" : "vpn.json will be created on the first change"
+        description: vpn.loaded ? Paths.config.replace(Paths.home, "~") + "/vpn.json" : "vpn.json will be created on the first change"
 
         GlyphText {
             text: Services.BarVpn.configured ? (Services.BarVpn.connected ? "connected" : "disconnected") : "not configured"

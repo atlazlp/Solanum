@@ -34,12 +34,25 @@ Item {
     width: 380
     implicitHeight: frame.implicitHeight
     opacity: modelData.leaving ? 0 : 1
-    x: 32
+    x: 0
+    transform: Translate {
+        id: enterSlide
+        x: 32
+    }
 
     Component.onCompleted: {
         modelData.lock(root);
-        x = 0;
+        enterAnim.start();
         glowFlash.start();
+    }
+
+    NumberAnimation {
+        id: enterAnim
+        target: enterSlide
+        property: "x"
+        to: 0
+        duration: Motion.normal
+        easing.type: Motion.slide
     }
     Component.onDestruction: modelData.unlock(root)
 
@@ -95,7 +108,7 @@ Item {
 
             // App icon in a small hex (or the notification image).
             Item {
-                width: 40
+                width: Theme.hexWidth(40)
                 height: 40
                 anchors.top: parent.top
 

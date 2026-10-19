@@ -11,7 +11,7 @@
 #   --no-system          skip the system (sudo) phase and do not print it
 #   --link-hypr          point ~/.config/hypr at <repo>/hypr (the Hyprland switch; off by default)
 #   --units              install + enable the user units (default with --full)
-#   --migrate-caelestia  copy Caelestia state/config into the quantum-moon paths (never moves)
+#   --migrate-caelestia  copy Caelestia state/config into the solanum paths (never moves)
 #   --sddm-uwsm          include the SDDM -> hyprland-uwsm switch in the system steps
 #   --force-mime         overwrite existing MIME defaults with config/mimeapps.defaults
 #   --yes                run the sudo steps (scripts/system-steps.sh --run) instead of printing them
@@ -45,7 +45,7 @@ export DRY YES
 
 # ---------------------------------------------------------------- preflight
 log "preflight ($REPO)"
-[[ -d "$REPO/bin" && -d "$REPO/config" && -d "$REPO/quantum-moon" ]] || die "not a Quantum-Moon checkout: $REPO"
+[[ -d "$REPO/bin" && -d "$REPO/config" && -d "$REPO/solanum" ]] || die "not a Quantum-Moon checkout: $REPO"
 for t in jq systemctl install ln; do command -v "$t" >/dev/null 2>&1 || die "missing tool: $t"; done
 [[ -d "$REPO/hypr" ]] || warn "$REPO/hypr is missing (Lua config not landed yet); --link-hypr will be skipped"
 [[ -d "$REPO/shell" ]] || warn "$REPO/shell is missing (shell not landed yet); the quickshell symlink will dangle"
@@ -71,11 +71,11 @@ fi
 
 # ---------------------------------------------------------------- symlinks
 log "symlinks"
-link "$REPO/shell" "$CFG/quickshell/quantum-moon"
+link "$REPO/shell" "$CFG/quickshell/solanum"
 for f in "$REPO"/bin/qm-*; do
   link "$f" "$HOME/.local/bin/$(basename "$f")"
 done
-printf '%s\n' "$REPO/quantum-moon" | write_file "$QM_CFG/root" 644
+printf '%s\n' "$REPO/solanum" | write_file "$QM_CFG/root" 644
 if [[ "$LINK_HYPR" == "1" ]]; then
   link "$REPO/hypr" "$CFG/hypr"
 else
@@ -86,9 +86,9 @@ if [[ -L "$CFG/caelestia/quantum-moon-root" || -f "$CFG/caelestia/quantum-moon-r
 fi
 
 # ---------------------------------------------------------------- config seeding
-log "config seeding (~/.config/quantum-moon)"
+log "config seeding (~/.config/solanum)"
 run mkdir -p "$QM_CFG/monitors" "$QM_CFG/generated" "$QM_STATE" "$QM_SHARE/launcher-icons"
-for ex in "$REPO"/config/quantum-moon/*.example; do
+for ex in "$REPO"/config/solanum/*.example; do
   name="$(basename "$ex" .example)"
   mode=644
   case "$name" in git-watcher.json|vpn.json|services.json) mode=600 ;; esac
@@ -100,8 +100,8 @@ for ex in "$REPO"/config/quantum-moon/*.example; do
   esac
   copy_if_missing "$ex" "$QM_CFG/$name" "$mode"
 done
-copy_if_missing "$REPO/config/quantum-moon/nautilus-sidebar-extra" "$QM_CFG/nautilus-sidebar-extra"
-copy_if_missing "$REPO/config/quantum-moon/nautilus-drive-icons" "$QM_CFG/nautilus-drive-icons"
+copy_if_missing "$REPO/config/solanum/nautilus-sidebar-extra" "$QM_CFG/nautilus-sidebar-extra"
+copy_if_missing "$REPO/config/solanum/nautilus-drive-icons" "$QM_CFG/nautilus-drive-icons"
 for f in "$REPO"/config/wireplumber/wireplumber.conf.d/*.conf; do
   copy_sync "$f" "$CFG/wireplumber/wireplumber.conf.d/$(basename "$f")"
 done
@@ -125,21 +125,36 @@ copy_if_missing "$REPO/config/gtk/gtk-3.0.settings.ini" "$CFG/gtk-3.0/settings.i
 copy_if_missing "$REPO/config/gtk/gtk-4.0.settings.ini" "$CFG/gtk-4.0/settings.ini"
 
 log "kitty integration"
-copy_sync "$REPO/config/kitty/quantum-moon.conf" "$CFG/kitty/quantum-moon.conf"
+copy_sync "$REPO/config/kitty/solanum.conf" "$CFG/kitty/solanum.conf"
 kc="$CFG/kitty/kitty.conf"
 if [[ -f "$kc" ]] && grep -q 'kitty-caelestia-qm.sock\|colors-caelestia-qm.conf' "$kc"; then
   info "dropping legacy caelestia lines from kitty.conf (migrate-caelestia-state.sh copies the colour file)"
-  run_sh "sed -i -e '/^# quantum-moon: listen_on + allow_remote_control so qm-apply can run$/d' -e '/^listen_on unix:\${XDG_RUNTIME_DIR}\/kitty-caelestia-qm.sock$/d' -e '/^include colors-caelestia-qm.conf$/d' '$kc'"
+  run_sh "sed -i -e '/^# solanum: listen_on + allow_remote_control so qm-apply can run$/d' -e '/^listen_on unix:\${XDG_RUNTIME_DIR}\/kitty-caelestia-qm.sock$/d' -e '/^include colors-caelestia-qm.conf$/d' '$kc'"
 fi
-if [[ -f "$kc" ]] && grep -q '^# BEGIN quantum-moon$' "$kc"; then
-  ok "kitty.conf already includes quantum-moon.conf"
+if [[ -f "$kc" ]] && grep -q '^# BEGIN solanum$' "$kc"; then
+  ok "kitty.conf already includes solanum.conf"
 else
-  run_sh "mkdir -p '$CFG/kitty' && { printf '%s\n' '# BEGIN quantum-moon' 'include quantum-moon.conf' '# END quantum-moon'; [[ -f '$kc' ]] && cat '$kc'; } > '$kc.tmp' && mv '$kc.tmp' '$kc'"
+  run_sh "mkdir -p '$CFG/kitty' && { printf '%s\n' '# BEGIN solanum' 'include solanum.conf' '# END solanum'; [[ -f '$kc' ]] && cat '$kc'; } > '$kc.tmp' && mv '$kc.tmp' '$kc'"
 fi
-[[ -f "$CFG/kitty/colors-quantum-moon.conf" ]] || { [[ "$DRY" == "1" ]] || : > "$CFG/kitty/colors-quantum-moon.conf"; info "created empty colors-quantum-moon.conf (filled by qm-apply)"; }
-# strip duplicate allow_remote_control lines left outside the include (kitty warns on duplicates)
-if [[ -f "$kc" ]] && [[ "$(grep -c '^allow_remote_control socket$' "$kc" || true)" -gt 0 ]]; then
-  run_sh "sed -i '/^allow_remote_control socket$/d' '$kc'"
+[[ -f "$CFG/kitty/colors-solanum.conf" ]] || { [[ "$DRY" == "1" ]] || : > "$CFG/kitty/colors-solanum.conf"; info "created empty colors-solanum.conf (filled by qm-apply)"; }
+# Drop settings now owned by solanum.conf (kitty warns on duplicate includes / options)
+if [[ -f "$kc" ]]; then
+  run_sh "sed -i \
+    -e '/^# solanum: listen_on + allow_remote_control so qm-apply can run$/d' \
+    -e '/^# kitten @ --to … set-colors without a controlling TTY\.$/d' \
+    -e '/^allow_remote_control socket$/d' \
+    -e '/^listen_on unix:\${XDG_RUNTIME_DIR}\/kitty-solanum\.sock$/d' \
+    -e '/^listen_on unix:\${XDG_RUNTIME_DIR}\/kitty-caelestia-qm\.sock$/d' \
+    -e '/^include colors-solanum\.conf$/d' \
+    -e '/^include colors-caelestia-qm\.conf$/d' \
+    '$kc'"
+fi
+
+log "Firefox Pywalfox host (optional; needs the Pywalfox add-on)"
+if [[ -x "$REPO/solanum/scripts/qm-pywalfox-host" ]]; then
+  run "$REPO/solanum/scripts/qm-pywalfox-host" install
+else
+  info "qm-pywalfox-host missing or not executable — skipped"
 fi
 
 log "uwsm environment"
@@ -153,14 +168,14 @@ if [[ "$UNITS" == "1" ]]; then
   done
   run systemctl --user daemon-reload
   # graphical-session.target units: enable only (they start on the next UWSM login)
-  for u in quantum-moon-shell quantum-moon-video quantum-moon-git-watcher quantum-moon-suspend-resume-watch \
-           quantum-moon-audio-inhibit hyprsunset hyprresume lan-mouse llm-tray hyprpaper hyprpolkitagent cliphist; do
+  for u in solanum-shell solanum-video solanum-git-watcher solanum-suspend-resume-watch \
+           solanum-audio-inhibit hyprsunset hyprresume lan-mouse llm-tray hyprpaper hyprpolkitagent cliphist; do
     if [[ -f "$REPO/config/systemd/user/$u.service" ]] || systemctl --user cat "$u.service" >/dev/null 2>&1; then
       if systemctl --user is-enabled --quiet "$u.service" 2>/dev/null; then ok "$u.service enabled"; else run systemctl --user enable "$u.service"; fi
     else warn "$u.service not found (package missing?)"; fi
   done
   if systemctl --user is-enabled --quiet audio-analog-mic-setup.service 2>/dev/null; then ok "audio-analog-mic-setup.service enabled"; else run systemctl --user enable audio-analog-mic-setup.service; fi
-  if systemctl --user is-enabled --quiet quantum-moon-backup.timer 2>/dev/null; then ok "quantum-moon-backup.timer enabled"; else run systemctl --user enable --now quantum-moon-backup.timer; fi
+  if systemctl --user is-enabled --quiet solanum-backup.timer 2>/dev/null; then ok "solanum-backup.timer enabled"; else run systemctl --user enable --now solanum-backup.timer; fi
   if [[ "$MIGRATE" == "1" ]]; then
     for u in caelestia-main-monitor-hotplug caelestia-suspend-resume-watch; do
       if systemctl --user is-enabled --quiet "$u.service" 2>/dev/null; then run systemctl --user disable "$u.service"; info "$u.service disabled (still running until logout)"; fi
@@ -205,7 +220,7 @@ if [[ "$LINK_HYPR" == "1" ]] && [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; the
   run hyprctl reload
 fi
 if [[ -d "$REPO/.git" ]] && command -v git-lfs >/dev/null 2>&1; then
-  if ! find "$REPO/quantum-moon/modes" -name center.mp4 -size +1M 2>/dev/null | grep -q .; then
+  if ! find "$REPO/solanum/modes" -name center.mp4 -size +1M 2>/dev/null | grep -q .; then
     info "center.mp4 videos are LFS pointers: run qm-fetch-videos when you want them"
   fi
 fi

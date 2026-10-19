@@ -18,7 +18,7 @@ Item {
     signal edited(real value)
 
     implicitWidth: row.implicitWidth
-    implicitHeight: 30
+    implicitHeight: Math.max(32, row.implicitHeight)
 
     function fmt(v: real): string {
         return Number(v).toFixed(places);

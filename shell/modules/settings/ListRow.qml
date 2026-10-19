@@ -11,6 +11,8 @@ SettingRow {
 
     property string placeholder: "add..."
     property bool mono: false
+    property string error: ""
+    property var validateItem: null
     readonly property list<string> items: Array.isArray(current) ? current.map(v => String(v)) : []
 
     stacked: true
@@ -19,6 +21,14 @@ SettingRow {
         const t = v.trim();
         if (t === "")
             return;
+        if (row.validateItem) {
+            const err = String(row.validateItem(t) || "");
+            if (err !== "") {
+                row.error = err;
+                return;
+            }
+        }
+        row.error = "";
         row.write(items.concat([t]));
     }
 
@@ -48,7 +58,7 @@ SettingRow {
                     chamfer: Theme.chamferSm
                     fill: Theme.ink0
                     lineOpacity: 0.6
-                    implicitHeight: 26
+                    implicitHeight: 32
                     implicitWidth: chipRow.implicitWidth + Theme.spaceSm * 2
 
                     Row {
@@ -81,7 +91,7 @@ SettingRow {
                 text: "empty"
                 role: "small"
                 dim: true
-                height: 26
+                height: 32
             }
         }
 
@@ -96,9 +106,14 @@ SettingRow {
                 input.font.family: row.mono ? Theme.fontMono : Theme.fontBody
                 onAccepted: {
                     row.add(text);
-                    text = "";
+                    if (row.error === "")
+                        text = "";
                 }
                 onEscaped: input.focus = false
+                onTextChanged: {
+                    if (row.error !== "")
+                        row.error = "";
+                }
             }
 
             HexButton {
@@ -107,9 +122,19 @@ SettingRow {
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked: {
                     row.add(addField.text);
-                    addField.text = "";
+                    if (row.error === "")
+                        addField.text = "";
                 }
             }
+        }
+
+        GlyphText {
+            visible: row.error !== ""
+            text: row.error
+            role: "small"
+            width: parent.width
+            wrapMode: Text.WordWrap
+            color: Theme.danger
         }
     }
 }

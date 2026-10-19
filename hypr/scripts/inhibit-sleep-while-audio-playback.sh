@@ -5,10 +5,10 @@ poll_s="${INHIBIT_AUDIO_POLL_SEC:-4}"
 rtdir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}"
 # Marker + pidfile read by the shell's IdleMonitors and by locked-sleep-after.sh. Until the Phase 3 cutover the
 # live Caelestia shell (patches/.../IdleMonitors.qml) reads caelestia-audio-playback.active, so BOTH the new
-# quantum-moon-* and the legacy caelestia-* paths are written; drop the legacy_* lines afterwards.
-marker="${QM_AUDIO_IDLE_MARKER:-$rtdir/quantum-moon-audio-playback.active}"
+# solanum-* and the legacy caelestia-* paths are written; drop the legacy_* lines afterwards.
+marker="${QM_AUDIO_IDLE_MARKER:-$rtdir/solanum-audio-playback.active}"
 legacy_marker="${CAELESTIA_AUDIO_IDLE_MARKER:-$rtdir/caelestia-audio-playback.active}"
-inhibit_pidfile="${QM_AUDIO_INHIBIT_PID:-$rtdir/quantum-moon-audio-inhibit.pid}"
+inhibit_pidfile="${QM_AUDIO_INHIBIT_PID:-$rtdir/solanum-audio-inhibit.pid}"
 legacy_inhibit_pidfile="${CAELESTIA_AUDIO_INHIBIT_PID:-$rtdir/caelestia-audio-inhibit.pid}"
 
 have_active_sink_input() {

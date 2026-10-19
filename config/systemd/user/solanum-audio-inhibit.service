@@ -1,0 +1,16 @@
+[Unit]
+Description=Quantum Moon idle inhibitor while audio is playing (marker for the shell's idle monitors)
+PartOf=graphical-session.target
+After=graphical-session.target pipewire.service
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=%h/.config/hypr/scripts/inhibit-sleep-while-audio-playback.sh
+ExecStopPost=-/usr/bin/rm -f %t/solanum-audio-playback.active
+Slice=session.slice
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

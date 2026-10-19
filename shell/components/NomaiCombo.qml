@@ -21,7 +21,7 @@ Item {
     signal activated(var value)
 
     implicitWidth: 200
-    implicitHeight: 30
+    implicitHeight: 32
     activeFocusOnTab: true
 
     function valueOf(entry: var): var {
@@ -59,7 +59,7 @@ Item {
         const host = overlayItem();
         const pos = root.mapToItem(host, 0, root.height + Theme.spaceXs);
         const w = popupWidth > 0 ? popupWidth : root.width;
-        const h = Math.min(maxPopupHeight, model.length * 30 + Theme.spaceSm * 2 + 2);
+        const h = Math.min(maxPopupHeight, model.length * 33 + Theme.spaceSm * 2);
         popup = popupComp.createObject(host, {
             x: Math.max(0, Math.min(pos.x, host.width - w)),
             y: pos.y + h > host.height ? Math.max(0, root.mapToItem(host, 0, 0).y - h - Theme.spaceXs) : pos.y,
@@ -185,7 +185,7 @@ Item {
                         readonly property bool selected: root.valueOf(modelData) === root.currentValue
 
                         width: list.width
-                        height: 29
+                        height: 32
 
                         NomaiFrame {
                             anchors.fill: parent
@@ -195,9 +195,24 @@ Item {
                             fill: optHover.hovered ? Theme.ink2 : (opt.selected ? Theme.alpha(Theme.line, 0.12) : "transparent")
                         }
 
-                        GlyphText {
+                        NomaiFrame {
+                            id: pip
+                            visible: opt.selected
+                            z: 1
+                            height: Theme.hexPip
+                            width: Theme.hexWidth(Theme.hexPip)
+                            shape: "hex"
+                            padding: 0
+                            fill: Theme.line
+                            lineColor: Theme.line
                             anchors.left: parent.left
                             anchors.leftMargin: Theme.spaceSm
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        GlyphText {
+                            anchors.left: parent.left
+                            anchors.leftMargin: Theme.spaceSm * 2 + Theme.hexWidth(Theme.hexPip)
                             anchors.right: parent.right
                             anchors.rightMargin: Theme.spaceSm
                             anchors.verticalCenter: parent.verticalCenter

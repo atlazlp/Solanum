@@ -9,10 +9,11 @@ hl.config({
     gaps_workspaces = 20,
     gaps_in = 5,
     gaps_out = 10,
-    border_size = 1,
+    -- Nomai-style: crisp 2 px edge; active = primary→tertiary (line + spark), inactive = outline.
+    border_size = 2,
     col = {
-      active_border = S.rgba("primary", "e6"),
-      inactive_border = S.rgba("onSurfaceVariant", "11"),
+      active_border = { colors = { S.rgba("primary", "ff"), S.rgba("tertiary", "cc") }, angle = 135 },
+      inactive_border = S.rgba("outlineVariant", "88"),
     },
   },
 

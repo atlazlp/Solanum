@@ -31,13 +31,13 @@ Column {
                 role: "title"
                 text: root.twelveHour ? Time.format("AP") : ""
                 visible: root.twelveHour
-                color: Theme.line
+                color: Theme.spark
             }
 
             GlyphText {
                 role: "mono"
                 text: Time.format("ss")
-                color: Theme.line
+                color: Theme.spark
                 opacity: 0.8
             }
         }
@@ -48,13 +48,13 @@ Column {
 
         NomaiDivider {
             anchors.verticalCenter: parent.verticalCenter
-            color: Theme.line
+            color: Theme.spark
         }
 
         GlyphText {
             role: "label"
             text: Time.format("dddd")
-            color: Theme.line
+            color: Theme.spark
             anchors.verticalCenter: parent.verticalCenter
         }
 

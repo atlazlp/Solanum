@@ -80,8 +80,8 @@ Item {
                     visible: root.entry || root.group
 
                     NomaiFrame {
-                        width: 40
                         height: 40
+                        width: Theme.hexWidth(40)
                         shape: "hex"
                         padding: 0
                         fill: Theme.ink2

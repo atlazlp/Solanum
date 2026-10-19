@@ -63,6 +63,7 @@ Item {
         if (body && typeof body.revealNow === "function")
             body.revealNow();
         root.forceActiveFocus();
+        Qt.callLater(() => search.forceFocus());
     }
 
     function consumeRequestedMode(): void {
@@ -256,10 +257,11 @@ Item {
                     HexButton {
                         required property var modelData
                         required property int index
+                        shape: "hex"
                         icon: modelData.icon
                         active: root.effectiveMode === modelData.mode
                         tooltip: `${modelData.label}  (Ctrl+${index + 1})`
-                        padding: Theme.spaceSm
+                        padding: Theme.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: root.setMode(modelData.mode)
                     }

@@ -15,7 +15,9 @@ Singleton {
     property int generation: 0   // bumps whenever a DrawerVisibilities is registered so bindings refresh
 
     // Exclusive drawers close each other when opened (one big panel at a time).
-    readonly property list<string> exclusive: ["launcher", "windowPicker", "dashboard", "sidebar", "shipLog", "session", "quantumMoon", "services", "kvm", "audio", "updates", "settings"]
+    // `audio` is intentionally not exclusive: the volume strip is a thin hover edge and
+    // must not dismiss centre panels (ship log, settings, …) when the pointer brushes it.
+    readonly property list<string> exclusive: ["launcher", "windowPicker", "dashboard", "sidebar", "shipLog", "session", "quantumMoon", "services", "kvm", "audioMixer", "updates", "settings"]
     readonly property list<string> fullscreenBlocked: ["session", "dashboard", "sidebar", "quantumMoon"]
 
     function load(screen: ShellScreen, vis: DrawerVisibilities): void {

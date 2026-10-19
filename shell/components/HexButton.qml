@@ -28,8 +28,30 @@ Item {
     signal rightClicked()
     signal wheel(var event)
 
-    implicitWidth: frame.implicitWidth
-    implicitHeight: frame.implicitHeight
+    // Regular flat-top hex: width = height × Theme.hexAspect (equal side lengths).
+    implicitWidth: shape === "hex" ? Theme.hexWidth(Math.max(frame.implicitHeight, frame.implicitWidth / Theme.hexAspect)) : frame.implicitWidth
+    implicitHeight: shape === "hex" ? Math.max(frame.implicitHeight, frame.implicitWidth / Theme.hexAspect) : frame.implicitHeight
+    property bool _hexSyncing: false
+    onWidthChanged: {
+        if (shape !== "hex" || _hexSyncing || width <= 0)
+            return;
+        const h = Theme.hexHeight(width);
+        if (Math.abs(height - h) > 0.5) {
+            _hexSyncing = true;
+            height = h;
+            _hexSyncing = false;
+        }
+    }
+    onHeightChanged: {
+        if (shape !== "hex" || _hexSyncing || height <= 0)
+            return;
+        const w = Theme.hexWidth(height);
+        if (Math.abs(width - w) > 0.5) {
+            _hexSyncing = true;
+            width = w;
+            _hexSyncing = false;
+        }
+    }
     activeFocusOnTab: true
     enabled: true
     opacity: enabled ? 1 : 0.45
@@ -118,8 +140,5 @@ Item {
     NomaiTooltip {
         text: root.tooltip
         show: root.tooltip !== "" && hover.hovered
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.bottom
-        anchors.topMargin: Theme.spaceXs
     }
 }

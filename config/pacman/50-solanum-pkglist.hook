@@ -1,0 +1,14 @@
+# /etc/pacman.d/hooks/50-solanum-pkglist.hook
+# Keeps package lists in /var/lib/solanum/ after every transaction so a backup
+# (qm-backup) always carries a reinstall list: pacman -S --needed - < pkglist-explicit.txt
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Writing package lists to /var/lib/solanum/
+When = PostTransaction
+Exec = /bin/sh -c 'mkdir -p /var/lib/solanum && pacman -Qqe > /var/lib/solanum/pkglist-explicit.txt && pacman -Qqm > /var/lib/solanum/pkglist-foreign.txt; pacman -Qq > /var/lib/solanum/pkglist-all.txt; pacman -Qqen > /var/lib/solanum/pkglist-explicit-native.txt'

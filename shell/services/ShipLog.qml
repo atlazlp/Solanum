@@ -7,10 +7,9 @@ import Quickshell.Io
 import qs.config
 import qs.services
 
-// Persistent notification history ("ship log"): every notification becomes an entry in
-// ~/.local/state/quantum-moon/ship-log.json. Entries received while DND is on are "rumors"
-// (hidden until the user looks at them). Groups are per app, edges link the chronological
-// chain inside a group and cross-app entries that arrive close together sharing a word.
+// Persistent unread ship log: only unread (and pinned) entries live in
+// ~/.local/state/solanum/ship-log.json. DND arrivals are "rumors" until opened.
+// Groups are per app; edges are only the chronological parent chain within an app.
 Singleton {
     id: root
 
@@ -28,8 +27,6 @@ Singleton {
 
     readonly property int maxEntries: Config.shiplog.maxEntries ?? 500
     readonly property int retentionDays: Config.shiplog.retentionDays ?? 30
-    readonly property int linkWindowMs: 2 * 60 * 1000
-    readonly property int minTokenLength: 5
 
     readonly property int unreadCount: entries.filter(e => !e.read).length
     readonly property int rumorCount: entries.filter(e => e.rumor).length
@@ -56,7 +53,7 @@ Singleton {
         return [...map.values()].sort((a, b) => b.latest - a.latest);
     }
 
-    // [{ from, to, kind: "chain" | "link", rumor, fromApp, toApp }]
+    // [{ from, to, kind: "chain", rumor, fromApp, toApp }] — parent chain within an app only
     readonly property list<var> edges: {
         void generation;
         const out = [];
@@ -68,28 +65,6 @@ Singleton {
             if (prev)
                 out.push({ from: prev.id, to: e.id, kind: "chain", rumor: !!(prev.rumor || e.rumor), fromApp: key, toApp: key });
             byApp.set(key, e);
-        }
-        const tokensOf = e => {
-            const set = new Set();
-            for (const t of `${e.summary} ${e.body}`.toLowerCase().split(/[^a-z0-9\u00c0-\u024f\u0400-\u04ff]+/))
-                if (t.length >= minTokenLength)
-                    set.add(t);
-            return set;
-        };
-        const toks = asc.map(tokensOf);
-        for (let i = 0; i < asc.length; i++) {
-            for (let j = i + 1; j < asc.length && asc[j].ts - asc[i].ts <= linkWindowMs; j++) {
-                if ((asc[i].app || "Unknown") === (asc[j].app || "Unknown"))
-                    continue;
-                let shared = false;
-                for (const t of toks[i])
-                    if (toks[j].has(t)) {
-                        shared = true;
-                        break;
-                    }
-                if (shared)
-                    out.push({ from: asc[i].id, to: asc[j].id, kind: "link", rumor: !!(asc[i].rumor || asc[j].rumor), fromApp: asc[i].app || "Unknown", toApp: asc[j].app || "Unknown" });
-            }
         }
         return out;
     }
@@ -123,7 +98,8 @@ Singleton {
 
     function prune(list: var): var {
         const cutoff = Date.now() - retentionDays * 86400000;
-        let out = list.filter(e => e.pinned || e.ts >= cutoff);
+        // Persist unread + pinned only; drop read (unpinned) entries.
+        let out = list.filter(e => e.pinned || ((!e.read || e.rumor) && e.ts >= cutoff));
         if (out.length > maxEntries) {
             const pinned = out.filter(e => e.pinned);
             const rest = out.filter(e => !e.pinned).slice(0, Math.max(0, maxEntries - pinned.length));
@@ -148,14 +124,22 @@ Singleton {
 
     function markRead(id: string): void {
         const e = byId(id);
-        if (e && (!e.read || e.rumor))
-            update(id, { read: true, rumor: false });
+        if (!e)
+            return;
+        if (e.pinned) {
+            if (!e.read || e.rumor)
+                update(id, { read: true, rumor: false });
+            return;
+        }
+        // Unread-only store: reading drops the entry unless pinned.
+        remove(id);
     }
 
     function markAllRead(): void {
-        if (!entries.some(e => !e.read || e.rumor))
+        const keep = entries.filter(e => e.pinned).map(e => Object.assign({}, e, { read: true, rumor: false }));
+        if (keep.length === entries.length && !entries.some(e => !e.read || e.rumor))
             return;
-        entries = entries.map(e => Object.assign({}, e, { read: true, rumor: false }));
+        entries = keep;
         touch();
     }
 
@@ -200,6 +184,8 @@ Singleton {
             Notifs.activate(live);
             return;
         }
+        if (Hypr.focusApp(entry.app, entry.desktopEntry))
+            return;
         Notifs.launchApp(entry.app, entry.desktopEntry);
     }
 

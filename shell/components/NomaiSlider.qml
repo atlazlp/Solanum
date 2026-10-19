@@ -16,6 +16,7 @@ Item {
     property int thickness: 36
     property int length: 140
     property color accent: Theme.line
+    property bool showReadout: true
     readonly property real ratio: to > from ? Math.max(0, Math.min(1, (value - from) / (to - from))) : 0
     readonly property bool vertical: orientation === Qt.Vertical
     property bool dragging: drag.active
@@ -24,6 +25,11 @@ Item {
 
     implicitWidth: vertical ? thickness : length
     implicitHeight: vertical ? length : thickness
+    activeFocusOnTab: true
+
+    function nudge(dir: int): void {
+        root.moved(Math.max(root.from, Math.min(root.to, root.value + dir * root.step)));
+    }
 
     function valueAt(px: real, py: real): real {
         const r = vertical ? 1 - (py / height) : px / width;
@@ -37,8 +43,8 @@ Item {
         chamfer: Theme.chamferSm
         fill: Theme.ink0
         lineColor: root.accent
-        lineOpacity: hover.hovered || root.dragging ? 1 : 0.6
-        glow: root.dragging
+        lineOpacity: hover.hovered || root.dragging || root.activeFocus ? 1 : 0.6
+        glow: root.dragging || root.activeFocus
         ticks: true
 
         // Fill portion
@@ -89,6 +95,7 @@ Item {
         }
 
         GlyphText {
+            visible: root.showReadout
             text: Math.round(root.ratio * 100)
             role: "label"
             dim: true
@@ -122,7 +129,17 @@ Item {
         onWheel: event => {
             const dir = event.angleDelta.y > 0 ? 1 : (event.angleDelta.y < 0 ? -1 : 0);
             if (dir !== 0)
-                root.moved(Math.max(root.from, Math.min(root.to, root.value + dir * root.step)));
+                root.nudge(dir);
+        }
+    }
+
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Left || event.key === Qt.Key_Down) {
+            root.nudge(-1);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Up) {
+            root.nudge(1);
+            event.accepted = true;
         }
     }
 }

@@ -12,7 +12,7 @@ fi
 
 git lfs install
 
-ATTR='quantum-moon/modes/*/wallpapers/center.mp4'
+ATTR='solanum/modes/*/wallpapers/center.mp4'
 if ! grep -qF 'wallpapers/center.mp4' .gitattributes 2>/dev/null; then
   git lfs track "$ATTR"
 fi

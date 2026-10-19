@@ -1,7 +1,7 @@
 -- features/night.lua: night light via hyprsunset, tinted per planet (scheme.night_temperature from
 -- modes/<slug>/meta.json nightTemperature). Schedule 19:00-07:00 -> `hyprctl hyprsunset temperature N`,
 -- otherwise `identity`. Re-evaluated every 60 s and on every reload (qm-apply reloads after a palette change).
--- The shell can override through ~/.local/state/quantum-moon/nightlight.json {"enabled":bool,"temperature":N}
+-- The shell can override through ~/.local/state/solanum/nightlight.json {"enabled":bool,"temperature":N}
 -- (written by `qs ... nightlight` in Phase 2); the file is re-read on every tick.
 local U, S = QM.util, QM.scheme
 local N = {

@@ -19,14 +19,30 @@ HexSegment {
 
     readonly property list<var> items: SystemTray.items.values.filter(i => !(Config.bar.tray.hiddenIcons ?? []).includes(i.id))
 
+    readonly property real iconSize: Theme.sizeIcon * 1.15
+    readonly property real accentIconSize: Theme.sizeIcon * 1.4
+
+    function isAccentTray(item: var): bool {
+        const id = String(item?.id ?? "").toLowerCase();
+        const title = String(item?.title ?? "").toLowerCase();
+        const tip = String(item?.tooltipTitle ?? "").toLowerCase();
+        const icon = String(item?.icon ?? "").toLowerCase();
+        return id.includes("lan-mouse") || id.includes("local-llm")
+            || title.includes("lan kvm") || title.includes("local llm")
+            || tip.includes("lan kvm") || tip.includes("local llm") || tip.includes("lan-mouse")
+            || icon.includes("lan-kvm") || icon.includes("llm-");
+    }
+
     interactive: false
     visible: items.length > 0
-    implicitWidth: visible ? itemsRow.implicitWidth + padding * 2 + leftSlant + rightSlant : 0
+    padding: Theme.spaceXs
+    implicitWidth: visible ? accentIconSize + padding * 2 : 0
+    implicitHeight: visible ? itemsCol.implicitHeight + padding * 2 + startSlant + endSlant : 0
 
-    Row {
-        id: itemsRow
-        spacing: Theme.spaceSm
-        anchors.verticalCenter: parent.verticalCenter
+    Column {
+        id: itemsCol
+        spacing: Theme.spaceXs
+        anchors.horizontalCenter: parent.horizontalCenter
 
         Repeater {
             model: root.items
@@ -36,10 +52,12 @@ HexSegment {
 
                 required property SystemTrayItem modelData
                 readonly property bool menuOpen: (root.bar?.popouts?.hasCurrent ?? false) && root.bar.popouts.currentName === "tray" && root.bar.popouts.payload === modelData
+                readonly property bool accent: root.isAccentTray(modelData)
+                readonly property real size: accent ? root.accentIconSize : root.iconSize
 
-                width: Theme.sizeIcon * 1.2
+                width: trayItem.size
                 height: width
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
 
                 IconImage {
                     anchors.fill: parent
@@ -50,11 +68,11 @@ HexSegment {
                 }
 
                 Rectangle {
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width
-                    height: 1
-                    color: Theme.line
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 1
+                    height: parent.height
+                    color: Theme.spark
                     visible: trayItem.menuOpen
                 }
 
@@ -79,7 +97,7 @@ HexSegment {
                             if (trayItem.menuOpen)
                                 host.hide();
                             else
-                                host.show("tray", trayItem.mapToItem(null, 0, 0).x, trayItem.width, item, true);
+                                host.show("tray", trayItem.mapToItem(null, 0, 0).y, trayItem.height, item, true);
                         } else if (button === Qt.MiddleButton) {
                             item.secondaryActivate();
                         } else {
@@ -95,9 +113,8 @@ HexSegment {
                 NomaiTooltip {
                     text: trayItem.modelData.tooltipTitle || trayItem.modelData.title
                     show: hover.hovered && !trayItem.menuOpen
-                    anchors.top: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.topMargin: Theme.spaceSm
+                    place: "right"
+                    gap: Theme.spaceSm
                 }
             }
         }

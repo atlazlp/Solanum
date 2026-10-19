@@ -36,21 +36,42 @@ SettingsPane {
         writeEntries(next);
     }
 
+    function statusLabel(key: string): string {
+        const names = {
+            showAudio: "Audio",
+            showMicrophone: "Microphone",
+            showNetwork: "Network",
+            showWifi: "Wi-Fi",
+            showBluetooth: "Bluetooth",
+            showBattery: "Battery",
+            showVpn: "VPN",
+            showGitWatcher: "Git watcher",
+            showUpdates: "Updates",
+            showSettings: "Settings",
+            showGameMode: "Game mode",
+            showIdleInhibit: "Idle inhibit",
+            showRecording: "Recording",
+            showNightLight: "Night light",
+            showKvm: "KVM"
+        };
+        return names[key] || SettingsStore.humanize(key).replace(/^Show /, "");
+    }
+
     NumberRow {
-        key: "bar.height"
-        label: "Bar height"
+        key: "bar.width"
+        label: "Bar width"
         description: "Pixels; also the exclusive zone on the main screen"
-        from: 24
+        from: 32
         to: 64
         step: 1
         suffix: "px"
-        fallback: 36
+        fallback: 40
     }
 
     SettingRow {
         key: "bar.entries"
         label: "Segments"
-        description: "Order of the bar row, left to right. Toggle to hide a segment."
+        description: "Order of the bar column, top to bottom. Toggle to hide a segment."
         stacked: true
 
         Column {
@@ -66,7 +87,7 @@ SettingsPane {
                     required property int index
 
                     width: parent.width
-                    height: 32
+                    height: 48
 
                     NomaiFrame {
                         anchors.fill: parent
@@ -76,28 +97,34 @@ SettingsPane {
                         lineOpacity: 0.35
                     }
 
-                    Row {
+                    Column {
+                        id: entryLabel
                         anchors.left: parent.left
+                        anchors.right: entryTools.left
                         anchors.leftMargin: Theme.spaceSm
+                        anchors.rightMargin: Theme.spaceSm
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Theme.spaceSm
+                        spacing: 0
 
                         GlyphText {
-                            text: String(entry.index + 1).padStart(2, "0")
-                            role: "mono"
-                            dim: true
-                            anchors.verticalCenter: parent.verticalCenter
+                            text: SettingsStore.humanize(String(entry.modelData.id))
+                            color: entry.modelData.enabled !== false ? Theme.text : Theme.textDim
+                            width: entryLabel.width
+                            elide: Text.ElideRight
                         }
 
                         GlyphText {
-                            text: entry.modelData.id
+                            text: String(entry.index + 1).padStart(2, "0") + "  " + entry.modelData.id
                             role: "mono"
-                            color: entry.modelData.enabled !== false ? Theme.text : Theme.textDim
-                            anchors.verticalCenter: parent.verticalCenter
+                            dim: true
+                            font.pointSize: Theme.sizeLabel
+                            width: entryLabel.width
+                            elide: Text.ElideRight
                         }
                     }
 
                     Row {
+                        id: entryTools
                         anchors.right: parent.right
                         anchors.rightMargin: Theme.spaceSm
                         anchors.verticalCenter: parent.verticalCenter
@@ -145,7 +172,7 @@ SettingsPane {
         SwitchRow {
             required property string modelData
             key: "bar.status." + modelData
-            label: SettingsStore.humanize(modelData)
+            label: pane.statusLabel(modelData)
         }
     }
 
@@ -219,10 +246,39 @@ SettingsPane {
     NumberRow {
         key: "bar.activeWindow.maxWidth"
         label: "Title max width"
+        description: "How wide the active window title may grow"
         from: 120
         to: 1200
         step: 10
         suffix: "px"
         fallback: 420
+    }
+
+    SectionHeader {
+        text: "Updates"
+        topPadding: Theme.spaceLg
+    }
+
+    NumberRow {
+        key: "updates.interval"
+        label: "Check interval"
+        description: "How often the updates glyph looks for new packages"
+        from: 60
+        to: 86400
+        step: 60
+        suffix: "s"
+        fallback: 1800
+    }
+
+    SwitchRow {
+        key: "updates.checkOnResume"
+        label: "Check after wake"
+        description: "Look again when the session resumes"
+    }
+
+    SwitchRow {
+        key: "updates.toast"
+        label: "Announce new updates"
+        description: "Show a toast when the pending count changes"
     }
 }

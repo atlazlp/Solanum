@@ -1,5 +1,5 @@
 -- lib/shell.lua: the ONE place that knows which Quickshell config the binds talk to.
--- Phase 3 cutover = swap the active block below for the quantum-moon one (nothing else changes).
+-- Phase 3 cutover = swap the active block below for the solanum one (nothing else changes).
 local U = QM.util
 local S = {}
 
@@ -23,15 +23,15 @@ local S = {}
 -- S.clipboard_delete = "pkill fuzzel || caelestia clipboard -d"
 -- S.emoji = "pkill fuzzel || caelestia emoji -p"
 
--- ============================ Phase 3: quantum-moon shell (ACTIVE) ============================
+-- ============================ Phase 3: solanum shell (ACTIVE) ============================
 S.appid = "qm"
 S.ipc = function(target, fn, ...)
   local args = table.pack(...)
   local tail = args.n > 0 and (" " .. table.concat(args, " ", 1, args.n)) or ""
-  return "qs -c quantum-moon ipc call " .. target .. " " .. fn .. tail
+  return "qs -c solanum ipc call " .. target .. " " .. fn .. tail
 end
-S.start = "qs -c quantum-moon -d"
-S.kill = "qs -c quantum-moon kill"
+S.start = "qs -c solanum -d"
+S.kill = "qs -c solanum kill"
 S.restart = U.BIN .. "/qm-restart-shell"
 S.global = function(name) return "qm:" .. name end
 S.screenshot = U.BIN .. "/qm-screenshot"
@@ -45,9 +45,9 @@ S.launcher_toggle = S.ipc("drawers", "toggle", "launcher")
 S.window_picker = S.ipc("drawers", "toggle", "windowPicker")
 S.lock = S.ipc("lock", "lock")
 S.is_locked = S.ipc("lock", "isLocked")
--- Caelestia has gameMode enable|disable (no `set`); the quantum-moon shell adds `set <bool>`.
+-- Caelestia has gameMode enable|disable (no `set`); the solanum shell adds `set <bool>`.
 S.game_mode = function(on) return S.ipc("gameMode", on and "enable" or "disable") end
--- `monitors hotplug <host>` only exists in the quantum-moon shell; Caelestia ignores the unknown target.
+-- `monitors hotplug <host>` only exists in the solanum shell; Caelestia ignores the unknown target.
 S.monitors_hotplug = function(host) return S.ipc("monitors", "hotplug", host) end
 
 QM.shell = S

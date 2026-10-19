@@ -1,0 +1,59 @@
+[gd_scene load_steps=5 format=3 uid="uid://qmwallpaperroot"]
+
+[ext_resource type="Script" path="res://scripts/wallpaper_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://scripts/solar_system.gd" id="2_solar"]
+[ext_resource type="Script" path="res://scripts/isometric_camera.gd" id="4_cam"]
+[ext_resource type="Script" path="res://scripts/debug_hud.gd" id="5_hud"]
+
+[node name="WallpaperRoot" type="Node3D"]
+script = ExtResource("1_root")
+
+[node name="SolarSystemMode" type="Node3D" parent="."]
+script = ExtResource("2_solar")
+
+[node name="IsometricCamera" type="Camera3D" parent="."]
+script = ExtResource("4_cam")
+
+[node name="DebugHud" type="CanvasLayer" parent="."]
+script = ExtResource("5_hud")
+
+[node name="Panel" type="PanelContainer" parent="DebugHud"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 420.0
+offset_bottom = 220.0
+modulate = Color(1, 1, 1, 0.85)
+
+[node name="VBox" type="VBoxContainer" parent="DebugHud/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DebugHud/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "debug"
+
+[node name="HideButton" type="Button" parent="DebugHud/Panel/VBox"]
+layout_mode = 2
+text = "Hide [H]"
+
+[node name="CollapsedButton" type="Button" parent="DebugHud"]
+visible = false
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 52.0
+offset_bottom = 52.0
+text = "H"
+flat = false
+
+[node name="BootFade" type="CanvasLayer" parent="."]
+layer = 128
+
+[node name="Cover" type="ColorRect" parent="BootFade"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.01, 0.03, 1)

@@ -108,19 +108,41 @@ Singleton {
     function launch(app: var): void {
         if (!app)
             return;
-        const cmd = app.command ?? app.entry?.command ?? [];
+        noteLaunch(app.id);
+
+        // Prefer the desktop entry id so Path=/Exec quoting/field-codes are handled by the launcher.
+        // Use a systemd *service* (not a scope): Electron apps like WhatsApp/Teams exit immediately under scopes.
+        const id = app.id || "";
+        if (id.length > 0) {
+            Quickshell.execDetached({
+                command: ["app2unit", "-t", "service", `${id}.desktop`],
+                workingDirectory: Paths.home
+            });
+            return;
+        }
+
+        let cmd = app.command ?? app.entry?.command ?? [];
         if (!cmd || cmd.length === 0)
             return;
-        noteLaunch(app.id);
-        const wd = app.workingDirectory || Paths.home;
+        // Drop freestanding desktop field codes (%U, %F, …).
+        cmd = cmd.filter(a => !(typeof a === "string" && /^%[a-zA-Z]$/.test(a)));
+        let wd = app.workingDirectory || "";
+        const bin = String(cmd[0] ?? "");
+        if (!wd && bin.includes("/")) {
+            const i = bin.lastIndexOf("/");
+            if (i > 0)
+                wd = bin.slice(0, i);
+        }
+        if (!wd)
+            wd = Paths.home;
         if (app.runInTerminal)
             Quickshell.execDetached({
-                command: ["app2unit", "--", "kitty", "--", ...cmd],
+                command: ["app2unit", "-t", "service", "--", "kitty", "--", ...cmd],
                 workingDirectory: wd
             });
         else
             Quickshell.execDetached({
-                command: ["app2unit", "--", ...cmd],
+                command: ["app2unit", "-t", "service", "--", ...cmd],
                 workingDirectory: wd
             });
     }

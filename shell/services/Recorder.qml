@@ -7,8 +7,8 @@ import qs.config
 import qs.services
 
 // gpu-screen-recorder control, pid-file compatible with bin/qm-record:
-//   $XDG_RUNTIME_DIR/quantum-moon-record.pid  (pid of gpu-screen-recorder)
-//   $XDG_RUNTIME_DIR/quantum-moon-record.path (output file)
+//   $XDG_RUNTIME_DIR/solanum-record.pid  (pid of gpu-screen-recorder)
+//   $XDG_RUNTIME_DIR/solanum-record.path (output file)
 // Modes: screen | region | screen-audio | region-audio ("+audio" / "_audio" also accepted).
 // pause = SIGUSR2 (toggle), stop = SIGINT (file is finalised).
 Singleton {
@@ -30,8 +30,8 @@ Singleton {
     ]
 
     readonly property string runtimeDir: Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"
-    readonly property string pidFile: `${runtimeDir}/quantum-moon-record.pid`
-    readonly property string pathFile: `${runtimeDir}/quantum-moon-record.path`
+    readonly property string pidFile: `${runtimeDir}/solanum-record.pid`
+    readonly property string pathFile: `${runtimeDir}/solanum-record.path`
     readonly property string outDir: (Quickshell.env("XDG_VIDEOS_DIR") || `${Quickshell.env("HOME")}/Videos`) + "/Recordings"
     readonly property int fps: Config.utilities.recorder?.fps ?? 60
     readonly property string audioSource: Config.utilities.recorder?.audioSource ?? "default_output"

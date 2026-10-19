@@ -9,9 +9,9 @@ YES="${YES:-0}"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}"
 SHARE="${XDG_DATA_HOME:-$HOME/.local/share}"
-QM_CFG="$CFG/quantum-moon"
-QM_STATE="$STATE/quantum-moon"
-QM_SHARE="$SHARE/quantum-moon"
+QM_CFG="$CFG/solanum"
+QM_STATE="$STATE/solanum"
+QM_SHARE="$SHARE/solanum"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 if [[ -t 1 ]]; then C_B=$'\e[1m'; C_D=$'\e[2m'; C_Y=$'\e[33m'; C_R=$'\e[31m'; C_G=$'\e[32m'; C_0=$'\e[0m'; else C_B=""; C_D=""; C_Y=""; C_R=""; C_G=""; C_0=""; fi

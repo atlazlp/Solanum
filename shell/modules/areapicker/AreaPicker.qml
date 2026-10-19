@@ -26,7 +26,7 @@ Scope {
 
                 screen: modelData
                 color: "transparent"
-                WlrLayershell.namespace: "quantum-moon-area-picker"
+                WlrLayershell.namespace: "solanum-area-picker"
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.exclusionMode: ExclusionMode.Ignore
                 WlrLayershell.keyboardFocus: Screenshot.closing ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive

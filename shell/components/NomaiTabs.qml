@@ -72,8 +72,8 @@ Item {
 
                 // Active marker: a hex pip on the left edge.
                 NomaiFrame {
-                    width: Theme.hexPip
                     height: Theme.hexPip
+                    width: Theme.hexWidth(Theme.hexPip)
                     shape: "hex"
                     padding: 0
                     fill: tab.active ? Theme.line : "transparent"

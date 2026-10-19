@@ -31,7 +31,7 @@ Singleton {
         color: "transparent"
         mask: Region {}
         exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.namespace: "quantum-moon-idle-inhibitor"
+        WlrLayershell.namespace: "solanum-idle-inhibitor"
         WlrLayershell.layer: WlrLayer.Background
     }
 

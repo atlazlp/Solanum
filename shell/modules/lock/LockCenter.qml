@@ -91,8 +91,8 @@ Item {
             id: avatar
 
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 96
             height: 96
+            width: Theme.hexWidth(96)
 
             Image {
                 id: face

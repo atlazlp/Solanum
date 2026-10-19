@@ -21,8 +21,8 @@ Column {
         Repeater {
             model: [
                 { label: "CPU", icon: "memory", value: SystemUsage.cpuPerc, accent: Theme.line, detail: SystemUsage.cpuTemp > 0 ? `${Math.round(SystemUsage.cpuTemp)}°C` : "" },
-                { label: "MEM", icon: "memory_alt", value: SystemUsage.memPerc, accent: Theme.spark, detail: SystemUsage.formatKibStr(SystemUsage.memUsed, 1) },
-                { label: "DISK", icon: "hard_drive", value: SystemUsage.storagePerc, accent: Theme.ember, detail: SystemUsage.formatKibStr(SystemUsage.storageUsed, 0) }
+                { label: "MEM", icon: "memory_alt", value: SystemUsage.memPerc, accent: Theme.secondary, detail: SystemUsage.formatKibStr(SystemUsage.memUsed, 1) },
+                { label: "DISK", icon: "hard_drive", value: SystemUsage.storagePerc, accent: Theme.spark, detail: SystemUsage.formatKibStr(SystemUsage.storageUsed, 0) }
             ]
 
             Column {

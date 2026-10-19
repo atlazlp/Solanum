@@ -109,8 +109,8 @@ and `/usr/share/hypr/hyprland.lua`.
 - Monitors: HDMI-A-1 1366x768@59.79 0x0 scale 1 transform 1; DP-2 1920x1080@143.99 768x0; DP-3 1366x768@59.79 2688x312;
   fallback `output=""` preferred auto 1.
 - Workspace rules: w[tv1]s[false] gaps_out 10; f[1]s[false] gaps_out 10.
-- Layer rules: fade on hyprpicker|logout_dialog|selection|wayfreeze; no_anim mpvpaper; quantum-moon-(drawers|background)
-  fade; quantum-moon-(area-picker|fade|border-exclusion) no_anim; (transition) caelestia-* equivalents + launcher/fuzzel popin blur.
+- Layer rules: fade on hyprpicker|logout_dialog|selection|wayfreeze; no_anim mpvpaper; solanum-(drawers|background)
+  fade; solanum-(area-picker|fade|border-exclusion) no_anim; (transition) caelestia-* equivalents + launcher/fuzzel popin blur.
 - Window rules: see caelestia rules.conf:1-90 + hypr-user.conf:49-101 (final intent: Discord/Spotify tiled + suppress
   maximize fullscreen + fullscreen_state 0 0; Telegram/Discord/WhatsApp suppress_event activate; Telegram media viewer
   group barred + non-viewer suppress fullscreen; Proton ghosts no_focus/no_initial_focus; games opaque immediate
@@ -131,12 +131,12 @@ Key points:
   left-to-right with hl.monitor re-specs, host = rightmost, marker file STATE/main-monitor-fallback; on return re-apply
   defaults; debounce 800 ms; notify shell `monitors hotplug <host>`; run qm-apply --persisted.
 - gamemode: is_game = class starts with steam_app_ or == gamescope or content_type == "game"; active when such a window is
-  visible or fullscreen; marker $XDG_RUNTIME_DIR/quantum-moon-game-mode.active; pause/resume mpvpaper via
+  visible or fullscreen; marker $XDG_RUNTIME_DIR/solanum-game-mode.active; pause/resume mpvpaper via
   hypr/scripts/qm-mpv-ipc; tell shell `gameMode set true|false`.
 - mouse submaps: press mouse:275 -> submap mousedragthumb unless active window is steam_app_*; release -> reset with
   {release=true, submap_universal=true}; mouse:276 -> mouse5group with mouse:272 {click=true} toggling group / out of group.
 
 ## Scheme
-`qm-apply` writes `~/.local/state/quantum-moon/scheme.lua` (atomic) =
+`qm-apply` writes `~/.local/state/solanum/scheme.lua` (atomic) =
 `return { slug=, night_temperature=, colours={...}, shadow_tint="rrggbb", groupbar={active_bg=key,...} }` and runs
 `hyprctl reload`. `lib/scheme.lua` loads it with `pcall(dofile)` (NOT require) and falls back to `lib/scheme-default.lua`.

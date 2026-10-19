@@ -4,15 +4,18 @@ import qs.components
 import qs.modules.settings
 
 SettingsPane {
-    NumberRow {
+    SliderRow {
+        id: tempRow
         key: "nightlight.temperature"
-        label: "Night light temperature"
-        description: "hyprsunset Kelvin used when no per-planet value applies"
+        label: "Colour temperature"
+        description: "Used when the current planet does not set its own"
         from: 1000
         to: 10000
         step: 100
         suffix: "K"
+        decimals: 0
         fallback: 4000
+        accent: Theme.mix(Theme.ember, Theme.spark, Math.max(0, Math.min(1, (((typeof tempRow.current === "number" ? tempRow.current : 4000) - 1000) / 9000))))
     }
 
     SectionHeader {
@@ -28,7 +31,7 @@ SettingsPane {
 
     SwitchRow {
         key: "gameMode.pauseVideo"
-        label: "Pause video wallpaper"
-        description: "Pause mpvpaper over IPC while game mode is on"
+        label: "Pause the centre wallpaper"
+        description: "Stop the live scene and the recorded video while a game is focused"
     }
 }

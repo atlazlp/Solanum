@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily Quantum Moon borg backup
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+OnBootSec=20min
+Persistent=true
+RandomizedDelaySec=10min
+Unit=solanum-backup.service
+
+[Install]
+WantedBy=timers.target

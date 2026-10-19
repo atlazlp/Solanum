@@ -3,6 +3,7 @@ import qs.config
 import qs.theme
 import qs.components
 import qs.modules.settings
+import "../Validators.js" as Validators
 
 SettingsPane {
     id: pane
@@ -13,7 +14,7 @@ SettingsPane {
     }
 
     GlyphText {
-        text: services.loaded ? "~/.config/quantum-moon/services.json" : "services.json will be created on the first change"
+        text: services.loaded ? Paths.config.replace(Paths.home, "~") + "/services.json" : "services.json will be created on the first change"
         role: "small"
         dim: true
         bottomPadding: Theme.spaceSm
@@ -40,6 +41,7 @@ SettingsPane {
         placeholder: "http://127.0.0.1:11434"
         fieldWidth: 420
         mono: true
+        validate: t => Validators.url(t)
     }
 
     TextRow {
@@ -49,6 +51,7 @@ SettingsPane {
         placeholder: "http://127.0.0.1:8080"
         fieldWidth: 420
         mono: true
+        validate: t => Validators.url(t)
     }
 
     TextRow {

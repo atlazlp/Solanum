@@ -10,7 +10,7 @@ import qs.services
 // One notification as the shell sees it. Wraps a live `Notification` (from the server) or a
 // persisted / synthetic record. Owns the expire timer, the popup lifecycle (popup -> leaving ->
 // gone) and the image cache (image:// sources vanish with the notification, so they are grabbed
-// into ~/.cache/quantum-moon/notifs/<hash>.png once).
+// into ~/.cache/solanum/notifs/<hash>.png once).
 QtObject {
     id: notif
 
@@ -79,7 +79,7 @@ QtObject {
             implicitHeight: 96
             color: "transparent"
             mask: Region {}
-            WlrLayershell.namespace: "quantum-moon-notifimage"
+            WlrLayershell.namespace: "solanum-notifimage"
 
             Image {
                 id: grabImage

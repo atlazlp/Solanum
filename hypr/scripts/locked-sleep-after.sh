@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 set -eu
 
-# Markers live under $XDG_RUNTIME_DIR with the quantum-moon- prefix. During the Caelestia -> quantum-moon
+# Markers live under $XDG_RUNTIME_DIR with the solanum- prefix. During the Caelestia -> solanum
 # transition the live Caelestia shell (patches/.../IdleMonitors.qml) still reads caelestia-resume-grace.until
 # and caelestia-audio-playback.active, so the resume grace is written to BOTH names and the audio release
 # removes both. Drop the LEGACY_* lines after the Phase 3 cutover.
 RT="${XDG_RUNTIME_DIR:-/tmp}"
-PIDFILE="${RT}/quantum-moon-locked-sleep.pid"
-ARM="${RT}/quantum-moon-locked-sleep.arm"
-WAS_ARMED="${RT}/quantum-moon-locked-sleep.was-armed"
-DELAY_FILE="${RT}/quantum-moon-locked-sleep.delay"
-GRACE_UNTIL="${RT}/quantum-moon-resume-grace.until"
+PIDFILE="${RT}/solanum-locked-sleep.pid"
+ARM="${RT}/solanum-locked-sleep.arm"
+WAS_ARMED="${RT}/solanum-locked-sleep.was-armed"
+DELAY_FILE="${RT}/solanum-locked-sleep.delay"
+GRACE_UNTIL="${RT}/solanum-resume-grace.until"
 LEGACY_GRACE_UNTIL="${RT}/caelestia-resume-grace.until"
-AUDIO_MARKER="${RT}/quantum-moon-audio-playback.active"
+AUDIO_MARKER="${RT}/solanum-audio-playback.active"
 LEGACY_AUDIO_MARKER="${RT}/caelestia-audio-playback.active"
-AUDIO_INHIBIT_PID="${RT}/quantum-moon-audio-inhibit.pid"
+AUDIO_INHIBIT_PID="${RT}/solanum-audio-inhibit.pid"
 LEGACY_AUDIO_INHIBIT_PID="${RT}/caelestia-audio-inhibit.pid"
-# Shell IPC prefix: the unit/env sets QM_SHELL_IPC="qs -c quantum-moon ipc call" after the cutover.
+# Shell IPC prefix: the unit/env sets QM_SHELL_IPC="qs -c solanum ipc call" after the cutover.
 QM_SHELL_IPC="${QM_SHELL_IPC:-qs -c caelestia ipc call}"
 RESUME_GRACE_SEC="${QM_RESUME_GRACE_SEC:-${CAELESTIA_RESUME_GRACE_SEC:-300}}"
 

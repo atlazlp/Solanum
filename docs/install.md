@@ -16,7 +16,7 @@ GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/atlazlp/Quantum-Moon.git ~/Pr
 
 `GIT_LFS_SKIP_SMUDGE=1` skips the six centre-monitor videos (about 110 MB each). GitHub's free LFS bandwidth is 1 GB per month, so two fresh clones with videos exhaust it. Fetch them later with `qm-fetch-videos`; without them the centre monitor shows the static `slot-1.png`.
 
-The repo can live anywhere under `$HOME`; the installer records its location in `~/.config/quantum-moon/root`.
+The repo can live anywhere under `$HOME`; the installer records its location in `~/.config/solanum/root`.
 
 ## 3. Read the plan, then run it
 
@@ -25,7 +25,7 @@ cd ~/Projects/Quantum-Moon
 ./scripts/install.sh --dry-run --full
 ```
 
-`install.sh` is idempotent and user-level. `--full` does: package check (prints what `system-steps.sh` will install), symlinks (`~/.config/hypr -> hypr/`, `~/.config/quickshell/quantum-moon -> shell/`, `~/.local/bin/qm-* -> bin/`), config seeding from `config/quantum-moon/*.example` (never overwrites an existing file; secrets get mode 600), MIME default for folders (Nautilus), GTK `settings.ini`, kitty include block, uwsm env, systemd user units (enabled, started on the next login), and the backup timer.
+`install.sh` is idempotent and user-level. `--full` does: package check (prints what `system-steps.sh` will install), symlinks (`~/.config/hypr -> hypr/`, `~/.config/quickshell/solanum -> shell/`, `~/.local/bin/qm-* -> bin/`), config seeding from `config/solanum/*.example` (never overwrites an existing file; secrets get mode 600), MIME default for folders (Nautilus), GTK `settings.ini`, kitty include block, uwsm env, systemd user units (enabled, started on the next login), and the backup timer.
 
 ```sh
 ./scripts/install.sh --full
@@ -43,17 +43,18 @@ Log out, choose **Hyprland (uwsm)** (autologin does it after `system-steps.sh --
 systemctl --user is-active graphical-session.target     # active
 systemctl --user --failed                               # empty
 pgrep -c hyprpaper                                      # 1
-qs -c quantum-moon ipc show                             # the IPC surface
+qs -c solanum ipc show                             # the IPC surface
 ```
 
 Pick a planet: `qm-random`, or open the Quantum Moon panel from the bar logo.
 
 ## 5. Optional
 
+- Firefox planet themes: install [Pywalfox](https://addons.mozilla.org/firefox/addon/pywalfox/), restart Firefox (or run `solanum/scripts/qm-pywalfox-host install`), and click **Fetch Pywal colors** once. After that, planet changes update the browser chrome live (see post-install).
 - `qm-fetch-videos` then `qm-apply --persisted` for the centre-monitor videos.
-- `~/.config/quantum-moon/vpn.json`: the NetworkManager connection the bar's VPN glyph toggles.
-- `~/.config/quantum-moon/git-watcher.json`: Azure DevOps PR watcher (needs a PAT); the `quantum-moon-git-watcher` unit starts once the file exists.
-- `~/.config/quantum-moon/services.json`: paths for the Docker/Ollama/Open WebUI and KVM panels.
+- `~/.config/solanum/vpn.json`: the NetworkManager connection the bar's VPN glyph toggles.
+- `~/.config/solanum/git-watcher.json`: Azure DevOps PR watcher (needs a PAT); the `solanum-git-watcher` unit starts once the file exists.
+- `~/.config/solanum/services.json`: paths for the Docker/Ollama/Open WebUI and KVM panels.
 - `qm-backup init` then `qm-backup run --dry-run`: borg backups to `/mnt/Backup` (the timer runs daily at 03:30 when the mount exists).
 - `extras/middle-mouse-debounce/`: a system service that debounces a flaky middle button.
 
@@ -67,7 +68,7 @@ cd ~/Projects/Quantum-Moon && git pull && ./scripts/install.sh --quick && qm-res
 
 ## 7. Uninstall
 
-Remove the symlinks and units created by `install.sh` (the dry run lists them) and the `~/.config/quantum-moon`, `~/.local/state/quantum-moon`, `~/.local/share/quantum-moon` directories. Package removal is up to you; `config/packages/*.txt` lists what was installed.
+Remove the symlinks and units created by `install.sh` (the dry run lists them) and the `~/.config/solanum`, `~/.local/state/solanum`, `~/.local/share/solanum` directories. Package removal is up to you; `config/packages/*.txt` lists what was installed.
 
 ## 8. Legal
 

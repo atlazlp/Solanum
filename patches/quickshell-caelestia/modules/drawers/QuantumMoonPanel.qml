@@ -22,7 +22,7 @@ Item {
     readonly property bool shouldBeActive: visibilities.quantumMoon && cfgOn && !suppressedOnOutput
     property real offsetScale: shouldBeActive ? 0 : 1
 
-    readonly property string stateFile: Paths.home + "/.local/state/quantum-moon/current.json"
+    readonly property string stateFile: Paths.home + "/.local/state/solanum/current.json"
     readonly property string qmRootFile: Paths.home + "/.config/caelestia/quantum-moon-root"
     readonly property var planetSlugs: ["brittle-hollow", "dark-bramble", "giants-deep", "hourglass-twins", "timber-hearth"]
 

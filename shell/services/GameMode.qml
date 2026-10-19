@@ -12,7 +12,7 @@ Singleton {
     id: root
 
     property alias enabled: props.enabled
-    readonly property string resourcesScript: `${Paths.scripts}/qm-game-mode-resources.sh`
+    readonly property string resourcesScript: `${Paths.home}/.config/hypr/scripts/game-mode-resources.sh`
     property bool _booted: false
 
     readonly property list<string> keywords: ["animations:enabled 0", "decoration:shadow:enabled 0", "decoration:blur:enabled 0", "general:gaps_in 0", "general:gaps_out 0", "general:border_size 1", "decoration:rounding 0", "general:allow_tearing 1"]

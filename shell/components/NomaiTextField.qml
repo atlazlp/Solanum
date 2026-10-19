@@ -21,7 +21,7 @@ NomaiFrame {
     glow: focused
     ticks: true
     implicitWidth: 240
-    implicitHeight: input.implicitHeight + padding * 2
+    implicitHeight: Math.max(32, input.implicitHeight + padding * 2)
 
     function forceFocus(): void {
         input.forceActiveFocus();
@@ -49,7 +49,10 @@ NomaiFrame {
             selectedTextColor: Theme.text
             clip: true
             onAccepted: root.accepted()
-            Keys.onEscapePressed: root.escaped()
+            Keys.onEscapePressed: event => {
+                root.escaped();
+                event.accepted = true;
+            }
 
             GlyphText {
                 visible: input.text.length === 0 && root.placeholder !== ""

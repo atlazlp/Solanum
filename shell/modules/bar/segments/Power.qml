@@ -10,17 +10,17 @@ HexSegment {
     property var screen: null
     property var bar: null
 
-    ends: "left"
+    ends: "top"
     connector: false
     active: root.bar?.visibilities?.session ?? false
-    lineColor: active ? Theme.danger : Theme.line
+    lineColor: active ? Theme.danger : Theme.spark
     onClicked: Visibilities.toggle("session", root.bar?.visibilities ?? null)
 
     GlyphIcon {
         icon: "power_settings_new"
         weight: 500
-        color: root.active ? Theme.danger : (root.hovered ? Theme.text : Theme.textDim)
+        color: root.active ? Theme.danger : (root.hovered ? Theme.text : Theme.spark)
         animate: true
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 }

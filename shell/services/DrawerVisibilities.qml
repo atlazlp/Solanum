@@ -15,13 +15,14 @@ QtObject {
     property bool services: false
     property bool kvm: false
     property bool audio: false
+    property bool audioMixer: false
     property bool updates: false
     property bool settings: false
 
     // Not a drawer: set while a panel wants keyboard focus (drawers window flips keyboardFocus to OnDemand).
-    property bool wantsKeyboard: launcher || windowPicker || session || settings || shipLog || kvm || audio || services || updates
+    property bool wantsKeyboard: launcher || windowPicker || session || settings || shipLog || kvm || audio || audioMixer || services || updates
 
-    readonly property list<string> names: ["launcher", "windowPicker", "dashboard", "sidebar", "shipLog", "session", "utilities", "quantumMoon", "osd", "services", "kvm", "audio", "updates", "settings"]
+    readonly property list<string> names: ["launcher", "windowPicker", "dashboard", "sidebar", "shipLog", "session", "utilities", "quantumMoon", "osd", "services", "kvm", "audio", "audioMixer", "updates", "settings"]
 
     function anyOpen(): bool {
         return names.some(n => this[n]);

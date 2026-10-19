@@ -1,4 +1,4 @@
-# Design: standalone Quickshell shell (`shell/`, config name `quantum-moon`)
+# Design: standalone Quickshell shell (`shell/`, config name `solanum`, brand Solanum)
 
 ## Rules
 - Pure QML on Quickshell 0.3.2. NEVER `import Caelestia.*`. Imports: `Quickshell`, `Quickshell.Io`, `Quickshell.Wayland`,
@@ -7,9 +7,9 @@
   Shell-local modules import as `qs.config`, `qs.theme`, `qs.components`, `qs.services`, `qs.utils`, `qs.modules.<x>`.
 - Singletons: `pragma Singleton` + `import Quickshell` + `Singleton { ... }` and a `qmldir` per directory listing
   `singleton Name 1.0 Name.qml`.
-- Layer namespaces: `quantum-moon-<module>` (WlrLayershell.namespace). GlobalShortcut appid `qm`.
-- Config read-only from `~/.config/quantum-moon/shell.json` (+ `monitors/<name>.json` overrides), state in
-  `~/.local/state/quantum-moon/`. The shell never writes shell.json except through `Config.save()` from Settings.
+- Layer namespaces: `solanum-<module>` (WlrLayershell.namespace). GlobalShortcut appid `qm`.
+- Config read-only from `~/.config/solanum/shell.json` (+ `monitors/<name>.json` overrides), state in
+  `~/.local/state/solanum/`. The shell never writes shell.json except through `Config.save()` from Settings.
 - Dev flags (`QM_SHELL_DEV=1`): no NotificationServer, no WlSessionLock/IdleMonitors, bar exclusionMode Ignore.
 - Visual language: Nomai glyph / ship-log. Angular hexagons and chamfered rectangles (chamfer on top-left and
   bottom-right corners only), ink fills, 1 px glowing line in the planet primary, 6 px outer glow at 18%, corner ticks.
@@ -20,7 +20,8 @@
 ## Theme roles (from `state/scheme.json` -> `.colours`)
 ink0 surfaceContainerLowest | ink surface | ink1 surfaceContainer | ink2 surfaceContainerHigh | ink3 surfaceContainerHighest |
 scrim scrim@0.55 | line primary | lineSoft primaryContainer | lineDim outlineVariant | glow primary@0.18 |
-text onSurface | textDim onSurfaceVariant | textOnLine onPrimary | ember peach ?? #e9a23b | spark tertiary |
+text onSurface | textDim onSurfaceVariant | textOnLine onPrimary | ember #e9a23b (fixed) | moon #c8c4bc (fixed) |
+spark tertiary | firefoxAccent / firefoxAccentSecondary (Pywalfox color10/color13; may differ from line/spark) |
 danger error / onDanger onError | success success ?? green | warn yellow | term[0..15] term0..term15.
 Fonts: display "Orbitron" (fallback Rubik), body "Rubik", mono "JetBrainsMono NF", icon "Material Symbols Rounded".
 Sizes label 10 small 11 body 13 large 15 title 18 display 42 (x appearance.fontScale). Spacing xs 4 sm 6 md 10 lg 14 xl 20.
@@ -29,7 +30,7 @@ Motion: fast 110, normal 180, slow 260, reveal 420 ms; enter OutCubic, exit InCu
 
 ## Screens
 `screens.roles = { main: "DP-2", left: "HDMI-A-1", right: "DP-3" }`; `modules` matrix maps module -> roles or "*".
-Today: bar/main only; dashboard main+right; sidebar main; utilities main+right; launcher *; quantumMoon main;
+Today: left bar on main only; dashboard main+right; sidebar main; utilities main+right; launcher *; quantumMoon main;
 notifications main; lock.fullUi main; hover.launcher main+right. Hotplug may promote another screen to main at runtime
 (`state/screens-runtime.json`).
 

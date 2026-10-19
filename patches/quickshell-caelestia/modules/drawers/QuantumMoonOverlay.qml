@@ -21,7 +21,7 @@ Scope {
                 required property ShellScreen modelData
 
                 screen: modelData
-                name: "quantum-moon-fade"
+                name: "solanum-fade"
                 WlrLayershell.exclusionMode: ExclusionMode.Ignore
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None

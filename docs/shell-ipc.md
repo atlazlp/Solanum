@@ -1,6 +1,6 @@
 # Shell IPC and global shortcuts
 
-Call with `qm-shell <target> <function> [args]` (= `qs -c quantum-moon ipc call ...`). Generated from `qs -c quantum-moon ipc show`.
+Call with `qm-shell <target> <function> [args]` (= `qs -c solanum ipc call ...`). Generated from `qs -c solanum ipc show`.
 
 ```
 target updates

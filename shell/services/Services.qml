@@ -11,7 +11,7 @@ import qs.services
 Singleton {
     id: root
 
-    // ---- config (~/.config/quantum-moon/services.json) ----
+    // ---- config (~/.config/solanum/services.json) ----
     readonly property var defaults: ({
             llm: {
                 controlScript: `${Paths.home}/Projects/gemma4-heretic/llm-control.sh`,

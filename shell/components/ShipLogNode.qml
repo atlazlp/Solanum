@@ -28,10 +28,10 @@ Item {
 
     readonly property color accent: critical ? Theme.ember : (rumor ? Theme.lineDim : Theme.line)
 
-    width: size
+    width: Theme.hexWidth(size)
     height: size
-    x: cx - size / 2
-    y: cy - size / 2
+    x: cx - width / 2
+    y: cy - height / 2
     opacity: dimmed ? 0.25 : 1
     z: selected || focused ? 2 : 1
 
@@ -106,8 +106,8 @@ Item {
         anchors.topMargin: -4
         shape: "hex"
         padding: 0
-        width: root.pinned && root.kind === "entry" ? 16 : 22
-        height: 18
+        height: root.pinned && root.kind === "entry" ? 14 : 18
+        width: Theme.hexWidth(height)
         fill: Theme.ink0
         lineColor: root.accent
         lineOpacity: 0.9

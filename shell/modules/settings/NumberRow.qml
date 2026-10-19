@@ -10,14 +10,23 @@ SettingRow {
     property int decimals: -1
     property string suffix: ""
     property real fallback: 0
+    // Display = stored * displayScale. Timeouts use 0.001 so the field shows seconds.
+    property real displayScale: 1
+
+    function storedOf(display: real): real {
+        const snapped = row.step > 0 ? Math.round(display / row.step) * row.step : display;
+        const clamped = Math.max(row.from, Math.min(row.to, snapped));
+        return row.displayScale === 1 ? Number(clamped.toFixed(6)) : Number((clamped / row.displayScale).toFixed(6));
+    }
 
     NomaiNumber {
-        value: typeof row.current === "number" ? row.current : row.fallback
+        readonly property real shown: ((typeof row.current === "number" ? row.current : row.fallback) * row.displayScale)
+        value: shown
         from: row.from
         to: row.to
         step: row.step
         decimals: row.decimals
         suffix: row.suffix
-        onEdited: v => row.write(v)
+        onEdited: v => row.write(row.storedOf(v))
     }
 }

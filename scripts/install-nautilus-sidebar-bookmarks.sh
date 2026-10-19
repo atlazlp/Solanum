@@ -5,8 +5,8 @@ HOME="${HOME:?}"
 GTK3_MARKS="${HOME}/.config/gtk-3.0/bookmarks"
 GTK4_MARKS="${HOME}/.config/gtk-4.0/bookmarks"
 GTK4_CSS="${HOME}/.config/gtk-4.0/gtk.css"
-CSS_BEGIN="/* BEGIN quantum-moon-nautilus-sidebar */"
-CSS_END="/* END quantum-moon-nautilus-sidebar */"
+CSS_BEGIN="/* BEGIN solanum-nautilus-sidebar */"
+CSS_END="/* END solanum-nautilus-sidebar */"
 
 file_uri() {
 	python3 -c '
@@ -38,7 +38,7 @@ load_xdg_dirs() {
 }
 
 extra_mounts_count() {
-	local f="${HOME}/.config/quantum-moon/nautilus-sidebar-extra"
+	local f="${HOME}/.config/solanum/nautilus-sidebar-extra"
 	local n=0 line path rest
 	[[ -f "${f}" ]] || {
 		printf '%s' "0"
@@ -56,7 +56,7 @@ extra_mounts_count() {
 }
 
 apply_drive_icons() {
-	local f="${HOME}/.config/quantum-moon/nautilus-drive-icons"
+	local f="${HOME}/.config/solanum/nautilus-drive-icons"
 	local line path icon rest
 	[[ -f "${f}" ]] || return 0
 	command -v gio >/dev/null 2>&1 || return 0
@@ -143,7 +143,7 @@ apply_nautilus_prefs() {
 }
 
 append_extra_from_config() {
-	local f="${HOME}/.config/quantum-moon/nautilus-sidebar-extra"
+	local f="${HOME}/.config/solanum/nautilus-sidebar-extra"
 	local line path rest label
 	[[ -f "${f}" ]] || return 0
 	while IFS= read -r line || [[ -n "${line}" ]]; do
@@ -229,7 +229,7 @@ main() {
 	apply_drive_icons
 	apply_nautilus_prefs
 
-	echo "Nautilus: splitter border-top on sidebar row nth-last-child(${nth}) (= ${n_mounts} mount(s) + tail ${tail}); set NAUTILUS_SIDEBAR_TAIL_ROWS=0 if nothing sits below mounts. Drive icons: ~/.config/quantum-moon/nautilus-drive-icons. Recent on unless NAUTILUS_DISABLE_SYSTEM_RECENT=1."
+	echo "Nautilus: splitter border-top on sidebar row nth-last-child(${nth}) (= ${n_mounts} mount(s) + tail ${tail}); set NAUTILUS_SIDEBAR_TAIL_ROWS=0 if nothing sits below mounts. Drive icons: ~/.config/solanum/nautilus-drive-icons. Recent on unless NAUTILUS_DISABLE_SYSTEM_RECENT=1."
 }
 
 main "$@"

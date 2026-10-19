@@ -72,7 +72,7 @@ Singleton {
             id: `synthetic-${Date.now()}-${syntheticSeq++}`,
             summary: summary ?? "",
             body: body ?? "",
-            appName: app ?? "quantum-moon",
+            appName: app ?? "solanum",
             urgency: urgency ?? NotificationUrgency.Normal,
             actions: acts,
             popup: shouldShowPopup()
@@ -118,6 +118,16 @@ Singleton {
             n.dismissPopup();
     }
 
+    // When the user focuses an application window after a toast, clear the toast stack.
+    readonly property var focusToplevel: Hypr.activeToplevel
+    onFocusToplevelChanged: {
+        if (!loaded || popupCount === 0)
+            return;
+        if (!focusToplevel)
+            return;
+        dismissPopups();
+    }
+
     function launchApp(appName: string, desktopEntry: string): bool {
         let entry = null;
         if (desktopEntry)
@@ -132,10 +142,14 @@ Singleton {
         return true;
     }
 
-    // Click behaviour: default action if the config allows and one exists, else launch the app.
+    // Click: focus the running app (incl. window-group tabs); else default action / launch.
     function activate(n: NotifData): void {
         if (!n)
             return;
+        if (Hypr.focusApp(n.appName, n.desktopEntry)) {
+            n.dismissPopup();
+            return;
+        }
         if (Config.notifs.actionOnClick !== false) {
             const a = n.defaultAction();
             if (a) {
@@ -266,7 +280,7 @@ Singleton {
             return root.count;
         }
 
-        // Debug: `qs -c quantum-moon ipc call notifs inject "Summary" "Body" "App"`
+        // Debug: `qs -c solanum ipc call notifs inject "Summary" "Body" "App"`
         function inject(summary: string, body: string, app: string): string {
             const n = root.inject(summary, body, app, NotificationUrgency.Normal, [{ identifier: "default", text: "Open" }, { identifier: "later", text: "Later" }]);
             return n.id;

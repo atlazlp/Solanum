@@ -22,7 +22,7 @@ hl.bind("CTRL + SUPER + ALT + R", B.exec(S.restart), { release = true })
 hl.bind("SUPER + D", B.exec(S.window_picker))
 
 -- Utilities
-hl.bind("Print", B.exec(S.screenshot), L)                  -- full screen capture > clipboard
+hl.bind("Print", B.exec(S.screenshot .. " freeze"), L)     -- region picker (frozen), then edit
 hl.bind("SUPER + SHIFT + S", B.global("screenshotFreeze")) -- capture region (freeze)
 hl.bind("SUPER + SHIFT + ALT + S", B.global("screenshot")) -- capture region
 hl.bind("SUPER + ALT + R", B.exec(S.record .. " -s"))      -- record screen with sound

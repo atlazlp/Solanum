@@ -1,0 +1,16 @@
+[Unit]
+Description=Quantum Moon suspend/resume watcher (DPMS restore, USB HID rebind, locked-sleep resume grace)
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=%h/.config/hypr/scripts/suspend-resume-watch.sh
+Environment=QM_SHELL_IPC="qs -c solanum ipc call"
+Slice=session.slice
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

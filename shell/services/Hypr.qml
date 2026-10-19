@@ -47,6 +47,100 @@ Singleton {
         Hyprland.dispatch(request);
     }
 
+    function _norm(s: string): string {
+        return String(s ?? "").toLowerCase().replace(/\.desktop$/i, "").replace(/[^a-z0-9]+/g, "");
+    }
+
+    function _clientMatches(t: var, needles: list<string>): bool {
+        if (!t || needles.length === 0)
+            return false;
+        const ipc = t.lastIpcObject ?? {};
+        const hay = [
+            ipc.class, ipc.initialClass, ipc.initial_class,
+            t.title, ipc.title, ipc.desktopEntry, ipc.desktop
+        ].map(x => root._norm(x)).filter(s => s.length > 0);
+        for (const n of needles) {
+            if (!n)
+                continue;
+            for (const h of hay) {
+                if (h === n || h.includes(n) || n.includes(h))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    function _addressOf(t: var): string {
+        const a = t?.address ?? t?.lastIpcObject?.address ?? "";
+        return String(a);
+    }
+
+    // Focus an open window by app name / desktop id. If it sits in a Hyprland group,
+    // cycle the group until that member is frontmost (same approach as hypr/features/alttab.lua).
+    function focusApp(appName: string, desktopEntry: string): bool {
+        void root.toplevels.values;
+        const needles = [desktopEntry, appName].map(s => root._norm(s)).filter(s => s.length > 0);
+        if (needles.length === 0)
+            return false;
+
+        let match = null;
+        for (const t of root.toplevels.values) {
+            if (root._clientMatches(t, needles)) {
+                match = t;
+                break;
+            }
+        }
+        if (!match)
+            return false;
+
+        const addr = root._addressOf(match);
+        if (!addr)
+            return false;
+
+        const ws = match.workspace?.name ?? match.lastIpcObject?.workspace?.name
+            ?? match.workspace?.id ?? match.lastIpcObject?.workspace?.id;
+        if (ws !== undefined && ws !== null && String(ws).length)
+            root.dispatch(`workspace ${ws}`);
+
+        root.dispatch(`focuswindow address:${addr}`);
+
+        const grouped = match.lastIpcObject?.grouped ?? [];
+        if (Array.isArray(grouped) && grouped.length > 1)
+            root._ensureGroupMember(addr, grouped.length);
+
+        return true;
+    }
+
+    property string _groupTarget: ""
+    property int _groupTries: 0
+    property int _groupMax: 0
+
+    function _ensureGroupMember(addr: string, size: int): void {
+        _groupTarget = addr;
+        _groupTries = 0;
+        _groupMax = Math.max(1, size);
+        groupFocusTimer.restart();
+    }
+
+    Timer {
+        id: groupFocusTimer
+        interval: 40
+        repeat: true
+        onTriggered: {
+            const active = root.activeToplevel;
+            const cur = root._addressOf(active);
+            if (cur === root._groupTarget || root._groupTries >= root._groupMax) {
+                stop();
+                return;
+            }
+            if (root._groupTries === 0)
+                root.dispatch(`focuswindow address:${root._groupTarget}`);
+            else
+                root.dispatch("changegroupactive f");
+            root._groupTries++;
+        }
+    }
+
     // Custom event other tooling (Lua config, scripts) can listen to: qm:<topic>:<payload>
     function emit(topic: string, payload: string): void {
         Quickshell.execDetached(["hyprctl", "dispatch", "event", `qm:${topic}:${payload ?? ""}`]);

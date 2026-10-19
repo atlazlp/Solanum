@@ -2,7 +2,7 @@
 # qm-backup: borg backups of $HOME (+ a few system files) to /mnt/Backup.
 #   qm-backup <init|run|list|mount <dir>|umount <dir>|check|prune|info> [--dry-run]
 #   init     create the repository (unencrypted) at /mnt/Backup/borg/home-<hostname>
-#   run      borg create (zstd,3, excludes from ~/.config/quantum-moon/backup-patterns.txt),
+#   run      borg create (zstd,3, excludes from ~/.config/solanum/backup-patterns.txt),
 #            then prune (7 daily / 4 weekly / 6 monthly) and, on Sundays, compact
 #   list     list archives            check   verify the repository
 #   mount    FUSE-mount the repo      umount  unmount it
@@ -16,8 +16,8 @@ usage() { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; }
 ROOT="${QM_BACKUP_ROOT:-/mnt/Backup}"
 HOST="$(hostname -s 2>/dev/null || hostname)"
 REPO="${QM_BACKUP_REPO:-$ROOT/borg/home-$HOST}"
-PATTERNS="${XDG_CONFIG_HOME:-$HOME/.config}/quantum-moon/backup-patterns.txt"
-SOURCES=("$HOME" /var/lib/quantum-moon /etc/sddm.conf /etc/sddm.conf.d /etc/modprobe.d /etc/pacman.d/hooks)
+PATTERNS="${XDG_CONFIG_HOME:-$HOME/.config}/solanum/backup-patterns.txt"
+SOURCES=("$HOME" /var/lib/solanum /etc/sddm.conf /etc/sddm.conf.d /etc/modprobe.d /etc/pacman.d/hooks)
 export BORG_RELOCATED_REPO_ACCESS_IS_OK=yes
 export BORG_REPO="$REPO"
 
@@ -35,7 +35,7 @@ done
 fail() { # msg
   echo "qm-backup: $*" >&2
   if command -v qm-toast >/dev/null 2>&1; then qm-toast error "Backup failed" "$*" "backup" || true
-  elif command -v notify-send >/dev/null 2>&1; then notify-send -a quantum-moon -u critical "Backup failed" "$*" || true; fi
+  elif command -v notify-send >/dev/null 2>&1; then notify-send -a solanum -u critical "Backup failed" "$*" || true; fi
   exit 1
 }
 

@@ -2,13 +2,14 @@
 -- (a top-level hl.exec_cmd is `exec`: it re-runs on every reload and segfaults under --verify-config).
 --
 -- Always: uwsm finalize (only under a UWSM session), cliphist watchers, trash-empty, cursor, hyprresume,
--- autolock on login. Non-UWSM fallback (Phase 1-3 plain SDDM session): the daemons that Phase 4 turns into
--- user units (shell, hyprpaper, hyprsunset, qm-apply + qm-video-watch, lan-mouse/llm-tray sessions, audio
--- inhibit, suspend-resume watch, polkit agent). Dropped from caelestia execs.conf on purpose: gnome-keyring,
--- polkit-gnome (kept only as the fallback below), geoclue, gammastep, mpris-proxy, `caelestia resizer -d`.
+-- autolock on login, polkit agent (hyprpolkitagent). Non-UWSM fallback (Phase 1-3 plain SDDM session):
+-- the daemons that Phase 4 turns into user units (shell, hyprpaper, hyprsunset, qm-apply + qm-video-watch,
+-- lan-mouse/llm-tray sessions, audio inhibit, suspend-resume watch). Dropped from caelestia execs.conf on
+-- purpose: gnome-keyring, geoclue, gammastep, mpris-proxy, `caelestia resizer -d`.
 local U, S = QM.util, QM.shell
 
-local UWSM_ACTIVE = "command -v uwsm >/dev/null 2>&1 && uwsm check is-active -q 2>/dev/null"
+-- uwsm check is-active has no -q (only -v); a bogus -q made the check always fail.
+local UWSM_ACTIVE = "command -v uwsm >/dev/null 2>&1 && uwsm check is-active 2>/dev/null"
 
 -- Run cmd only when the session is NOT managed by UWSM (units own it there).
 local function unless_uwsm(cmd)
@@ -51,7 +52,7 @@ hl.on("hyprland.start", function()
   -- Not `exec`-ed at reload: a reload must not respawn the center video during game mode.
   X(unless_uwsm(
     "QM=" .. U.shq(U.QM_ROOT) .. "; repo=\"$(dirname \"$QM\")\"; "
-    .. "command -v git-lfs >/dev/null && [ -d \"$repo/.git\" ] && (cd \"$repo\" && git lfs pull --include=\"quantum-moon/modes/*/wallpapers/center.mp4\") || true; "
+    .. "command -v git-lfs >/dev/null && [ -d \"$repo/.git\" ] && (cd \"$repo\" && git lfs pull --include=\"solanum/modes/*/wallpapers/center.mp4\") || true; "
     .. "sleep 2; \"$QM/scripts/qm-apply\" --persisted; "
     .. unless_running("[q]m-video-watch", "exec \"$QM/scripts/qm-video-watch\"")))
   -- Lan Mouse tray + daemon (lan-kvm-hyprland) and local LLM tray (Ollama + Open WebUI)
@@ -62,7 +63,11 @@ hl.on("hyprland.start", function()
   -- Suspend/resume watcher (Phase 1: caelestia-suspend-resume-watch.service still runs the live copy; skip if so)
   X(unless_uwsm("systemctl --user is-active -q caelestia-suspend-resume-watch.service && exit 0; "
     .. unless_running("[s]uspend-resume-watch.sh", "exec bash " .. U.script("suspend-resume-watch.sh"))))
-  -- Polkit agent until hyprpolkitagent.service (Phase 4) owns it
-  X(unless_uwsm(unless_running("[p]olkit-gnome-authentication-agent-1|[h]yprpolkitagent",
-    "exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")))
+  -- Polkit agent for Shelly UI / pkexec / asroot. Always ensure one is up: plain
+  -- start-hyprland never activates graphical-session.target, so the stock
+  -- hyprpolkitagent user unit alone stays dead without a drop-in + this start.
+  X(unless_running("[h]yprpolkitagent|[p]olkit-gnome-authentication-agent-1",
+    "systemctl --user start hyprpolkitagent.service 2>/dev/null"
+      .. " || exec /usr/lib/hyprpolkitagent/hyprpolkitagent"
+      .. " || exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1"))
 end)

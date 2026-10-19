@@ -1,6 +1,0 @@
-# /etc/sddm.conf.d/quantum-moon-autologin.conf
-# Autologin into the UWSM-managed Hyprland session (hyprland-uwsm.desktop).
-# Installed by scripts/system-steps.sh; replaces caelestia-autologin.conf.
-[Autologin]
-User=lpacheco
-Session=hyprland-uwsm

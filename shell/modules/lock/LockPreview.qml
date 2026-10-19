@@ -5,7 +5,7 @@ import qs.config
 import qs.theme
 import qs.services
 
-// Debug host for `qs -c quantum-moon ipc call lock preview [seconds]`: shows LockContent inside a
+// Debug host for `qs -c solanum ipc call lock preview [seconds]`: shows LockContent inside a
 // normal top-layer PanelWindow on the main screen (no WlSessionLock, PAM disabled), then unloads.
 PanelWindow {
     id: root
@@ -14,7 +14,7 @@ PanelWindow {
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
-    WlrLayershell.namespace: "quantum-moon-lock-preview"
+    WlrLayershell.namespace: "solanum-lock-preview"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     anchors {

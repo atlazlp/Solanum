@@ -8,7 +8,7 @@
 --     top-level exec re-runs on every reload. One-shots go in hl.on("hyprland.start"), repeat
 --     timers go through QM.util.on_live (start + every reload).
 --   * everything that talks to the Quickshell shell goes through lib/shell.lua (one-file flip).
---   * colours come from lib/scheme.lua (~/.local/state/quantum-moon/scheme.lua written by qm-apply).
+--   * colours come from lib/scheme.lua (~/.local/state/solanum/scheme.lua written by qm-apply).
 
 QM = QM or {}
 QM.features = QM.features or {}
@@ -28,7 +28,7 @@ require("workspaces")
 require("rules")
 require("binds/init")
 
-for _, name in ipairs({ "alttab", "special", "launcher_super", "proton_ghosts", "hotplug", "gamemode", "telegram", "night", "pip" }) do
+for _, name in ipairs({ "alttab", "special", "launcher_super", "proton_ghosts", "hotplug", "gamemode", "telegram", "night", "pip", "hyprwinwrap" }) do
   local ok, err = pcall(require, "features/" .. name)
   if not ok then
     QM.util.log("feature " .. name .. " failed to load: " .. tostring(err))

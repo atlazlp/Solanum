@@ -1,14 +1,17 @@
 # local / generated
 hypr/local.lua
 hypr/hyprpaper.conf
+hypr/plugins/**/*.so
 *.local.json
 *.local.lua
-config/quantum-moon/git-watcher.json
-config/quantum-moon/vpn.json
-config/quantum-moon/shell.ui.json
+config/solanum/git-watcher.json
+config/solanum/vpn.json
+config/solanum/shell.ui.json
 backup/
 backup/*.zip
 backup/*.tar.gz
 **/.DS_Store
 __pycache__/
 *.py[cod]
+solanum/scene/.godot/*
+!solanum/scene/.godot/global_script_class_cache.cfg

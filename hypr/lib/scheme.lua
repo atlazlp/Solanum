@@ -1,5 +1,5 @@
 -- lib/scheme.lua: colours for borders/groupbar/shadow/background + per-planet night temperature.
--- qm-apply writes ~/.local/state/quantum-moon/scheme.lua atomically and runs `hyprctl reload`.
+-- qm-apply writes ~/.local/state/solanum/scheme.lua atomically and runs `hyprctl reload`.
 -- Loaded with dofile (NOT require) so the state file is not added to the inotify reload set.
 local U = QM.util
 local PATH = U.STATE .. "/scheme.lua"

@@ -19,12 +19,7 @@ NomaiFrame {
     readonly property int gap: Theme.spaceMd
     readonly property int appsMaxHeight: 200
     property bool echoCancel: false
-    // hide PipeWire internals (echo-cancel module streams, Quickshell peak monitors)
-    readonly property list<PwNode> appStreams: Audio.streams.filter(n => {
-        const p = n.properties ?? {};
-        const nn = p["node.name"] ?? n.name ?? "";
-        return !nn.startsWith("echo-cancel") && p["media.name"] !== "Peak detect" && p["application.name"] !== "Quickshell";
-    })
+    readonly property list<PwNode> appStreams: Audio.streams.filter(n => Audio.isMixerStream(n))
 
     function reveal(): void {
         reveal.trigger();
@@ -348,9 +343,7 @@ NomaiFrame {
         NomaiTooltip {
             text: dev.node?.name ?? ""
             show: hover.hovered && text !== ""
-            anchors.top: parent.bottom
-            anchors.left: parent.left
-            anchors.topMargin: Theme.spaceXs
+            align: "start"
         }
     }
 

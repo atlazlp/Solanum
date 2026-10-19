@@ -15,8 +15,8 @@ Scope {
     readonly property string runtimeDir: Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"
     readonly property var idleConfig: Config.general.idle ?? ({})
 
-    readonly property list<string> audioMarkerPaths: [`${runtimeDir}/quantum-moon-audio-playback.active`, `${runtimeDir}/caelestia-audio-playback.active`]
-    readonly property list<string> resumeGracePaths: [`${runtimeDir}/quantum-moon-resume-grace.until`, `${runtimeDir}/caelestia-resume-grace.until`]
+    readonly property list<string> audioMarkerPaths: [`${runtimeDir}/solanum-audio-playback.active`, `${runtimeDir}/caelestia-audio-playback.active`]
+    readonly property list<string> resumeGracePaths: [`${runtimeDir}/solanum-resume-grace.until`, `${runtimeDir}/caelestia-resume-grace.until`]
 
     property bool markerPlaybackActive: false
     property bool legacyMarkerPlaybackActive: false

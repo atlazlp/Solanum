@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# Talk to the Godot solar wallpaper via godot-control.json.
+#
+# usage:
+#   qm-godot-ipc pause true|false
+#   qm-godot-ipc menu-hold true|false
+#   qm-godot-ipc game_pause true|false
+#   qm-godot-ipc host <slug>
+#   qm-godot-ipc speed <float>
+#   qm-godot-ipc supernova
+#   qm-godot-ipc orbit <body-id>
+#   qm-godot-ipc video <body-id>
+#   qm-godot-ipc cut-video <body-id>
+#   qm-godot-ipc restore-scene overview|orbit
+#   qm-godot-ipc overview
+#   qm-godot-ipc sun-pulse out|in <ms> <start-unix-ms>
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+# shellcheck source=qm-video-lib.sh
+source "${SCRIPT_DIR}/qm-video-lib.sh"
+
+cmd="${1:-}"
+case "${cmd}" in
+  pause)
+    want="${2:-}"
+    [[ "${want}" == "true" || "${want}" == "false" ]] || {
+      echo "usage: qm-godot-ipc pause true|false" >&2
+      exit 2
+    }
+    qm_godot_write_control "pause=${want}"
+    ;;
+  menu-hold)
+    want="${2:-}"
+    [[ "${want}" == "true" || "${want}" == "false" ]] || {
+      echo "usage: qm-godot-ipc menu-hold true|false" >&2
+      exit 2
+    }
+    qm_godot_write_control "menu_hold=${want}"
+    ;;
+  game_pause)
+    want="${2:-}"
+    [[ "${want}" == "true" || "${want}" == "false" ]] || {
+      echo "usage: qm-godot-ipc game_pause true|false" >&2
+      exit 2
+    }
+    qm_godot_write_control "game_pause=${want}"
+    ;;
+  host)
+    slug="${2:-}"
+    [[ -n "${slug}" ]] || {
+      echo "usage: qm-godot-ipc host <slug>" >&2
+      exit 2
+    }
+    qm_godot_write_control "qm_host=${slug}"
+    ;;
+  speed)
+    speed="${2:-}"
+    [[ "${speed}" =~ ^[0-9]+([.][0-9]+)?$ ]] || {
+      echo "usage: qm-godot-ipc speed <float>" >&2
+      exit 2
+    }
+    qm_godot_write_control "time_scale=${speed}"
+    ;;
+  supernova)
+    qm_godot_write_control "supernova_token=$(date +%s%N)"
+    ;;
+  orbit)
+    body="${2:-}"
+    case "${body}" in
+      hourglass_twins|timber_hearth|brittle_hollow|giants_deep|dark_bramble) ;;
+      *)
+        echo "usage: qm-godot-ipc orbit hourglass_twins|timber_hearth|brittle_hollow|giants_deep|dark_bramble" >&2
+        exit 2
+        ;;
+    esac
+    qm_godot_write_control "video_body=" "orbit_body=${body}" "orbit_snap=false" "orbit_token=$(date +%s%N)"
+    ;;
+  video)
+    body="${2:-}"
+    case "${body}" in
+      hourglass_twins|timber_hearth|brittle_hollow|giants_deep|dark_bramble) ;;
+      *)
+        echo "usage: qm-godot-ipc video hourglass_twins|timber_hearth|brittle_hollow|giants_deep|dark_bramble" >&2
+        exit 2
+        ;;
+    esac
+    qm_godot_write_control "video_body=${body}" "orbit_body=${body}" "orbit_snap=false" "orbit_token=$(date +%s%N)"
+    ;;
+  cut-video)
+    body="${2:-}"
+    qm_planet_video_begin "${body}"
+    ;;
+  restore-scene)
+    how="${2:-overview}"
+    case "${how}" in
+      overview|orbit) ;;
+      *)
+        echo "usage: qm-godot-ipc restore-scene overview|orbit" >&2
+        exit 2
+        ;;
+    esac
+    qm_planet_video_restore "${how}"
+    ;;
+  overview)
+    qm_godot_write_control "overview_token=$(date +%s%N)"
+    ;;
+  sun-pulse)
+    dir="${2:-}"
+    ms="${3:-}"
+    start="${4:-}"
+    [[ "${dir}" == "out" || "${dir}" == "in" ]] || {
+      echo "usage: qm-godot-ipc sun-pulse out|in <ms> <start-unix-ms>" >&2
+      exit 2
+    }
+    [[ "${ms}" =~ ^[0-9]+$ && "${start}" =~ ^[0-9]+$ ]] || {
+      echo "usage: qm-godot-ipc sun-pulse out|in <ms> <start-unix-ms>" >&2
+      exit 2
+    }
+    qm_godot_write_control "sun_pulse=${dir}" "sun_pulse_ms=${ms}" "sun_pulse_start=${start}" "sun_pulse_token=$(date +%s%N)"
+    ;;
+  *)
+    echo "usage: qm-godot-ipc pause|menu-hold|game_pause|host|speed|supernova|orbit|video|cut-video|restore-scene|overview|sun-pulse ..." >&2
+    exit 2
+    ;;
+esac

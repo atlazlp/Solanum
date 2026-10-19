@@ -20,7 +20,7 @@ done
 
 notify() { # level title msg
   if command -v qm-toast >/dev/null 2>&1; then qm-toast "$1" "$2" "${3:-}" "photo_camera" || true
-  elif command -v notify-send >/dev/null 2>&1; then notify-send -a quantum-moon "$2" "${3:-}" || true; fi
+  elif command -v notify-send >/dev/null 2>&1; then notify-send -a solanum "$2" "${3:-}" || true; fi
 }
 
 for t in grim; do command -v "$t" >/dev/null 2>&1 || { notify error "Screenshot failed" "$t is not installed"; exit 1; }; done
@@ -29,7 +29,7 @@ for t in grim; do command -v "$t" >/dev/null 2>&1 || { notify error "Screenshot 
 if [[ "$mode" == "region" || "$mode" == "freeze" ]]; then
   fn=open; [[ "$mode" == "freeze" ]] && fn=openFreeze
   [[ "$clip" -eq 1 ]] && fn="${fn}Clip"
-  if qs -c quantum-moon ipc call picker "$fn" >/dev/null 2>&1; then
+  if qs -c solanum ipc call picker "$fn" >/dev/null 2>&1; then
     exit 0
   fi
 fi

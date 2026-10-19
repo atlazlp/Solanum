@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Talk to the quantum-moon mpvpaper instance over its JSON IPC socket.
+"""Talk to the solanum mpvpaper instance over its JSON IPC socket.
 
 usage: qm-mpv-ipc pause true|false
 
-Writes {"command": ["set_property", "pause", <bool>]} to $XDG_RUNTIME_DIR/quantum-moon-mpvpaper.sock.
+Writes {"command": ["set_property", "pause", <bool>]} to $XDG_RUNTIME_DIR/solanum-mpvpaper.sock.
 Exits 0 silently when the socket is missing (no video wallpaper running).
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ def main(argv: list[str]) -> int:
         return 2
 
     runtime = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
-    sock_path = os.path.join(runtime, "quantum-moon-mpvpaper.sock")
+    sock_path = os.path.join(runtime, "solanum-mpvpaper.sock")
     try:
         if not os.path.exists(sock_path):
             return 0

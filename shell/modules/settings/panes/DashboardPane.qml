@@ -2,6 +2,7 @@ import QtQuick
 import qs.theme
 import qs.components
 import qs.modules.settings
+import "../Validators.js" as Validators
 
 SettingsPane {
     SwitchRow {
@@ -17,7 +18,8 @@ SettingsPane {
 
     NumberRow {
         key: "dashboard.resourceUpdateInterval"
-        label: "Resource update interval"
+        label: "Refresh interval"
+        description: "How often the CPU, memory and other meters update"
         from: 500
         to: 10000
         step: 500
@@ -43,14 +45,9 @@ SettingsPane {
     TextRow {
         key: "dashboard.weather.location"
         label: "Location"
-        description: "\"lat,lon\" or a place name for open-meteo; empty = IP geolocation"
+        description: "lat,lon or a place name for open-meteo; empty uses IP geolocation"
         placeholder: "e.g. -23.55,-46.63"
-    }
-
-    TextRow {
-        key: "services.weatherLocation"
-        label: "Location"
-        placeholder: "lat,lon"
+        validate: t => Validators.weather(t)
     }
 
     SwitchRow {
@@ -59,42 +56,7 @@ SettingsPane {
     }
 
     SwitchRow {
-        key: "services.useFahrenheit"
-        label: "Fahrenheit"
-    }
-
-    SwitchRow {
         key: "dashboard.weather.useTwelveHourClock"
         label: "12-hour clock"
-    }
-
-    SectionHeader {
-        text: "OSD"
-        topPadding: Theme.spaceLg
-    }
-
-    SwitchRow {
-        key: "osd.enabled"
-        label: "Enabled"
-    }
-
-    NumberRow {
-        key: "osd.hideDelay"
-        label: "Hide delay"
-        from: 300
-        to: 10000
-        step: 100
-        suffix: "ms"
-        fallback: 2000
-    }
-
-    SwitchRow {
-        key: "osd.showMicrophone"
-        label: "Show microphone"
-    }
-
-    SwitchRow {
-        key: "osd.showBrightness"
-        label: "Show brightness"
     }
 }

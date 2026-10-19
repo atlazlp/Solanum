@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+# shellcheck source=qm-video-lib.sh
+source "${SCRIPT_DIR}/qm-video-lib.sh"
+
+slug="${1:-}"
+if [[ -z "${slug}" ]]; then
+  echo "usage: qm-video-restart <slug>" >&2
+  exit 1
+fi
+
+if qm_game_mode_active; then
+  exit 0
+fi
+
+mkdir -p "${STATE_DIR}"
+printf '%s\n' "${slug}" >"${STATE_DIR}/last-video.slug"
+
+# Scene mode for every planet except the Eye. Eye always uses center.mp4.
+if qm_uses_scene_for_slug "${slug}"; then
+  body="$(qm_slug_to_body "${slug}" 2>/dev/null || true)"
+  # Planet video is a runtime mode. Keep it, aimed at the new host, instead of booting the scene.
+  if [[ -n "${body}" && -s "$(qm_planet_video_state)" ]]; then
+    qm_planet_video_begin "${body}"
+    exit $?
+  fi
+  live_orbit=""
+  if qm_godot_running; then
+    live_orbit="$(qm_live_orbit_body 2>/dev/null || true)"
+  fi
+  qm_video_stop
+  if qm_godot_running; then
+    # Same process: move Quantum Moon without reloading the scene.
+    if [[ -n "${live_orbit}" && -n "${body}" ]]; then
+      qm_godot_write_control "pause=false" "game_pause=false" "time_scale=$(qm_scene_speed)" "qm_host=${slug}" \
+        "video_body=" "orbit_body=${body}" "orbit_snap=true" "orbit_token=$(date +%s%N)"
+    else
+      qm_godot_write_control "pause=false" "game_pause=false" "time_scale=$(qm_scene_speed)" "qm_host=${slug}"
+    fi
+    # Keep the window on the centre monitor (Godot often opens on the focused one).
+    qm_godot_place_center || true
+    printf '%s\n' "scene:$(qm_godot_root 2>/dev/null || echo godot)" >"${STATE_DIR}/last-video.path"
+    hyprctl hyprpaper reload >/dev/null 2>&1 || true
+    exit 0
+  fi
+  qm_godot_start "${slug}"
+  exit $?
+fi
+
+# Video path (explicit video mode, or Eye of the Universe).
+qm_godot_stop
+qm_start_center_video "${slug}"
+exit $?

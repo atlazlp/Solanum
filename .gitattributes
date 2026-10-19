@@ -1,1 +1,5 @@
-quantum-moon/modes/*/wallpapers/center.mp4 filter=lfs diff=lfs merge=lfs -text
+solanum/modes/*/wallpapers/center.mp4 filter=lfs diff=lfs merge=lfs -text
+solanum/scene/**/*.glb filter=lfs diff=lfs merge=lfs -text
+solanum/scene/**/*.png filter=lfs diff=lfs merge=lfs -text
+solanum/scene/**/*.fbx filter=lfs diff=lfs merge=lfs -text
+solanum/scene/**/*.obj filter=lfs diff=lfs merge=lfs -text

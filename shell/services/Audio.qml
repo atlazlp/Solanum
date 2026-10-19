@@ -162,6 +162,53 @@ Singleton {
         return stream.properties["application.name"] || stream.description || stream.name || "Unknown Application";
     }
 
+    function streamMediaHint(stream: PwNode): string {
+        if (!stream)
+            return "";
+        const p = stream.properties ?? {};
+        return p["media.name"] || p["media.title"] || p["window.title"] || "";
+    }
+
+    // Hide PipeWire internals and cava (desktop visualiser) from mixer UIs.
+    function isMixerStream(stream: PwNode): bool {
+        if (!stream)
+            return false;
+        const p = stream.properties ?? {};
+        const nodeName = String(p["node.name"] ?? stream.name ?? "");
+        const app = String(p["application.name"] ?? "");
+        const binary = String(p["application.process.binary"] ?? "");
+        const media = String(p["media.name"] ?? "");
+        const blob = `${nodeName} ${app} ${binary} ${media} ${stream.description ?? ""}`.toLowerCase();
+        if (nodeName.startsWith("echo-cancel"))
+            return false;
+        if (media === "Peak detect" || app === "Quickshell")
+            return false;
+        if (app.toLowerCase() === "cava" || binary.toLowerCase() === "cava" || blob.includes("cava"))
+            return false;
+        return true;
+    }
+
+    function mixerStreams(): list<PwNode> {
+        return streams.filter(s => isMixerStream(s));
+    }
+
+    // Hover label: app name, plus media title when the same app has multiple streams.
+    function streamTooltip(stream: PwNode, allStreams: list<PwNode>): string {
+        const app = streamName(stream);
+        const media = streamMediaHint(stream).trim();
+        if (!media || media === app)
+            return app;
+        const list = allStreams ?? mixerStreams();
+        let count = 0;
+        for (let i = 0; i < list.length; i++) {
+            if (streamName(list[i]) === app)
+                count++;
+        }
+        if (count > 1)
+            return `${app}\n${media}`;
+        return app;
+    }
+
     onSinkChanged: {
         if (!sink?.ready)
             return;

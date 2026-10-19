@@ -11,10 +11,10 @@ for a in "$@"; do
     *) echo "qm-emoji: unknown argument '$a'" >&2; exit 2 ;;
   esac
 done
-if qs -c quantum-moon ipc call launcher open emoji >/dev/null 2>&1; then exit 0; fi
+if qs -c solanum ipc call launcher open emoji >/dev/null 2>&1; then exit 0; fi
 
-notify() { command -v notify-send >/dev/null 2>&1 && notify-send -a quantum-moon "$@" || echo "$*" >&2; }
-shell_dir="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/quantum-moon"
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send -a solanum "$@" || echo "$*" >&2; }
+shell_dir="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/solanum"
 list="$shell_dir/assets/emoji.txt"
 if [[ ! -f "$list" ]] || ! command -v fuzzel >/dev/null 2>&1; then
   notify "Emoji picker" "The Quantum Moon shell is required (no fallback emoji list/fuzzel)"

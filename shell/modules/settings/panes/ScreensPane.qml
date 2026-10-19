@@ -36,7 +36,25 @@ SettingsPane {
         return normalized(modules[key]).includes("*");
     }
 
-    // Keys like "hover.launcher" contain dots, so the whole matrix is written as one object.
+    function moduleName(key: string): string {
+        const names = {
+            "lock.fullUi": "Lock screen",
+            "windowPicker": "Window picker",
+            "quantumMoon": "Solanum",
+            "osd": "OSD",
+            "sidebar": "Signals",
+            "hover.launcher": "Launcher hover",
+            "hover.dashboard": "Dashboard hover",
+            "hover.sidebar": "Signals hover",
+            "hover.quantumMoon": "Solanum hover",
+            "hover.audio": "Volume hover"
+        };
+        return names[key] || SettingsStore.humanize(key);
+    }
+
+    function columnLabel(role: string): string {
+        return role === "*" ? "All" : SettingsStore.humanize(role);
+    }
     function toggle(key: string, role: string): void {
         const l = normalized(modules[key]);
         let next;
@@ -54,7 +72,7 @@ SettingsPane {
     ComboRow {
         key: "screens.roles.main"
         label: "Main screen"
-        description: "Bar, notifications and the QM panel follow it. Now: " + Screens.mainName
+        description: "Bar, notifications and the Solanum panel follow it. Now: " + Screens.mainName
         model: pane.screenModel
     }
 
@@ -78,12 +96,23 @@ SettingsPane {
     }
 
     SectionHeader {
-        text: "Module matrix"
+        text: "Fullscreen"
+        topPadding: Theme.spaceLg
+    }
+
+    SwitchRow {
+        key: "general.showOverFullscreen"
+        label: "Draw over fullscreen"
+        description: "Keep the bar and panels visible while a window is fullscreen"
+    }
+
+    SectionHeader {
+        text: "Where things appear"
         topPadding: Theme.spaceLg
     }
 
     GlyphText {
-        text: "Which screen roles each module appears on. * = every screen."
+        text: "Which screens each part of the shell is drawn on. All means every screen."
         role: "small"
         dim: true
         topPadding: Theme.spaceXs
@@ -92,8 +121,19 @@ SettingsPane {
 
     // header
     Item {
+        id: matrixHead
+        property bool filterHidden: false
         width: parent.width
         height: 24
+
+        states: State {
+            name: "filtered"
+            when: matrixHead.filterHidden
+            PropertyChanges {
+                matrixHead.visible: false
+                matrixHead.height: 0
+            }
+        }
 
         Row {
             anchors.right: parent.right
@@ -105,7 +145,7 @@ SettingsPane {
                 GlyphText {
                     required property string modelData
                     width: 72
-                    text: modelData
+                    text: pane.columnLabel(modelData)
                     role: "label"
                     dim: true
                     horizontalAlignment: Text.AlignHCenter
@@ -123,7 +163,17 @@ SettingsPane {
             readonly property bool all: pane.isAll(modelData)
 
             width: parent.width
-            height: 32
+            height: 48
+            property bool filterHidden: false
+
+            states: State {
+                name: "filtered"
+                when: matrixRow.filterHidden
+                PropertyChanges {
+                    matrixRow.visible: false
+                    matrixRow.height: 0
+                }
+            }
 
             Rectangle {
                 anchors.left: parent.left
@@ -133,14 +183,31 @@ SettingsPane {
                 color: Theme.alpha(Theme.lineDim, 0.3)
             }
 
-            GlyphText {
-                text: matrixRow.modelData
-                role: "mono"
+            Column {
                 anchors.left: parent.left
+                anchors.right: cells.left
+                anchors.rightMargin: Theme.spaceSm
                 anchors.verticalCenter: parent.verticalCenter
+                spacing: 0
+
+                GlyphText {
+                    text: pane.moduleName(matrixRow.modelData)
+                    width: parent.width
+                    elide: Text.ElideRight
+                }
+
+                GlyphText {
+                    text: matrixRow.modelData
+                    role: "mono"
+                    dim: true
+                    font.pointSize: Theme.sizeLabel
+                    width: parent.width
+                    elide: Text.ElideRight
+                }
             }
 
             Row {
+                id: cells
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 0
@@ -154,11 +221,25 @@ SettingsPane {
                         readonly property bool implied: matrixRow.all && modelData !== "*"
 
                         width: 72
-                        height: 24
+                        height: 32
+
+                        NomaiFrame {
+                            visible: pane.isOn(matrixRow.modelData, cell.modelData)
+                            height: Theme.hexPip
+                            width: Theme.hexWidth(Theme.hexPip)
+                            shape: "hex"
+                            padding: 0
+                            fill: Theme.line
+                            lineColor: Theme.line
+                            opacity: cell.implied ? 0.45 : 1
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
 
                         NomaiSwitch {
                             id: sw
-                            anchors.centerIn: parent
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
                             opacity: cell.implied ? 0.45 : 1
                             checked: pane.isOn(matrixRow.modelData, cell.modelData)
                             onToggled: {

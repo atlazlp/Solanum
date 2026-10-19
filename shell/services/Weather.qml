@@ -7,7 +7,7 @@ import qs.config
 import qs.utils
 
 // Weather via open-meteo (curl). Location from Config.dashboard.weather.location ("lat,lon" or a
-// city name) or ipinfo.io geolocation. Cached in ~/.cache/quantum-moon/weather.json, refreshed hourly.
+// city name) or ipinfo.io geolocation. Cached in ~/.cache/solanum/weather.json, refreshed hourly.
 Singleton {
     id: root
 

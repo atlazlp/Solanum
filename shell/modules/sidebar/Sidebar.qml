@@ -7,7 +7,7 @@ import qs.theme
 import qs.components
 import qs.services
 
-// Right drawer (360 px, full height): DND / clear / ship-log header, compact media card,
+// Right drawer (Signals): DND / clear / ship-log header, compact media card,
 // quick toggles and the grouped notification list.
 Item {
     id: root
@@ -16,8 +16,8 @@ Item {
     property var visibilities: null
     property var slot: null
 
-    implicitWidth: 360
-    implicitHeight: 720
+    implicitWidth: 480
+    implicitHeight: parent?.height ?? 900
 
     function reveal(): void {
         revealer.trigger();
@@ -100,19 +100,19 @@ Item {
                     readonly property var player: Players.active
                     width: parent.width
                     visible: player !== null
-                    padding: Theme.spaceSm
+                    padding: Theme.spaceMd
                     chamfer: Theme.chamferSm
                     fill: Theme.ink0
                     lineOpacity: 0.5
-                    implicitHeight: 52 + padding * 2
+                    implicitHeight: 64 + padding * 2
 
                     Row {
                         anchors.fill: parent
-                        spacing: Theme.spaceSm
+                        spacing: Theme.spaceMd
 
                         NomaiFrame {
-                            width: 52
-                            height: 52
+                            width: 64
+                            height: 64
                             padding: 0
                             chamfer: Theme.chamferSm
                             fill: Theme.ink2
@@ -123,7 +123,7 @@ Item {
                                 anchors.margins: 2
                                 source: media.player ? Players.getArtUrl(media.player) : ""
                                 fillMode: Image.PreserveAspectCrop
-                                sourceSize: Qt.size(104, 104)
+                                sourceSize: Qt.size(128, 128)
                                 asynchronous: true
                                 visible: status === Image.Ready
                             }
@@ -137,7 +137,7 @@ Item {
                         }
 
                         Column {
-                            width: parent.width - 52 - controls.width - parent.spacing * 2
+                            width: parent.width - 64 - controls.width - parent.spacing * 2
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 2
 
@@ -159,25 +159,27 @@ Item {
                         Row {
                             id: controls
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2
+                            spacing: Theme.spaceXs
 
                             HexButton {
                                 icon: "skip_previous"
+                                shape: "hex"
                                 flat: true
-                                padding: 3
+                                padding: Theme.spaceMd
                                 onClicked: Players.previous()
                             }
                             HexButton {
                                 icon: media.player?.isPlaying ? "pause" : "play_arrow"
                                 shape: "hex"
-                                padding: 4
+                                padding: Theme.spaceMd
                                 active: media.player?.isPlaying ?? false
                                 onClicked: Players.playPause()
                             }
                             HexButton {
                                 icon: "skip_next"
+                                shape: "hex"
                                 flat: true
-                                padding: 3
+                                padding: Theme.spaceMd
                                 onClicked: Players.next()
                             }
                         }
@@ -185,7 +187,7 @@ Item {
                 }
 
                 // ---- quick toggles ----
-                Row {
+                Flow {
                     width: parent.width
                     spacing: Theme.spaceSm
 
@@ -193,7 +195,7 @@ Item {
                         icon: "coffee"
                         text: "Keep awake"
                         active: IdleInhibitor.enabled
-                        padding: Theme.spaceSm
+                        padding: Theme.spaceMd
                         tooltip: "Idle inhibitor"
                         onClicked: IdleInhibitor.enabled = !IdleInhibitor.enabled
                     }
@@ -202,7 +204,7 @@ Item {
                         icon: "nightlight"
                         text: "Night light"
                         active: NightLight.enabled
-                        padding: Theme.spaceSm
+                        padding: Theme.spaceMd
                         onClicked: NightLight.toggle()
                     }
 
@@ -211,7 +213,7 @@ Item {
                         text: Recorder.running ? (Recorder.paused ? "Paused" : "REC") : "Idle"
                         active: Recorder.running
                         danger: Recorder.running && !Recorder.paused
-                        padding: Theme.spaceSm
+                        padding: Theme.spaceMd
                         tooltip: Recorder.running ? "Recording in progress" : "Recorder idle"
 
                         SequentialAnimation on opacity {
@@ -227,7 +229,7 @@ Item {
                 // ---- notifications ----
                 Item {
                     width: parent.width
-                    height: 20
+                    height: 22
 
                     SectionHeader {
                         anchors.left: parent.left

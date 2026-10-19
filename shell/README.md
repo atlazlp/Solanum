@@ -1,4 +1,4 @@
-# quantum-moon shell (`shell/`)
+# solanum shell (`shell/`)
 
 Standalone Quickshell 0.3.2 configuration. Pure QML: no `import Caelestia.*` anywhere.
 Design rules, theme roles and the IPC/shortcut surface are defined in `docs/dev/design-shell.md`;
@@ -8,15 +8,15 @@ this file documents how the code is organised and the contracts later modules mu
 
 ```sh
 # dev mode, side by side with another shell (nothing exclusive is claimed, bar reserves no space)
-QM_SHELL_DEV=1 qs -c quantum-moon
-qs -c quantum-moon ipc show          # list IPC targets
-qs -c quantum-moon ipc call drawers toggle dashboard
-qs -c quantum-moon kill
+QM_SHELL_DEV=1 qs -c solanum
+qs -c solanum ipc show          # list IPC targets
+qs -c solanum ipc call drawers toggle dashboard
+qs -c solanum kill
 ```
 
-`~/.config/quickshell/quantum-moon` is a symlink to this directory. Config lives in
-`~/.config/quantum-moon/` (`shell.json`, `monitors/<name>.json`, `vpn.json`, `root`), state in
-`~/.local/state/quantum-moon/` (`scheme.json`, `current.json`, `screens-runtime.json`, ...).
+`~/.config/quickshell/solanum` is a symlink to this directory. Config lives in
+`~/.config/solanum/` (`shell.json`, `monitors/<name>.json`, `vpn.json`, `root`), state in
+`~/.local/state/solanum/` (`scheme.json`, `current.json`, `screens-runtime.json`, ...).
 
 `DevFlags.dev` (from `QM_SHELL_DEV`) gates: `notificationServer`, `sessionLock`, `idleMonitors`,
 `barExclusive`. Modules that claim exclusive protocols must check the matching flag.
@@ -38,7 +38,7 @@ modules/
 ```
 
 Conventions: `pragma Singleton` + `Singleton {}` + `qmldir` entry per directory; every file that
-reaches another directory imports it as `qs.<dir>`. Layer namespaces are `quantum-moon-<module>`.
+reaches another directory imports it as `qs.<dir>`. Layer namespaces are `solanum-<module>`.
 GlobalShortcut appid is `qm`. All colours come from `Theme`, all timings from `Motion`.
 
 ## Adding a panel (drawer)
@@ -131,7 +131,7 @@ binds to them.
 
 ## Config (`qs.config`)
 
-- `Config.<section>` mirrors `Defaults.js` deep-merged with `~/.config/quantum-moon/shell.json`;
+- `Config.<section>` mirrors `Defaults.js` deep-merged with `~/.config/solanum/shell.json`;
   `Config.forScreen(name)` / `Config.getFor(name, "a.b", fallback)` add `monitors/<name>.json`;
   `Config.save("a.b", value)` writes atomically; `Config.reload` signal fires after any change.
 - `Screens.mainName`, `Screens.roleOf(name)`, `Screens.isEnabled(module, screenName)` evaluate the

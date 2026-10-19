@@ -9,9 +9,9 @@ import Caelestia
 Singleton {
     id: root
 
-    readonly property string stateFile: Paths.home + "/.local/state/quantum-moon/current.json"
+    readonly property string stateFile: Paths.home + "/.local/state/solanum/current.json"
     readonly property string rootFile: Paths.home + "/.config/caelestia/quantum-moon-root"
-    readonly property string videoStateFile: Paths.home + "/.local/state/quantum-moon/last-video.path"
+    readonly property string videoStateFile: Paths.home + "/.local/state/solanum/last-video.path"
 
     property string slug: ""
     property string qmRoot: ""

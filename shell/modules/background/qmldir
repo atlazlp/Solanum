@@ -1,3 +1,6 @@
 module qs.modules.background
 Backgrounds 1.0 Backgrounds.qml
 SlotWallpaper 1.0 SlotWallpaper.qml
+DesktopVisualiser 1.0 DesktopVisualiser.qml
+SunSupernovaPrompt 1.0 SunSupernovaPrompt.qml
+PlanetOrbitMenu 1.0 PlanetOrbitMenu.qml

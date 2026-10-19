@@ -10,7 +10,7 @@ import qs.modules
 import qs.modules.drawers
 import qs.modules.bar
 
-// quantum-moon shell root. Later phases fill the placeholder Loaders below by dropping files
+// solanum shell root. Later phases fill the placeholder Loaders below by dropping files
 // at the given paths and flipping `active` (each is gated by DevFlags so a dev instance never
 // claims exclusive protocols while another shell is running).
 ShellRoot {
@@ -45,6 +45,9 @@ ShellRoot {
         void Notifs.count;
         void ShipLog.entries;
         void QuantumMoon.slug;
+        void QuantumMoonWallpaper.videoState;
+        void SolarScene.active;
+        void SolarTracker.hasRing;
         if (Config.utilities.toasts.configLoaded)
             Toaster.toast("Shell started", DevFlags.dev ? "dev mode" : "", "rocket_launch", "info", 0);
     }

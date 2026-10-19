@@ -7,7 +7,9 @@ function defaults() {
         appearance: {
             fontScale: 1,
             motionScale: 1,
-            padding: 1
+            padding: 1,
+            // Role name -> RRGGBB. Layered on top of scheme.json so planet switches keep user colours.
+            colourOverrides: {}
         },
         screens: {
             roles: { main: "", left: "", right: "" },
@@ -27,9 +29,11 @@ function defaults() {
             "hover.launcher": ["main"],
             "hover.dashboard": ["main"],
             "hover.sidebar": ["main"],
-            "hover.quantumMoon": ["main"]
+            "hover.quantumMoon": ["main"],
+            "hover.audio": ["main", "right"]
         },
         bar: {
+            width: 40,
             height: 36,
             entries: [
                 { id: "logo", enabled: true },
@@ -50,6 +54,7 @@ function defaults() {
                 showVpn: true,
                 showGitWatcher: true,
                 showUpdates: true,
+                showSettings: true,
                 showGameMode: true,
                 showIdleInhibit: true,
                 showRecording: true,
@@ -80,7 +85,7 @@ function defaults() {
         },
         launcher: {
             enabled: true,
-            showOnHover: false,
+            showOnHover: true,
             maxResults: 40,
             maxShown: 10,
             width: 640,
@@ -89,10 +94,10 @@ function defaults() {
             hidden: [],
             emojiColumns: 8,
             actions: [
-                { name: "Lock", description: "Lock the session", icon: "lock", command: ["qs", "-c", "quantum-moon", "ipc", "call", "lock", "lock"] },
-                { name: "Session", description: "Power menu", icon: "power_settings_new", command: ["qs", "-c", "quantum-moon", "ipc", "call", "drawers", "open", "session"] },
-                { name: "Settings", description: "Shell settings", icon: "settings", command: ["qs", "-c", "quantum-moon", "ipc", "call", "drawers", "open", "settings"] },
-                { name: "Ship log", description: "Open the ship log", icon: "history", command: ["qs", "-c", "quantum-moon", "ipc", "call", "drawers", "open", "shipLog"] },
+                { name: "Lock", description: "Lock the session", icon: "lock", command: ["qs", "-c", "solanum", "ipc", "call", "lock", "lock"] },
+                { name: "Session", description: "Power menu", icon: "power_settings_new", command: ["qs", "-c", "solanum", "ipc", "call", "drawers", "open", "session"] },
+                { name: "Settings", description: "Shell settings", icon: "settings", command: ["qs", "-c", "solanum", "ipc", "call", "drawers", "open", "settings"] },
+                { name: "Ship log", description: "Open the ship log", icon: "history", command: ["qs", "-c", "solanum", "ipc", "call", "drawers", "open", "shipLog"] },
                 { name: "Windows", description: "Switch to window mode", icon: "select_window", command: ["mode", "windows"] },
                 { name: "Clipboard", description: "Switch to clipboard mode", icon: "content_paste", command: ["mode", "clip"] },
                 { name: "Emoji", description: "Switch to emoji mode", icon: "mood", command: ["mode", "emoji"] },
@@ -142,6 +147,10 @@ function defaults() {
                 audioSource: "default_output"
             }
         },
+        sidebar: {
+            enabled: true,
+            showOnHover: true
+        },
         dashboard: {
             enabled: true,
             showOnHover: true,
@@ -159,10 +168,25 @@ function defaults() {
             shuffleOnIdle: true,
             background: {
                 enabled: true,
-                desktopClock: { enabled: false, position: "bottom-right" }
+                // "scene" = live Godot solar system on the centre monitor (the Eye still uses its video);
+                // "video" = recorded centre video on every planet.
+                // sceneRoot empty = the scene shipped in <engine>/scene. A path overrides that.
+                centerMode: "scene",
+                sceneSpeed: 4.0,
+                sceneRoot: "",
+                desktopClock: { enabled: true, position: "bottom-right" },
+                visualiser: {
+                    enabled: true,
+                    bars: 128,
+                    // "follow_solanum" = ring around Solanum's current host planet;
+                    // "fixed" = stay on fixedPlanet.
+                    ringMode: "follow_solanum",
+                    fixedPlanet: "giants_deep"
+                }
             }
         },
         audio: {
+            showOnHover: true,
             increment: 0.1,
             maxVolume: 1,
             analogSinkId: "11_00.6.analog-stereo"

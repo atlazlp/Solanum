@@ -14,15 +14,16 @@ Hyprland --verify-config -c /home/lpacheco/Projects/Quantum-Moon/hypr/hyprland.l
 | `hyprland.lua` | entry: requires everything below in order, loads `features/*` with `pcall`, then `local.lua` |
 | `lib/util.lua` | `QM.util`: paths (`HOME RT CFG STATE CFG_DIR SCRIPTS QM_ROOT`), fs helpers, `debounce/after/every`, `on_live` (run on start + every reload, never under verify), `log`, `toast` |
 | `lib/shell.lua` | **the one-file flip**: appid, `ipc(target, fn, ...)`, `start/kill/restart`, `global(name)`, caelestia-cli exec strings (`screenshot record clipboard emoji`) |
-| `lib/scheme.lua` / `lib/scheme-default.lua` | colours + `night_temperature` + groupbar pairs from `~/.local/state/quantum-moon/scheme.lua` (written by `qm-apply`), fallback = eye-of-the-universe |
-| `env.lua` `monitors.lua` `general.lua` `decoration.lua` `animations.lua` `input.lua` `group.lua` `workspaces.lua` `rules.lua` | settings, monitors, gestures, window/layer/workspace rules |
+| `lib/scheme.lua` / `lib/scheme-default.lua` | colours + `night_temperature` + groupbar pairs from `~/.local/state/solanum/scheme.lua` (written by `qm-apply`), fallback = eye-of-the-universe |
+| `env.lua` `monitors.lua` `general.lua` `decoration.lua` `animations.lua` `input.lua` `group.lua` `workspaces.lua` `rules.lua` | settings, monitors, gestures, window/layer/workspace rules; `group.lua` loads `plugins/groupbar-current` |
+| `plugins/groupbar-current/` | Hyprland plugin so the group's current tab keeps `col.active` when unfocused (`make -C hypr/plugins/groupbar-current`) |
 | `binds/{init,apps,windows,workspaces,media,shell,mouse}.lua` | every keybind from the inventory; `binds/shell.lua` only uses strings from `lib/shell.lua` |
 | `features/alttab.lua` | Alt+Tab / Shift+Alt+Tab over all windows sorted by display line (window_menu.py + hypr-focus-window.sh) |
 | `features/special.lua` | scratchpad toggle (toggle-special-window.sh), `caelestia toggle specialws|sysmon|todo`, Super+M music |
 | `features/launcher_super.lua` | Super tap -> launcher (super-launcher.sh + the 121 generated interrupts) |
 | `features/proton_ghosts.lua` | closes Proton ghost windows, runs `scripts/qm-proton-kill-explorer` |
 | `features/hotplug.lua` | main-monitor fallback/restore (main-monitor-hotplug.sh), marker `STATE/main-monitor-fallback` |
-| `features/gamemode.lua` | game window visible/fullscreen -> `$XDG_RUNTIME_DIR/quantum-moon-game-mode.active`, pause mpvpaper, shell IPC |
+| `features/gamemode.lua` | game window visible/fullscreen -> `$XDG_RUNTIME_DIR/solanum-game-mode.active`, pause mpvpaper, shell IPC |
 | `features/telegram.lua` | clears the chat window's stuck fullscreen after the media viewer closes |
 | `features/night.lua` | hyprsunset schedule 19:00-07:00 with the planet's `night_temperature` (override file `STATE/nightlight.json`) |
 | `features/pip.lua` | PiP windows: float, 25% width, bottom-right, pin (`caelestia resizer`) |
@@ -32,14 +33,14 @@ Hyprland --verify-config -c /home/lpacheco/Projects/Quantum-Moon/hypr/hyprland.l
 | `scripts/` | bash that stays bash: suspend-resume-watch, locked-sleep-after, qm-shuffle-if-unlocked, game-mode-resources, activity-monitor, nautilus-wrap, hyprresume-save, audio-*, inhibit-sleep-while-audio-playback, qm-autolock-on-login; helpers `qm-mpv-ipc` (python) and `qm-proton-kill-explorer` |
 
 Scripts talk to the shell through `${QM_SHELL_IPC:-qs -c caelestia ipc call}`; the cutover sets
-`QM_SHELL_IPC="qs -c quantum-moon ipc call"` in the units. Runtime markers are `quantum-moon-*`; the audio
+`QM_SHELL_IPC="qs -c solanum ipc call"` in the units. Runtime markers are `solanum-*`; the audio
 inhibit and locked-sleep scripts also write the legacy `caelestia-*` names the live Caelestia shell reads
 (`patches/quickshell-caelestia/modules/IdleMonitors.qml`) until the cutover.
 
 ## The flip (Phase 3)
 
-Edit `lib/shell.lua` only: comment the Caelestia block, uncomment the quantum-moon block
-(appid `qm`, `qs -c quantum-moon ipc call`, `~/.local/bin/qm-restart-shell`, `qm-screenshot/record/clip/emoji`).
+Edit `lib/shell.lua` only: comment the Caelestia block, uncomment the solanum block
+(appid `qm`, `qs -c solanum ipc call`, `~/.local/bin/qm-restart-shell`, `qm-screenshot/record/clip/emoji`).
 
 ## Switch / rollback
 
@@ -77,7 +78,8 @@ stub afterwards.
 - Scratchpad: Super+Alt+S / Ctrl+Super+S / Ctrl+Super+Space moves the window to `special:special` and back.
 - Hotplug: unplug DP-2 -> packed layout, bar on the rightmost, toast, `qm-apply --persisted`; replug -> defaults.
   (Phase 1: `caelestia-main-monitor-hotplug.service` still runs the old script in parallel; disable it in Phase 3.)
-- Game mode: Steam game fullscreen -> `$XDG_RUNTIME_DIR/quantum-moon-game-mode.active`, mpvpaper paused; exit resumes.
+- Game mode: Steam game fullscreen -> `$XDG_RUNTIME_DIR/solanum-game-mode.active`, mpvpaper / Godot scene paused; exit resumes.
+- Godot centre wallpaper (`qm-solar-wallpaper`): local plugin at `hypr/plugins/hyprwinwrap` ([gen3vra/hyprwinwrap](https://github.com/gen3vra/hyprwinwrap); official hyprland-plugins dropped it). Build with `make -C hypr/plugins/hyprwinwrap`. Prefer that over `hyprpm` (headers often mismatch on CachyOS).
 - Telegram: open/close the media viewer, the chat window must not stay fullscreen.
 - `qm-apply <slug>` recolours borders/groupbar/shadow and (once hyprsunset is installed) changes the night temperature;
   `hyprctl repl 'return QM.scheme.night_temperature'`.

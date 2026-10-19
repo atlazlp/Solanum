@@ -126,8 +126,8 @@ Column {
                 NomaiFrame {
                     visible: dayCell.modelData.today
                     anchors.centerIn: parent
-                    width: root.cell - 4
                     height: root.cell - 4
+                    width: Theme.hexWidth(height)
                     shape: "hex"
                     fill: Theme.alpha(Theme.line, 0.16)
                     lineColor: Theme.line

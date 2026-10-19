@@ -28,10 +28,12 @@ MouseArea {
     property real ssx: 0
     property real ssy: 0
 
+    // Start empty so Enter before onCompleted cannot capture a full-monitor rect by accident.
     property real sx: 0
     property real sy: 0
-    property real ex: screen.width
-    property real ey: screen.height
+    property real ex: 0
+    property real ey: 0
+    property bool selectionReady: false
 
     property real rsx: Math.min(sx, ex)
     property real rsy: Math.min(sy, ey)
@@ -98,7 +100,7 @@ MouseArea {
     }
 
     function capture(): void {
-        if (Screenshot.closing || Screenshot.capturing)
+        if (Screenshot.closing || Screenshot.capturing || !selectionReady)
             return;
         if (sw < 2 || sh < 2)
             return;
@@ -129,19 +131,13 @@ MouseArea {
         Hypr.refreshAll();
         if (freeze)
             clients = clients;   // break the binding: keep the rects as they were when frozen
-        const c = clients[0];
-        if (c) {
-            onClient = true;
-            sx = c.x;
-            sy = c.y;
-            ex = c.x + c.w;
-            ey = c.y + c.h;
-        } else {
-            sx = screen.width / 2 - 160;
-            sy = screen.height / 2 - 100;
-            ex = screen.width / 2 + 160;
-            ey = screen.height / 2 + 100;
-        }
+        // Never pre-select a window — user must drag or hover a window, then confirm.
+        onClient = false;
+        sx = screen.width / 2 - 160;
+        sy = screen.height / 2 - 100;
+        ex = screen.width / 2 + 160;
+        ey = screen.height / 2 + 100;
+        selectionReady = true;
         forceActiveFocus();
     }
 
@@ -310,21 +306,5 @@ MouseArea {
             }
         }
 
-        // Hint strip (top centre)
-        NomaiFrame {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: Theme.spaceXl
-            padding: Theme.spaceSm
-            chamfer: Theme.chamferSm
-            fill: Theme.ink0
-            lineOpacity: 0.5
-            ticks: true
-
-            Row {
-                spacing: Theme.spaceMd
-                GlyphIcon { icon: root.freeze ? "ac_unit" : "screenshot_region"; size: Theme.sizeSmall + 4; color: Theme.line; anchors.verticalCenter: parent.verticalCenter }
-                GlyphText { role: "label"; dim: true; text: (root.clipboardOnly ? "COPY" : "EDIT") + "   drag · hover window · enter capture · esc cancel"; anchors.verticalCenter: parent.verticalCenter }
-            }
-        }
     }
 }

@@ -1,12 +1,12 @@
 import QtQuick
 import qs.theme
 
-// Container for a bar popout: chamfered frame with a 1 px stem up to the segment it hangs from.
-// `anchorCenterX` is in the popout's parent coordinates; the host positions the popout.
+// Container for a bar popout: chamfered frame with a 1 px stem pointing left toward the bar.
+// `anchorCenterY` is in the popout's parent coordinates; the host positions the popout.
 NomaiFrame {
     id: root
 
-    property real anchorCenterX: width / 2
+    property real anchorCenterY: height / 2
     property int stemHeight: Theme.spaceSm
 
     padding: Theme.spaceMd
@@ -18,10 +18,10 @@ NomaiFrame {
 
     Rectangle {
         parent: root
-        x: Math.max(2, Math.min(root.width - 3, root.anchorCenterX - root.x)) - 0.5
-        y: -root.stemHeight
-        width: 1
-        height: root.stemHeight
+        x: -root.stemHeight
+        y: Math.max(2, Math.min(root.height - 3, root.anchorCenterY - root.y)) - 0.5
+        width: root.stemHeight
+        height: 1
         color: Theme.line
     }
 }

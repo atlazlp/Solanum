@@ -12,13 +12,19 @@ SettingsPane {
         label: "Enabled"
     }
 
+    SwitchRow {
+        key: "general.lockOnLogin"
+        label: "Lock on login"
+        description: "Lock the session as soon as you log in"
+    }
+
     SectionHeader {
         text: "Commands"
         topPadding: Theme.spaceLg
     }
 
     GlyphText {
-        text: "argv run by each session button; separate arguments with spaces."
+        text: "Command each power button runs. Separate arguments with spaces."
         role: "small"
         dim: true
         topPadding: Theme.spaceXs

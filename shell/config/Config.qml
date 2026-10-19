@@ -7,7 +7,7 @@ import Quickshell.Io
 import qs.config
 import "Defaults.js" as Defaults
 
-// Shell configuration. `~/.config/quantum-moon/shell.json` deep-merged over Defaults.js,
+// Shell configuration. `~/.config/solanum/shell.json` deep-merged over Defaults.js,
 // plus `monitors/<name>.json` overrides available through forScreen(name).
 // The only writer is save(dottedKey, value) (used by Settings); writes are atomic.
 Singleton {
@@ -43,6 +43,11 @@ Singleton {
 
     function get(dotted: string, fallback: var): var {
         return Defaults.getPath(data, dotted, fallback);
+    }
+
+    // Value from Defaults.js, ignoring shell.json. Settings uses this for reset.
+    function baseline(dotted: string): var {
+        return Defaults.getPath(Defaults.defaults(), dotted, undefined);
     }
 
     // Config as seen from one screen: data deep-merged with monitors/<name>.json.

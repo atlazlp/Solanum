@@ -8,7 +8,7 @@ import qs.services
 
 // Pending package updates via `qm-update --check` ({"repo":N,"aur":M,"packages":[{name,from,to,source}]}).
 // Checks every Config.updates.interval seconds, on logind resume and on refresh(); the last result is
-// cached in ~/.cache/quantum-moon/updates.json so the bar shows a count right after a reload.
+// cached in ~/.cache/solanum/updates.json so the bar shows a count right after a reload.
 Singleton {
     id: root
 

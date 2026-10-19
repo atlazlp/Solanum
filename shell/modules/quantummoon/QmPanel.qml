@@ -7,9 +7,8 @@ import qs.theme
 import qs.components
 import qs.services
 
-// Quantum Moon panel (top-right drawer "quantumMoon"): selector wheel ring, five planet logos on a
-// 106 px arc, the QM button at the arc centre, Eye mode and the scout lock. Geometry is the
-// verbatim port of the Caelestia patch panel; the dressing is Nomai (chamfered frame, arc ticks).
+// Solanum planet panel (top-right drawer "quantumMoon"): selector wheel, planet logos on an arc,
+// centre jump button, Eye mode and scout lock. No hex frames or arc tick lines on the logos.
 NomaiFrame {
     id: root
 
@@ -26,10 +25,13 @@ NomaiFrame {
     readonly property real vPad: Theme.spaceLg
     readonly property real orbitLift: -15
     readonly property real cardHeightTrim: 15
+    // Clear band above the wheel so the planet name can use the full header line.
+    readonly property real headerBand: Theme.spaceXl + Theme.spaceSm
     readonly property real selectorWheelSize: btnSize * 5.8
+    readonly property real scoutLockReserve: locked ? QuantumMoon.lockMarkerBarWidth : QuantumMoon.lockMarkerBarHeight
 
     readonly property real layoutW: arcRadius * 2 + planetSize + hPad * 2
-    readonly property real layoutH: vPad * 2 + planetSize * 0.5 + arcRadius + btnSize
+    readonly property real layoutH: headerBand + vPad * 2 + planetSize * 0.5 + arcRadius + btnSize
 
     readonly property bool eyeMode: QuantumMoon.slug === "eye-of-the-universe"
     readonly property bool locked: QuantumMoon.planetLocked
@@ -50,7 +52,6 @@ NomaiFrame {
     fill: Theme.ink1
     glow: true
     ticks: true
-    // While the wheel spins the frame line drifts toward the destination planet's primary.
     lineColor: QuantumMoon.destinationPrimary.a > 0 ? Theme.mix(Theme.line, QuantumMoon.destinationPrimary, QuantumMoon.spinBlend) : Theme.line
 
     Component.onCompleted: QuantumMoon.syncWheelRingIfIdle()
@@ -59,7 +60,6 @@ NomaiFrame {
         id: body
 
         anchors.fill: parent
-        clip: true
 
         GlyphReveal {
             id: revealer
@@ -72,7 +72,9 @@ NomaiFrame {
                 id: orbitLayout
 
                 anchors.fill: parent
+                anchors.topMargin: root.headerBand
                 visible: !root.eyeMode
+                clip: true
 
                 readonly property real arcCx: width * 0.5
                 readonly property real arcCy: height - root.vPad - root.btnSize * 0.5 + root.orbitLift
@@ -102,16 +104,6 @@ NomaiFrame {
                     }
                 }
 
-                QmArc {
-                    anchors.fill: parent
-                    cx: orbitLayout.arcCx
-                    cy: orbitLayout.arcCy
-                    radius: root.arcRadius
-                    count: root.planetSlugs.length
-                    color: root.lineColor
-                    opacity: root.locked ? 0.4 : 1
-                }
-
                 Repeater {
                     model: root.planetSlugs
 
@@ -131,7 +123,8 @@ NomaiFrame {
                         height: root.planetSize
                         x: orbitLayout.arcCx + root.arcRadius * Math.sin(angle) - root.planetSize * 0.5
                         y: orbitLayout.arcCy - root.arcRadius * Math.cos(angle) - root.planetSize * 0.5
-                        opacity: root.locked ? 0.38 : 1
+                        opacity: root.locked ? 0.38 : (planetHover.hovered ? 1 : (planet.current || planet.pending ? 1 : 0.85))
+                        scale: planetHover.hovered && !root.locked ? 1.06 : (planet.pending ? 1.04 : 1)
 
                         Behavior on opacity {
                             NumberAnimation {
@@ -139,17 +132,11 @@ NomaiFrame {
                                 easing.type: Motion.fade
                             }
                         }
-
-                        NomaiFrame {
-                            anchors.fill: parent
-                            anchors.margins: 2
-                            shape: "hex"
-                            fill: planetHover.hovered && !root.locked ? Theme.alpha(Theme.ink2, 0.6) : "transparent"
-                            lineColor: planet.pending ? root.lineColor : Theme.line
-                            lineOpacity: planet.pending ? 1 : (planetHover.hovered && !root.locked ? 1 : (planet.current ? 0.5 : 0))
-                            glow: planet.pending || planet.current
-                            glowOpacity: planet.pending ? 0.3 : 0.12
-                            padding: 0
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: Motion.fast
+                                easing.type: Motion.enter
+                            }
                         }
 
                         Image {
@@ -175,7 +162,6 @@ NomaiFrame {
                     }
                 }
 
-                // QM button at the arc centre.
                 Item {
                     id: qmBtn
 
@@ -183,7 +169,8 @@ NomaiFrame {
                     height: root.btnSize
                     x: orbitLayout.arcCx - width * 0.5
                     y: orbitLayout.arcCy - height * 0.5
-                    opacity: root.locked ? 0.38 : 1
+                    opacity: root.locked ? 0.38 : (qmHover.hovered ? 1 : 0.9)
+                    scale: qmHover.hovered && !root.locked ? 1.08 : 1
 
                     Behavior on opacity {
                         NumberAnimation {
@@ -191,15 +178,11 @@ NomaiFrame {
                             easing.type: Motion.fade
                         }
                     }
-
-                    NomaiFrame {
-                        anchors.fill: parent
-                        anchors.margins: -4
-                        shape: "hex"
-                        fill: qmHover.hovered && !root.locked ? Theme.alpha(Theme.ink2, 0.7) : "transparent"
-                        lineOpacity: qmHover.hovered && !root.locked ? 1 : 0
-                        glow: qmHover.hovered && !root.locked
-                        padding: 0
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Motion.fast
+                            easing.type: Motion.enter
+                        }
                     }
 
                     Image {
@@ -220,14 +203,6 @@ NomaiFrame {
                         enabled: !root.locked
                         onTapped: QuantumMoon.start()
                     }
-
-                    NomaiTooltip {
-                        text: "Quantum jump: random planet"
-                        show: qmHover.hovered
-                        anchors.top: parent.bottom
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.topMargin: Theme.spaceXs
-                    }
                 }
             }
 
@@ -236,7 +211,9 @@ NomaiFrame {
                 id: eyeLayout
 
                 anchors.fill: parent
+                anchors.topMargin: root.headerBand
                 visible: root.eyeMode
+                clip: true
 
                 Item {
                     id: eyeBtn
@@ -253,22 +230,13 @@ NomaiFrame {
                         }
                     }
 
-                    NomaiFrame {
-                        anchors.fill: parent
-                        anchors.margins: -8
-                        shape: "hex"
-                        fill: eyeHover.hovered && !root.locked ? Theme.alpha(Theme.ink2, 0.7) : "transparent"
-                        lineOpacity: eyeHover.hovered && !root.locked ? 1 : 0.35
-                        glow: true
-                        padding: 0
-                    }
-
                     Image {
                         anchors.fill: parent
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                         mipmap: true
                         source: root.logoFor("eye-of-the-universe")
+                        opacity: eyeHover.hovered && !root.locked ? 1 : 0.9
                     }
 
                     HoverHandler {
@@ -294,14 +262,14 @@ NomaiFrame {
                 GlyphText {
                     role: "label"
                     dim: true
-                    text: "Quantum Moon"
+                    text: "Solanum"
                 }
 
                 GlyphText {
                     role: "small"
                     text: QuantumMoon.pendingApplySlug.length ? "jumping..." : (QuantumMoon.displayName || "no planet")
                     color: QuantumMoon.pendingApplySlug.length ? root.lineColor : Theme.text
-                    width: 120
+                    width: Math.max(160, body.width - root.scoutLockReserve - Theme.spaceLg * 2)
                     elide: Text.ElideRight
                 }
 
@@ -319,6 +287,13 @@ NomaiFrame {
                 anchors.top: parent.top
                 anchors.right: parent.right
                 anchors.margins: Theme.spaceXs
+            }
+
+            // Outside the clipped orbit so it can paint past the panel bottom.
+            NomaiTooltip {
+                anchorItem: qmBtn
+                text: "Random planet"
+                show: qmHover.hovered && orbitLayout.visible
             }
         }
     }

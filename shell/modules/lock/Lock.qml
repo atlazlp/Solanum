@@ -16,7 +16,7 @@ Scope {
         id: sessionLock
 
         LockSurface {
-            pam: pam
+            pam: sharedPam
             host: root
         }
 
@@ -28,7 +28,7 @@ Scope {
     }
 
     Pam {
-        id: pam
+        id: sharedPam
 
         secure: sessionLock.secure
     }

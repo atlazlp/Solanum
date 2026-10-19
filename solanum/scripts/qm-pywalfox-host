@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""Minimal Pywalfox-compatible native messaging host for Solanum / Quantum Moon.
+
+Reads ~/.cache/wal/colors.json (written by qm-sync-file-manager-theme.py on planet
+change) and speaks the Pywalfox extension protocol so Firefox chrome follows the
+active planet. Also listens on the Pywalfox UNIX socket for `action:update`.
+
+Usage:
+  qm-pywalfox-host install   # write ~/.mozilla/native-messaging-hosts/pywalfox.json
+  qm-pywalfox-host uninstall
+  qm-pywalfox-host update    # poke a running host to push colors
+  qm-pywalfox-host           # started by Firefox (native messaging)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import socket
+import struct
+import sys
+import tempfile
+import threading
+from pathlib import Path
+
+DAEMON_VERSION = "2.9.0-solanum"
+EXTENSION_ID = "pywalfox@frewacom.org"
+WAL_COLORS = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "wal" / "colors.json"
+SOCKET_PATH = Path(tempfile.gettempdir()) / f"pywalfox_socket_{os.getuid()}"
+MANIFEST_NAME = "pywalfox.json"
+MANIFEST_MARKER = "solanum qm-pywalfox-host"
+
+ACTIONS = {
+    "VERSION": "debug:version",
+    "OUTPUT": "debug:output",
+    "COLORS": "action:colors",
+    "INVALID_ACTION": "action:invalid",
+    "CSS_ENABLE": "css:enable",
+    "CSS_DISABLE": "css:disable",
+    "CSS_FONT_SIZE": "css:font:size",
+    "THEME_MODE": "theme:mode",
+}
+UPDATE_CMD = "action:update"
+
+
+def manifest_dirs() -> list[Path]:
+    home = Path.home()
+    cfg = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
+    return [
+        home / ".mozilla" / "native-messaging-hosts",
+        cfg / "firefox" / "native-messaging-hosts",
+    ]
+
+
+def read_message() -> dict | None:
+    raw_len = sys.stdin.buffer.read(4)
+    if not raw_len:
+        return None
+    (length,) = struct.unpack("@I", raw_len)
+    raw = sys.stdin.buffer.read(length)
+    return json.loads(raw.decode("utf-8"))
+
+
+def send_message(payload: dict) -> None:
+    encoded = json.dumps(payload).encode("utf-8")
+    sys.stdout.buffer.write(struct.pack("@I", len(encoded)))
+    sys.stdout.buffer.write(encoded)
+    sys.stdout.buffer.flush()
+
+
+def reply(action: str, data=None, success: bool = True, message: str | None = None) -> None:
+    out: dict = {"action": action, "success": success}
+    if data is not None:
+        out["data"] = data
+    if message is not None:
+        out["message" if success else "error"] = message
+    send_message(out)
+
+
+def load_pywal_colors() -> tuple[bool, dict | None, str | None]:
+    try:
+        data = json.loads(WAL_COLORS.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        return False, None, f"Could not read colors from: {WAL_COLORS} ({e})"
+    colors_obj = data.get("colors")
+    if not isinstance(colors_obj, dict):
+        return False, None, f"{WAL_COLORS} does not contain any color values"
+    colors = [str(colors_obj.get(f"color{i}", "#000000")) for i in range(16)]
+    wallpaper = data.get("wallpaper") or ""
+    return True, {"colors": colors, "wallpaper": wallpaper}, None
+
+
+def send_colors() -> None:
+    ok, payload, err = load_pywal_colors()
+    reply(ACTIONS["COLORS"], data=payload, success=ok, message=err)
+
+
+def handle_extension_message(msg: dict) -> None:
+    action = msg.get("action")
+    if action == ACTIONS["VERSION"]:
+        reply(ACTIONS["VERSION"], data=DAEMON_VERSION)
+    elif action == ACTIONS["COLORS"]:
+        send_colors()
+    elif action in (ACTIONS["CSS_ENABLE"], ACTIONS["CSS_DISABLE"], ACTIONS["CSS_FONT_SIZE"]):
+        target = msg.get("target") or ""
+        reply(
+            action,
+            data=target,
+            success=False,
+            message="Solanum host does not manage Pywalfox custom CSS",
+        )
+    else:
+        reply(ACTIONS["INVALID_ACTION"], success=False)
+
+
+def socket_worker(stop: threading.Event) -> None:
+    try:
+        if SOCKET_PATH.exists():
+            SOCKET_PATH.unlink()
+    except OSError:
+        pass
+    srv = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    try:
+        srv.bind(str(SOCKET_PATH))
+        srv.settimeout(0.5)
+        while not stop.is_set():
+            try:
+                data = srv.recv(1024)
+            except socket.timeout:
+                continue
+            except OSError:
+                break
+            if not data:
+                continue
+            cmd = data.decode("utf-8", errors="replace").strip()
+            if cmd == UPDATE_CMD:
+                send_colors()
+    finally:
+        try:
+            srv.close()
+        except OSError:
+            pass
+        try:
+            if SOCKET_PATH.exists():
+                SOCKET_PATH.unlink()
+        except OSError:
+            pass
+
+
+def run_daemon() -> None:
+    stop = threading.Event()
+    t = threading.Thread(target=socket_worker, args=(stop,), daemon=True)
+    t.start()
+    try:
+        while True:
+            msg = read_message()
+            if msg is None:
+                break
+            handle_extension_message(msg)
+    finally:
+        stop.set()
+
+
+def send_update() -> int:
+    if not SOCKET_PATH.exists():
+        print(f"no running host socket at {SOCKET_PATH}", file=sys.stderr)
+        return 1
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    try:
+        sock.connect(str(SOCKET_PATH))
+        sock.send(UPDATE_CMD.encode("utf-8"))
+    except OSError as e:
+        print(f"failed to signal host: {e}", file=sys.stderr)
+        return 1
+    finally:
+        sock.close()
+    return 0
+
+
+def our_manifest(path_to_host: str) -> dict:
+    return {
+        "name": "pywalfox",
+        "description": MANIFEST_MARKER,
+        "path": path_to_host,
+        "type": "stdio",
+        "allowed_extensions": [EXTENSION_ID],
+    }
+
+
+def is_ours(manifest_path: Path) -> bool:
+    if not manifest_path.is_file():
+        return False
+    try:
+        data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    desc = str(data.get("description") or "")
+    path = str(data.get("path") or "")
+    return MANIFEST_MARKER in desc or "qm-pywalfox-host" in path
+
+
+def install_manifest() -> int:
+    host = Path(__file__).resolve()
+    if not os.access(host, os.X_OK):
+        try:
+            host.chmod(host.stat().st_mode | 0o111)
+        except OSError:
+            pass
+    written = 0
+    for d in manifest_dirs():
+        d.mkdir(parents=True, exist_ok=True)
+        dest = d / MANIFEST_NAME
+        if dest.is_file() and not is_ours(dest):
+            print(f"leaving existing Pywalfox manifest alone: {dest}", file=sys.stderr)
+            continue
+        dest.write_text(json.dumps(our_manifest(str(host)), indent=2) + "\n", encoding="utf-8")
+        print(f"installed {dest}")
+        written += 1
+    if written == 0:
+        print(
+            "no Solanum manifest written (a non-Solanum pywalfox.json already exists); "
+            "use that host's `pywalfox update` after planet changes",
+            file=sys.stderr,
+        )
+        return 0
+    print("restart Firefox, then click Pywalfox → Fetch Pywal colors once")
+    return 0
+
+
+def uninstall_manifest() -> int:
+    for d in manifest_dirs():
+        dest = d / MANIFEST_NAME
+        if is_ours(dest):
+            dest.unlink()
+            print(f"removed {dest}")
+    return 0
+
+
+def main() -> int:
+    # Firefox launches: <host> <unused> pywalfox@frewacom.org
+    if len(sys.argv) >= 3 and sys.argv[-1] == EXTENSION_ID:
+        run_daemon()
+        return 0
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "action",
+        nargs="?",
+        choices=("install", "uninstall", "update", "start"),
+        default="start",
+    )
+    args = ap.parse_args()
+    if args.action == "install":
+        return install_manifest()
+    if args.action == "uninstall":
+        return uninstall_manifest()
+    if args.action == "update":
+        return send_update()
+    run_daemon()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

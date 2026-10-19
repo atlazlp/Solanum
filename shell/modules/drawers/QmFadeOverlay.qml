@@ -6,7 +6,7 @@ import Quickshell.Wayland
 import qs.services
 
 // Per-screen fade-to-black overlay driven by QuantumMoon.overlayOpacity (Overlay layer, never takes input).
-// Windows exist only while a planet transition is active (namespace quantum-moon-fade).
+// Windows exist only while a planet transition is active (namespace solanum-fade).
 Scope {
     LazyLoader {
         active: QuantumMoon.active
@@ -23,7 +23,7 @@ Scope {
                 exclusionMode: ExclusionMode.Ignore
                 color: "transparent"
 
-                WlrLayershell.namespace: "quantum-moon-fade"
+                WlrLayershell.namespace: "solanum-fade"
                 WlrLayershell.layer: WlrLayer.Overlay
                 WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 

@@ -4,6 +4,7 @@ singleton Visibilities 1.0 Visibilities.qml
 DrawerVisibilities 1.0 DrawerVisibilities.qml
 singleton Toaster 1.0 Toaster.qml
 singleton Audio 1.0 Audio.qml
+singleton Cava 1.0 Cava.qml
 singleton Brightness 1.0 Brightness.qml
 singleton Network 1.0 Network.qml
 singleton BarVpn 1.0 BarVpn.qml
@@ -23,6 +24,8 @@ singleton Screenshot 1.0 Screenshot.qml
 singleton Notifs 1.0 Notifs.qml
 singleton QuantumMoon 1.0 QuantumMoon.qml
 singleton QuantumMoonWallpaper 1.0 QuantumMoonWallpaper.qml
+singleton SolarScene 1.0 SolarScene.qml
+singleton SolarTracker 1.0 SolarTracker.qml
 NotifData 1.0 NotifData.qml
 singleton ShipLog 1.0 ShipLog.qml
 singleton Weather 1.0 Weather.qml

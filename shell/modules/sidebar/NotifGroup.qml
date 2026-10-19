@@ -38,8 +38,8 @@ Column {
 
         NomaiFrame {
             id: hex
-            width: 32
             height: 32
+            width: Theme.hexWidth(32)
             shape: "hex"
             padding: 0
             fill: Theme.ink2
@@ -86,8 +86,8 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             shape: "hex"
             padding: 0
-            width: 24
-            height: 20
+            height: 24
+            width: Theme.hexWidth(24)
             fill: Theme.alpha(Theme.line, 0.14)
             lineColor: Theme.line
             lineOpacity: 0.6

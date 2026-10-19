@@ -8,7 +8,7 @@ import qs.services
 
 // Azure DevOps PR watcher: reads the state files written by services/git-watcher/git-watcher.py,
 // supervises the daemon (systemd unit > already-running pid > self-spawned) and owns the
-// mute/dismiss lists. Profile: `~/.config/quantum-moon/git-watcher.json`; when that file is
+// mute/dismiss lists. Profile: `~/.config/solanum/git-watcher.json`; when that file is
 // missing but the legacy `~/.config/caelestia/git-watcher.json` exists, the caelestia
 // config/state/pid paths are used read-only and a daemon alive in the legacy pid file is
 // reported as `daemonState == "legacy"` (never doubled).
@@ -75,7 +75,7 @@ Singleton {
     readonly property string mutedPath: `${stateDir}/git-watcher-muted.json`
     readonly property string pidPath: `${stateDir}/git-watcher.pid`
     readonly property string daemonPath: `${Quickshell.shellDir}/services/git-watcher/git-watcher.py`
-    readonly property string unitName: "quantum-moon-git-watcher.service"
+    readonly property string unitName: "solanum-git-watcher.service"
 
     // -----------------------------------------------------------------------
     // Derived sets
@@ -441,7 +441,7 @@ Singleton {
         interval: 1500
         onTriggered: {
             if (root.shouldSpawn && !daemon.running) {
-                console.log(`GitWatcher: spawning daemon (${root.legacy ? "legacy" : "quantum-moon"} profile)`);
+                console.log(`GitWatcher: spawning daemon (${root.legacy ? "legacy" : "solanum"} profile)`);
                 daemon.running = true;
             }
         }
@@ -450,7 +450,7 @@ Singleton {
     Process {
         id: daemon
         command: ["python3", root.daemonPath]
-        environment: ({ QM_SHELL_IPC: "qs -c quantum-moon ipc call" })
+        environment: ({ QM_SHELL_IPC: "qs -c solanum ipc call" })
         stderr: SplitParser {
             onRead: line => console.log("git-watcher:", line)
         }
@@ -513,7 +513,7 @@ Singleton {
         source: `${Quickshell.shellDir}/modules/bar/popouts/GitWatcherConfig.qml`
     }
 
-    // Always writes the quantum-moon config (migrates a legacy profile), then nudges the daemon:
+    // Always writes the solanum config (migrates a legacy profile), then nudges the daemon:
     // start the unit when it is not active, SIGHUP whatever pid file the new profile has.
     function applyConfig(jsonText: string): void {
         qmConfigWriter.setText(jsonText.endsWith("\n") ? jsonText : jsonText + "\n");

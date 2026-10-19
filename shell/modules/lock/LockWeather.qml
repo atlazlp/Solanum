@@ -5,7 +5,7 @@ import qs.theme
 import qs.components
 import qs.utils
 
-// Current conditions + 3-day strip read from ~/.cache/quantum-moon/weather.json (written by the
+// Current conditions + 3-day strip read from ~/.cache/solanum/weather.json (written by the
 // Weather singleton); the lock never fetches on its own.
 NomaiFrame {
     id: root

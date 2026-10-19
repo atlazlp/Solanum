@@ -10,3 +10,4 @@ ListRow 1.0 ListRow.qml
 ArgvRow 1.0 ArgvRow.qml
 SettingsPane 1.0 SettingsPane.qml
 Settings 1.0 Settings.qml
+SliderRow 1.0 SliderRow.qml

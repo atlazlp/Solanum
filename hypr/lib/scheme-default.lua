@@ -1,5 +1,5 @@
--- lib/scheme-default.lua: fallback when ~/.local/state/quantum-moon/scheme.lua is missing (eye-of-the-universe,
--- the qm-apply --persisted default). Regenerate: qm-sync-file-manager-theme.py --emit-lua hypr/lib/scheme-default.lua --meta quantum-moon/modes/eye-of-the-universe/meta.json <merged scheme.json>
+-- lib/scheme-default.lua: fallback when ~/.local/state/solanum/scheme.lua is missing (eye-of-the-universe,
+-- the qm-apply --persisted default). Regenerate: qm-sync-file-manager-theme.py --emit-lua hypr/lib/scheme-default.lua --meta solanum/modes/eye-of-the-universe/meta.json <merged scheme.json>
 return {
   slug = "eye-of-the-universe",
   night_temperature = 5200,
@@ -128,12 +128,12 @@ return {
   },
   groupbar = {
     active_bg = "primary",
-    active_fg = "onPrimaryFixed",
-    inactive_bg = "outlineVariant",
+    active_fg = "onPrimary",
+    inactive_bg = "outline",
     inactive_fg = "onSurface",
-    locked_active_bg = "tertiaryFixed",
-    locked_active_fg = "onTertiaryContainer",
-    locked_inactive_bg = "secondaryFixed",
-    locked_inactive_fg = "onSecondary",
+    locked_active_bg = "tertiaryContainer",
+    locked_active_fg = "onTertiary",
+    locked_inactive_bg = "secondaryContainer",
+    locked_inactive_fg = "onSecondaryContainer",
   },
 }

@@ -75,13 +75,13 @@ NomaiFrame {
                         required property var modelData
                         required property int index
 
-                        shape: "hex"
+                        shape: "chamfer"
                         icon: modelData.icon
                         text: modelData.label
                         active: root.tab === index
                         flat: !active
                         glow: active
-                        padding: Theme.spaceSm
+                        padding: Theme.spaceMd
                         onClicked: root.tab = index
                         Keys.onLeftPressed: root.tab = (root.tab + root.tabs.length - 1) % root.tabs.length
                         Keys.onRightPressed: root.tab = (root.tab + 1) % root.tabs.length

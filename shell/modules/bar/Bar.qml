@@ -8,12 +8,11 @@ import qs.theme
 import qs.services
 import "segments" as Segments
 
-// Row of HexSegments built from Config.bar.entries (ids: logo, workspaces, spacer, activeWindow, tray, clock, status, power).
+// Column of HexSegments from Config.bar.entries. Spacers use fillHeight (justify-between).
 Item {
     id: root
 
     required property ShellScreen screen
-    // Depend on Visibilities.generation so these re-resolve once the drawers window has registered.
     readonly property DrawerVisibilities visibilities: {
         void Visibilities.generation;
         return Visibilities.forScreen(screen.name);
@@ -22,26 +21,14 @@ Item {
         void Visibilities.generation;
         return Visibilities.popoutFor(screen.name);
     }
-    readonly property int segmentHeight: height - Theme.spaceXs * 2
 
     readonly property list<var> entries: (Config.bar.entries ?? []).filter(e => e && e.enabled !== false)
 
-    // Thin ink base line under the segments.
-    Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        height: 1
-        color: Theme.alpha(Theme.lineDim, 0.6)
-    }
-
-    RowLayout {
-        id: row
+    ColumnLayout {
+        id: col
 
         anchors.fill: parent
-        anchors.topMargin: Theme.spaceXs
-        anchors.bottomMargin: Theme.spaceXs
-        spacing: Theme.spaceSm
+        spacing: Theme.spaceXs
 
         Repeater {
             model: root.entries
@@ -53,16 +40,16 @@ Item {
                 required property int index
                 readonly property string kind: String(modelData.id ?? "")
                 readonly property bool isSpacer: kind === "spacer"
+                readonly property bool isActiveWindow: kind === "activeWindow"
                 readonly property bool first: index === 0
                 readonly property bool last: index === root.entries.length - 1
                 readonly property bool nextIsSpacer: index + 1 < root.entries.length && String(root.entries[index + 1].id) === "spacer"
-                readonly property bool prevIsSpacer: index > 0 && String(root.entries[index - 1].id) === "spacer"
 
-                Layout.fillWidth: isSpacer
-                Layout.fillHeight: true
-                Layout.preferredWidth: isSpacer ? 0 : (item?.implicitWidth ?? 0)
-                Layout.minimumWidth: isSpacer ? 0 : (item?.implicitWidth ?? 0)
-                Layout.leftMargin: first ? 0 : 0
+                Layout.fillWidth: true
+                // Active window absorbs free height (shrinks when tray/status grow); spacers stay as gaps only.
+                Layout.fillHeight: isActiveWindow
+                Layout.preferredHeight: isSpacer ? 0 : (item?.implicitHeight ?? 0)
+                Layout.minimumHeight: isSpacer ? 0 : (item?.implicitHeight ?? 0)
 
                 sourceComponent: {
                     switch (kind) {
@@ -85,10 +72,15 @@ Item {
                         return;
                     item.screen = root.screen;
                     item.bar = root;
+                    if ("vertical" in item)
+                        item.vertical = true;
                     if ("ends" in item)
-                        item.ends = first ? "right" : (last ? "left" : "both");
+                        item.ends = first ? "bottom" : (last ? "top" : "both");
                     if ("connector" in item)
                         item.connector = !last && !nextIsSpacer;
+                    if (isActiveWindow) {
+                        item.anchors.fill = entry;
+                    }
                 }
             }
         }

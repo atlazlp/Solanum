@@ -96,7 +96,7 @@ SettingsPane {
                     readonly property string kind: pane.kindOf(modelData.idleAction)
 
                     width: parent.width
-                    height: 36
+                    height: 44
 
                     NomaiFrame {
                         anchors.fill: parent
@@ -195,37 +195,24 @@ SettingsPane {
 
     NumberRow {
         key: "general.idle.lockTimeout"
-        label: "Legacy lock timeout"
-        description: "Used only when the timeouts table is absent"
+        label: "Lock timeout"
+        description: "Used only when the timeout list above is empty"
         from: 60
         to: 86400
         step: 60
         suffix: "s"
+        visible: pane.timeouts.length === 0 && SettingsStore.has("general.idle.lockTimeout")
     }
 
     NumberRow {
         key: "general.idle.suspendTimeout"
-        label: "Legacy suspend timeout"
+        label: "Suspend timeout"
+        description: "Used only when the timeout list above is empty"
         from: 60
         to: 86400
         step: 60
         suffix: "s"
-    }
-
-    SectionHeader {
-        text: "General"
-        topPadding: Theme.spaceLg
-    }
-
-    SwitchRow {
-        key: "general.lockOnLogin"
-        label: "Lock on login"
-    }
-
-    SwitchRow {
-        key: "general.showOverFullscreen"
-        label: "Show over fullscreen"
-        description: "Keep the bar visible above fullscreen windows"
+        visible: pane.timeouts.length === 0 && SettingsStore.has("general.idle.suspendTimeout")
     }
 
     SectionHeader {
@@ -252,7 +239,7 @@ SettingsPane {
         label: "Hide notifications"
     }
 
-    NumberRow {
+    SliderRow {
         key: "lock.blur"
         label: "Blur"
         from: 0
@@ -262,12 +249,16 @@ SettingsPane {
         fallback: 48
     }
 
-    NumberRow {
+    SliderRow {
         key: "lock.scrim"
         label: "Scrim"
+        description: "Darkness of the veil over the wallpaper"
         from: 0
-        to: 1
-        step: 0.05
+        to: 100
+        step: 5
+        displayScale: 100
+        suffix: "%"
+        decimals: 0
         fallback: 0.45
     }
 }

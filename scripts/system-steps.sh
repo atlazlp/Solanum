@@ -8,7 +8,7 @@
 #   --packages   pacman -Syu, install config/packages/pacman.txt, yay config/packages/aur.txt,
 #                mark everything in those lists (and the keepers) explicit
 #   --system     pacman pkglist hook, modprobe ALC897 quirk, paccache.timer
-#   --sddm-uwsm  write /etc/sddm.conf.d/quantum-moon-autologin.conf, remove caelestia-autologin.conf,
+#   --sddm-uwsm  write /etc/sddm.conf.d/solanum-autologin.conf, remove caelestia-autologin.conf,
 #                sed /etc/sddm.conf Session=hyprland -> hyprland-uwsm
 #   --phase5     the approved removals (Caelestia packages, cachyos-hyprland-settings bundle, leftovers,
 #                keyd config); refuses when the removal set touches a keeper
@@ -67,10 +67,10 @@ fi
 # ------------------------------------------------------------------ system files
 if [[ "$S" == "1" ]]; then
   log "pacman pkglist hook"
-  hook=/etc/pacman.d/hooks/50-quantum-moon-pkglist.hook
-  if cmp -s "$REPO/config/pacman/50-quantum-moon-pkglist.hook" "$hook" 2>/dev/null; then ok "$hook up to date"
-  else sudo_run install -D -m644 "$REPO/config/pacman/50-quantum-moon-pkglist.hook" "$hook"; fi
-  sudo_sh 'mkdir -p /var/lib/quantum-moon && pacman -Qqe > /var/lib/quantum-moon/pkglist-explicit.txt && pacman -Qq > /var/lib/quantum-moon/pkglist-all.txt; pacman -Qqm > /var/lib/quantum-moon/pkglist-foreign.txt; true'
+  hook=/etc/pacman.d/hooks/50-solanum-pkglist.hook
+  if cmp -s "$REPO/config/pacman/50-solanum-pkglist.hook" "$hook" 2>/dev/null; then ok "$hook up to date"
+  else sudo_run install -D -m644 "$REPO/config/pacman/50-solanum-pkglist.hook" "$hook"; fi
+  sudo_sh 'mkdir -p /var/lib/solanum && pacman -Qqe > /var/lib/solanum/pkglist-explicit.txt && pacman -Qq > /var/lib/solanum/pkglist-all.txt; pacman -Qqm > /var/lib/solanum/pkglist-foreign.txt; true'
 
   log "modprobe: ALC897 headset quirk"
   mp=/etc/modprobe.d/alsa-realtek-alc897-headset.conf
@@ -87,9 +87,9 @@ fi
 if [[ "$SD" == "1" ]]; then
   log "SDDM autologin -> hyprland-uwsm"
   [[ -f /usr/share/wayland-sessions/hyprland-uwsm.desktop ]] || warn "hyprland-uwsm.desktop missing: install uwsm first"
-  src="$REPO/config/sddm/quantum-moon-autologin.conf.example"
-  dst=/etc/sddm.conf.d/quantum-moon-autologin.conf
-  tmp="$(mktemp -t quantum-moon-autologin.XXXXXX)"; sed -e "s/^User=.*/User=$USER/" "$src" > "$tmp"
+  src="$REPO/config/sddm/solanum-autologin.conf.example"
+  dst=/etc/sddm.conf.d/solanum-autologin.conf
+  tmp="$(mktemp -t solanum-autologin.XXXXXX)"; sed -e "s/^User=.*/User=$USER/" "$src" > "$tmp"
   if cmp -s "$tmp" "$dst" 2>/dev/null; then ok "$dst up to date"; else sudo_run install -D -m644 "$tmp" "$dst"; fi
   rm -f "$tmp"
   [[ -f /etc/sddm.conf.d/caelestia-autologin.conf ]] && sudo_run rm -f /etc/sddm.conf.d/caelestia-autologin.conf

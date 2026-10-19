@@ -18,7 +18,7 @@ PanelWindow {
 
     screen: Quickshell.screens.find(s => s.name === (Hypr.focusedMonitor?.name ?? "")) ?? Screens.mainScreen ?? null
     color: "transparent"
-    WlrLayershell.namespace: "quantum-moon-gitwatcher-config"
+    WlrLayershell.namespace: "solanum-gitwatcher-config"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
@@ -246,7 +246,7 @@ PanelWindow {
                 color: Theme.warn
                 wrapMode: Text.WordWrap
                 elide: Text.ElideNone
-                text: "Loaded from the legacy ~/.config/caelestia/git-watcher.json. Apply writes ~/.config/quantum-moon/git-watcher.json and switches the shell to it; stop the old daemon afterwards."
+                text: "Loaded from the legacy ~/.config/caelestia/git-watcher.json. Apply writes ~/.config/solanum/git-watcher.json and switches the shell to it; stop the old daemon afterwards."
             }
 
             Flickable {
@@ -544,7 +544,7 @@ PanelWindow {
         signal toggled(bool checked)
 
         width: parent ? parent.width : 300
-        height: 26
+        height: 32
 
         GlyphText {
             anchors.left: parent.left

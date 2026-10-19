@@ -53,9 +53,10 @@ Item {
         };
     }
 
-    implicitWidth: 1100
-    implicitHeight: 720
+    implicitWidth: 1400
+    implicitHeight: 900
     focus: true
+    clip: false
 
     function reveal(): void {
         revealer.trigger();
@@ -212,11 +213,12 @@ Item {
 
     NomaiFrame {
         anchors.fill: parent
-        padding: Theme.spaceMd
+        padding: Theme.spaceLg
         chamfer: Theme.chamferLg
         fill: Theme.ink1
         glow: true
         ticks: true
+        clip: false
 
         GlyphReveal {
             id: revealer
@@ -231,30 +233,34 @@ Item {
                 // ---- top bar ----
                 Item {
                     width: parent.width
-                    height: 34
+                    height: 48
 
                     Row {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Theme.spaceSm
+                        spacing: Theme.spaceMd
 
                         GlyphIcon {
                             icon: "hub"
                             color: Theme.line
+                            size: Theme.sizeLarge
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
-                        GlyphText {
-                            text: "Ship log"
-                            role: "title"
+                        Column {
+                            spacing: 2
                             anchors.verticalCenter: parent.verticalCenter
-                        }
 
-                        GlyphText {
-                            text: `${Services.ShipLog.entries.length} signals · ${Services.ShipLog.unreadCount} unread` + (Services.ShipLog.rumorCount > 0 ? ` · ${Services.ShipLog.rumorCount} rumors` : "")
-                            role: "label"
-                            dim: true
-                            anchors.verticalCenter: parent.verticalCenter
+                            GlyphText {
+                                text: "Ship log"
+                                role: "title"
+                            }
+
+                            GlyphText {
+                                text: `${Services.ShipLog.entries.length} signals · ${Services.ShipLog.unreadCount} unread` + (Services.ShipLog.rumorCount > 0 ? ` · ${Services.ShipLog.rumorCount} rumors` : "")
+                                role: "label"
+                                dim: true
+                            }
                         }
                     }
 
@@ -263,7 +269,7 @@ Item {
                         anchors.right: topRight.left
                         anchors.rightMargin: Theme.spaceMd
                         anchors.verticalCenter: parent.verticalCenter
-                        implicitWidth: 300
+                        implicitWidth: 380
                         icon: "search"
                         placeholder: "Search signals  ( / )"
                         onAccepted: root.forceActiveFocus()
@@ -283,14 +289,19 @@ Item {
 
                         HexButton {
                             icon: "done_all"
-                            text: "Mark all read"
+                            shape: "hex"
+                            padding: Theme.spaceMd
+                            tooltip: "Mark all read"
                             enabled: Services.ShipLog.unreadCount > 0 || Services.ShipLog.rumorCount > 0
                             onClicked: Services.ShipLog.markAllRead()
                         }
 
                         HexButton {
                             icon: "close"
+                            shape: "hex"
                             flat: true
+                            padding: Theme.spaceMd
+                            tooltip: "Close"
                             onClicked: root.visibilities?.closeAll()
                         }
                     }
@@ -410,7 +421,7 @@ Item {
 
                     ShipLogDetail {
                         id: detail
-                        width: 340
+                        width: 420
                         height: parent.height
                         entry: root.selectedEntryObj
                         group: root.selectedGroupObj

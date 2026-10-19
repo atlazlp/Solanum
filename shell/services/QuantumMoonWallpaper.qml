@@ -68,9 +68,23 @@ Singleton {
         if (!s.length)
             return false;
         if (s.startsWith("missing:") || s.startsWith("no-mpvpaper") || s.startsWith("lfs-pointer:")
-                || s === "no-monitor" || s.startsWith("mpvpaper-exit:"))
+                || s === "no-monitor" || s.startsWith("mpvpaper-exit:")
+                || s.startsWith("no-godot") || s.startsWith("godot-exit:")
+                || s.startsWith("missing:godot"))
+            return false;
+        if (s.startsWith("scene:"))
             return false;
         return true;
+    }
+
+    function centerUsesScene(): bool {
+        const s = root.videoState;
+        return s.startsWith("scene:");
+    }
+
+    // Centre monitor is covered by either mpvpaper video or the Godot scene.
+    function centerUsesLiveWallpaper(): bool {
+        return root.centerUsesVideo() || root.centerUsesScene();
     }
 
     function slotPathForScreen(screenName: string): string {
@@ -84,7 +98,7 @@ Singleton {
         const path = root.slotPathForScreen(screenName);
         if (!path.length)
             return false;
-        if (root.centerUsesVideo() && screenName === root.centerScreenName())
+        if (root.centerUsesLiveWallpaper() && screenName === root.centerScreenName())
             return false;
         return true;
     }

@@ -9,18 +9,19 @@ Singleton {
     id: root
 
     readonly property string home: Quickshell.env("HOME")
-    readonly property string config: (Quickshell.env("XDG_CONFIG_HOME") || `${home}/.config`) + "/quantum-moon"
-    readonly property string state: (Quickshell.env("XDG_STATE_HOME") || `${home}/.local/state`) + "/quantum-moon"
-    readonly property string cache: (Quickshell.env("XDG_CACHE_HOME") || `${home}/.cache`) + "/quantum-moon"
-    readonly property string data: (Quickshell.env("XDG_DATA_HOME") || `${home}/.local/share`) + "/quantum-moon"
+    readonly property string config: (Quickshell.env("XDG_CONFIG_HOME") || `${home}/.config`) + "/solanum"
+    readonly property string state: (Quickshell.env("XDG_STATE_HOME") || `${home}/.local/state`) + "/solanum"
+    readonly property string cache: (Quickshell.env("XDG_CACHE_HOME") || `${home}/.cache`) + "/solanum"
+    readonly property string data: (Quickshell.env("XDG_DATA_HOME") || `${home}/.local/share`) + "/solanum"
     readonly property string scripts: `${config}/scripts`
     readonly property string shellDir: Quickshell.shellDir
     readonly property string assets: `${shellDir}/assets`
 
-    // Root of the quantum-moon engine (modes/, palettes/, scripts/). Read from
-    // `~/.config/quantum-moon/root`; falls back to QM_ROOT env, then ~/Projects/Quantum-Moon/quantum-moon.
-    property string qmRoot: Quickshell.env("QM_ROOT") || `${home}/Projects/Quantum-Moon/quantum-moon`
+    // Root of the solanum engine (modes/, palettes/, scripts/). Read from
+    // `~/.config/solanum/root`; falls back to QM_ROOT env, then ~/Projects/Quantum-Moon/solanum.
+    property string qmRoot: Quickshell.env("QM_ROOT") || `${home}/Projects/Quantum-Moon/solanum`
     readonly property string modes: `${qmRoot}/modes`
+    readonly property string scene: `${qmRoot}/scene`
 
     readonly property string shellConfig: `${config}/shell.json`
     readonly property string scheme: `${state}/scheme.json`

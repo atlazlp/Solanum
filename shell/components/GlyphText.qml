@@ -1,13 +1,24 @@
 import QtQuick
 import qs.theme
 
-// Text with a typographic role. role: label | small | body | large | title | display | mono
+// Text with a typographic role.
+// title/display → Avant Garde · label/large → Serif Gothic · body/small/mono → Space Mono
 Text {
     id: root
 
     property string role: "body"
     property bool dim: false
     property bool animate: false
+    property bool filterHidden: false
+
+    states: State {
+        name: "filtered"
+        when: root.filterHidden
+        PropertyChanges {
+            root.visible: false
+            root.height: 0
+        }
+    }
 
     readonly property real roleSize: {
         switch (role) {
@@ -21,9 +32,22 @@ Text {
         }
     }
 
+    readonly property string roleFamily: {
+        switch (role) {
+        case "display":
+        case "title":
+            return Theme.fontDisplay;
+        case "label":
+        case "large":
+            return Theme.fontSubtitle;
+        default:
+            return Theme.fontBody;
+        }
+    }
+
     color: dim ? Theme.textDim : Theme.text
     font.pointSize: roleSize
-    font.family: role === "display" || role === "title" ? Theme.fontDisplay : (role === "mono" ? Theme.fontMono : Theme.fontBody)
+    font.family: roleFamily
     font.weight: role === "title" || role === "display" ? Font.DemiBold : Font.Normal
     font.letterSpacing: role === "label" ? Theme.letterSpacingHeader : (role === "display" ? 1 : 0)
     font.capitalization: role === "label" ? Font.AllUppercase : Font.MixedCase

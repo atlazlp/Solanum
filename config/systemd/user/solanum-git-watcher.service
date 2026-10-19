@@ -1,0 +1,16 @@
+[Unit]
+Description=Quantum Moon GitWatcher (Azure DevOps PR poller feeding the bar)
+PartOf=graphical-session.target
+After=graphical-session.target network-online.target
+ConditionPathExists=%h/.config/solanum/git-watcher.json
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.config/quickshell/solanum/services/git-watcher/git-watcher.py
+Environment=QM_SHELL_IPC="qs -c solanum ipc call"
+Slice=session.slice
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

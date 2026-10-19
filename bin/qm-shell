@@ -6,7 +6,7 @@
 set -euo pipefail
 if [[ $# -eq 0 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//'
-  echo "Targets: $(command -v qs >/dev/null && qs -c quantum-moon ipc show 2>/dev/null | grep -E '^target' | awk '{print $2}' | tr '\n' ' ')"
+  echo "Targets: $(command -v qs >/dev/null && qs -c solanum ipc show 2>/dev/null | grep -E '^target' | awk '{print $2}' | tr '\n' ' ')"
   exit 0
 fi
-exec qs -c quantum-moon ipc call "$@"
+exec qs -c solanum ipc call "$@"

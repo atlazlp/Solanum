@@ -18,12 +18,12 @@ done
 
 notify() { # level title msg
   if command -v qm-toast >/dev/null 2>&1; then qm-toast "$1" "$2" "${3:-}" "videocam" || true
-  elif command -v notify-send >/dev/null 2>&1; then notify-send -a quantum-moon "$2" "${3:-}" || true; fi
+  elif command -v notify-send >/dev/null 2>&1; then notify-send -a solanum "$2" "${3:-}" || true; fi
 }
 
 runtime="${XDG_RUNTIME_DIR:-/tmp}"
-pidfile="$runtime/quantum-moon-record.pid"
-pathfile="$runtime/quantum-moon-record.path"
+pidfile="$runtime/solanum-record.pid"
+pathfile="$runtime/solanum-record.path"
 
 if [[ -f "$pidfile" ]]; then
   pid="$(cat "$pidfile" 2>/dev/null || true)"

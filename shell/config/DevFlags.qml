@@ -2,7 +2,7 @@ pragma Singleton
 
 import Quickshell
 
-// Development flags. `QM_SHELL_DEV=1 qs -c quantum-moon` runs the shell side by side
+// Development flags. `QM_SHELL_DEV=1 qs -c solanum` runs the shell side by side
 // with another shell: nothing exclusive (notification server, session lock, idle
 // monitors) is claimed and the bar does not reserve an exclusive zone.
 Singleton {

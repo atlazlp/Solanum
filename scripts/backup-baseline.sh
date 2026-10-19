@@ -2,7 +2,7 @@
 # Archive the live desktop state (configs, state, units, package lists, hyprctl dumps)
 # plus a git bundle of this repo. Used before every destructive migration step.
 #   backup-baseline.sh [--tag NAME] [--out DIR]
-# Default output: /mnt/Backup/quantum-moon-baseline/<stamp>[-NAME]/ if /mnt/Backup is
+# Default output: /mnt/Backup/solanum-baseline/<stamp>[-NAME]/ if /mnt/Backup is
 # mounted, else <repo>/backup/.
 set -euo pipefail
 
@@ -16,7 +16,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 if [[ -z "$OUT_ROOT" ]]; then
-  if mountpoint -q /mnt/Backup 2>/dev/null || [[ -d /mnt/Backup ]]; then OUT_ROOT=/mnt/Backup/quantum-moon-baseline; else OUT_ROOT="$ROOT/backup"; fi
+  if mountpoint -q /mnt/Backup 2>/dev/null || [[ -d /mnt/Backup ]]; then OUT_ROOT=/mnt/Backup/solanum-baseline; else OUT_ROOT="$ROOT/backup"; fi
 fi
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT="$OUT_ROOT/$STAMP$TAG"
@@ -30,7 +30,7 @@ copy() { # copy <src> <dst-subdir>
   cp -aL --parents "$src" "$dst" 2>/dev/null || cp -a "$src" "$dst" 2>/dev/null || true
 }
 
-for d in caelestia quickshell quantum-moon kitty qt6ct qt5ct gtk-3.0 gtk-4.0 systemd/user autostart uwsm mimeapps.list; do
+for d in caelestia quickshell solanum kitty qt6ct qt5ct gtk-3.0 gtk-4.0 systemd/user autostart uwsm mimeapps.list; do
   copy "$HOME/.config/$d" config
 done
 # resolved hypr tree (today a symlink into the caelestia checkout)
@@ -39,9 +39,9 @@ if [[ -e "$HOME/.config/hypr" ]]; then
   cp -aL "$HOME/.config/hypr/." "$OUT/config/hypr-resolved/" 2>/dev/null || true
   readlink -f "$HOME/.config/hypr" > "$OUT/config/hypr-symlink-target.txt" || true
 fi
-for d in caelestia quantum-moon; do copy "$HOME/.local/state/$d" state; done
+for d in caelestia solanum; do copy "$HOME/.local/state/$d" state; done
 copy "$HOME/.local/share/caelestia/launcher-icons" share
-copy "$HOME/.local/share/quantum-moon" share
+copy "$HOME/.local/share/solanum" share
 copy "$HOME/.local/share/color-schemes" share
 [[ -f "$HOME/.local/share/caelestia/caelestia-meta-r183.cf94e7f-1-any.pkg.tar.zst" ]] && cp -a "$HOME/.local/share/caelestia/"caelestia-meta-*.pkg.tar.zst "$OUT/share/" || true
 for f in /etc/sddm.conf /etc/sddm.conf.d /etc/keyd /etc/modprobe.d /etc/pacman.d/hooks /etc/systemd/system/middle-mouse-debounce.service /etc/systemd/system/middle-mouse-debounce.service.d; do
@@ -60,7 +60,7 @@ if command -v hyprctl >/dev/null && [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]];
   hyprctl globalshortcuts > "$OUT/dumps/hyprctl-globalshortcuts.txt" 2>/dev/null || true
   hyprctl version > "$OUT/dumps/hyprctl-version.txt" 2>/dev/null || true
 fi
-for c in caelestia quantum-moon; do qs -c "$c" ipc show > "$OUT/dumps/qs-$c-ipc.txt" 2>/dev/null || true; done
+for c in caelestia solanum; do qs -c "$c" ipc show > "$OUT/dumps/qs-$c-ipc.txt" 2>/dev/null || true; done
 xdg-mime query default inode/directory > "$OUT/dumps/mime-inode-directory.txt" 2>/dev/null || true
 
 {

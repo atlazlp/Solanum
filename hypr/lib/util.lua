@@ -5,7 +5,7 @@ local U = {}
 U.HOME = os.getenv("HOME") or "/root"
 U.RT = os.getenv("XDG_RUNTIME_DIR") or "/tmp"
 U.CFG = os.getenv("XDG_CONFIG_HOME") or (U.HOME .. "/.config")
-U.STATE = (os.getenv("XDG_STATE_HOME") or (U.HOME .. "/.local/state")) .. "/quantum-moon"
+U.STATE = (os.getenv("XDG_STATE_HOME") or (U.HOME .. "/.local/state")) .. "/solanum"
 U.BIN = U.HOME .. "/.local/bin"
 
 -- Directory this config lives in (the repo's hypr/ or ~/.config/hypr when symlinked).
@@ -49,11 +49,11 @@ end
 function U.touch(path) return U.write(path, "") end
 function U.rm(path) os.remove(path) end
 
--- Quantum Moon engine root: ~/.config/caelestia/quantum-moon-root (Phase 1) or ~/.config/quantum-moon/root,
--- else derived from the config dir (<repo>/hypr -> <repo>/quantum-moon).
+-- Quantum Moon engine root: ~/.config/caelestia/quantum-moon-root (Phase 1) or ~/.config/solanum/root,
+-- else derived from the config dir (<repo>/hypr -> <repo>/solanum).
 U.QM_ROOT = U.read_line(U.CFG .. "/caelestia/quantum-moon-root")
-  or U.read_line(U.CFG .. "/quantum-moon/root")
-  or ((U.CFG_DIR:match("^(.*)/[^/]+$") or (U.HOME .. "/Projects/Quantum-Moon")) .. "/quantum-moon")
+  or U.read_line(U.CFG .. "/solanum/root")
+  or ((U.CFG_DIR:match("^(.*)/[^/]+$") or (U.HOME .. "/Projects/Quantum-Moon")) .. "/solanum")
 U.REPO = U.QM_ROOT:match("^(.*)/[^/]+$") or U.QM_ROOT
 U.QM_SCRIPTS = U.QM_ROOT .. "/scripts"
 

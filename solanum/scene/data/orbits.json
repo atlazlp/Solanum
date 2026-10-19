@@ -1,0 +1,281 @@
+{
+  "units": "Outer Wilds game meters (Unity world units). Scale freely for Godot; keep ratios.",
+  "sources": [
+    "User-measured orbits-per-22-minute-loop (preferred for angular speed)",
+    "Community datamine of in-game AstroObject / orbit fields (r/outerwilds almanac + code measurements)",
+    "Ship map screenshot: reference/ship-map-solar-system.png",
+    "https://outerwilds.fandom.com/wiki/Solar_System"
+  ],
+  "notes": [
+    "Layout radii/sizes: prefer Unity SolarSystem sockets + DistantProxy local offsets (TimberHearth_Socket z=-8593, BrittleHollow -11691, GiantsDeep -16458, DarkBramble -20000, Comet_Socket -24000 snapshot; twins \u00b1250 about HourglassCenter; Attlerock Proxy_THM z\u2248900 under Moon_Pivot in TimberHearth_DistantProxy; Hollow's Lantern under VolcanicMoon_Pivot in BrittleHollow_DistantProxy). Kaydara proxies/*.fbx are NOT the mesh source. orbits.json semiMajorAxis for circular planets should match those Unity sockets; HGT barycenter 5000m is the designed heliocentric SMA (ship-map AU=1) \u2014 scene snapshot placement of HourglassTwins is not authoritative. Interloper ellipse params remain datamine approximations (socket is a snapshot).",
+    "Wallpaper does NOT run the 22-minute apocalypse: sun size stays fixed, Interloper is never swallowed, orbits loop forever.",
+    "Use orbits_per_22min only to set relative angular speeds (period ratios). Optionally time-scale the whole system for aesthetics.",
+    "Omit The Stranger and the three Hearthian/deep-space satellites per project scope.",
+    "Sun Station / OPC / White Hole Station are optional flavor; proxies exist if wanted later.",
+    "semiMajorAxis values stay in game meters; period_seconds_wallpaper_ref is derived from user orbit counts."
+  ],
+  "loop_timing": {
+    "reference_loop_minutes": 22,
+    "reference_loop_seconds": 1320,
+    "wallpaper_behaviour": {
+      "sun_grows": false,
+      "interloper_swallowed": false,
+      "orbits_loop_forever": true
+    },
+    "orbits_per_22min": {
+      "hourglass_twins": 11.75,
+      "timber_hearth": 5.25,
+      "brittle_hollow": 3.25,
+      "giants_deep": 2.0,
+      "dark_bramble": 1.5,
+      "interloper": 2.5
+    },
+    "period_seconds_from_user_counts": {
+      "comment": "period = 1320 / orbits_per_22min",
+      "hourglass_twins": 112.34042553191489,
+      "timber_hearth": 251.42857142857142,
+      "brittle_hollow": 406.15384615384613,
+      "giants_deep": 660.0,
+      "dark_bramble": 880.0,
+      "interloper": 528.0
+    },
+    "angular_speed_relative_to_timber_hearth": {
+      "comment": "omega_body / omega_TH = orbits_body / orbits_TH",
+      "hourglass_twins": 2.238095238095238,
+      "timber_hearth": 1.0,
+      "brittle_hollow": 0.6190476190476191,
+      "giants_deep": 0.38095238095238093,
+      "dark_bramble": 0.2857142857142857,
+      "interloper": 0.47619047619047616
+    }
+  },
+  "gravitationalConstant_game": 0.001,
+  "bodies": {
+    "sun": {
+      "id": "SUN",
+      "primary": null,
+      "orbit": null,
+      "mesh_hint": "extracted/sun/GeodesicSphere12k_sphereUV.obj (sunSphere.obj is a stub)",
+      "mesh_gltf": "assets/gltf/SunProxy.glb",
+      "proxy_fbx_deprecated": null
+    },
+    "hourglass_twins_barycenter": {
+      "id": "HGT_BARYCENTER",
+      "primary": "SUN",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 5000.0,
+        "period_seconds_game_datamine": 111.07,
+        "period_seconds_wallpaper_ref": 112.34042553191489,
+        "orbits_per_22min": 11.75,
+        "inclination_deg": 0
+      },
+      "notes": "Virtual node. Ash Twin + Ember Twin orbit this point. Prefer period_seconds_wallpaper_ref / orbits_per_22min for speed."
+    },
+    "ash_twin": {
+      "id": "TOWER_TWIN",
+      "display": "Ash Twin",
+      "primary": "HGT_BARYCENTER",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 250.0,
+        "period_seconds_game": 55.53,
+        "phase_offset_deg": 0
+      },
+      "notes": "Binary pair with Ember Twin; 180\u00b0 apart on 250m circle around barycenter.",
+      "mesh_gltf": "assets/gltf/AshTwin_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_HGT.fbx"
+    },
+    "ember_twin": {
+      "id": "CAVE_TWIN",
+      "display": "Ember Twin",
+      "primary": "HGT_BARYCENTER",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 250.0,
+        "period_seconds_game": 55.53,
+        "phase_offset_deg": 180
+      },
+      "notes": "Same FBX as Ash Twin contains both; split/instance in Godot.",
+      "mesh_gltf": "assets/gltf/EmberTwin_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_HGT.fbx"
+    },
+    "timber_hearth": {
+      "id": "TIMBER_HEARTH",
+      "display": "Timber Hearth",
+      "primary": "SUN",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 8593.09,
+        "period_seconds_game_datamine": 250.25,
+        "period_seconds_wallpaper_ref": 251.42857142857142,
+        "orbits_per_22min": 5.25,
+        "inclination_deg": 0
+      },
+      "rotation_period_seconds_game": 628.32,
+      "mesh_gltf": "assets/gltf/TimberHearth_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_TH.fbx"
+    },
+    "attlerock": {
+      "id": "TIMBER_MOON",
+      "display": "Attlerock",
+      "primary": "TIMBER_HEARTH",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 900.0,
+        "period_seconds_game": 103.24
+      },
+      "mesh_gltf": "embedded:TimberHearth_DistantProxy/Moon_Pivot/Proxy_THM",
+      "proxy_fbx_deprecated": "proxies/Proxy_THM.fbx"
+    },
+    "brittle_hollow": {
+      "id": "BRITTLE_HOLLOW",
+      "display": "Brittle Hollow",
+      "primary": "SUN",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 11690.89,
+        "period_seconds_game_datamine": 397.13,
+        "period_seconds_wallpaper_ref": 406.15384615384613,
+        "orbits_per_22min": 3.25
+      },
+      "rotation_period_seconds_game": 314.16,
+      "mesh_gltf": "assets/gltf/BrittleHollow_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_BH.fbx"
+    },
+    "hollows_lantern": {
+      "id": "VOLCANIC_MOON",
+      "display": "Hollow's Lantern",
+      "primary": "BRITTLE_HOLLOW",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 1000.0,
+        "period_seconds_game": 114.71
+      },
+      "mesh_gltf": "embedded:BrittleHollow_DistantProxy/VolcanicMoon_Pivot",
+      "proxy_fbx_deprecated": "proxies/Proxy_VM.fbx"
+    },
+    "giants_deep": {
+      "id": "GIANTS_DEEP",
+      "display": "Giant's Deep",
+      "primary": "SUN",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 16457.59,
+        "period_seconds_game_datamine": 663.27,
+        "period_seconds_wallpaper_ref": 660.0,
+        "orbits_per_22min": 2.0
+      },
+      "notes": "Largest visual planet on the ship map.",
+      "mesh_gltf": "assets/gltf/GiantsDeep_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_GD.fbx"
+    },
+    "dark_bramble": {
+      "id": "DARK_BRAMBLE",
+      "display": "Dark Bramble",
+      "primary": "SUN",
+      "orbit": {
+        "type": "circular",
+        "semiMajorAxis": 20000.0,
+        "period_seconds_game_datamine": 888.63,
+        "period_seconds_wallpaper_ref": 880.0,
+        "orbits_per_22min": 1.5
+      },
+      "mesh_gltf": "assets/gltf/DarkBramble_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_DB.fbx"
+    },
+    "interloper": {
+      "id": "COMET",
+      "display": "The Interloper",
+      "primary": "SUN",
+      "orbit": {
+        "type": "elliptical",
+        "semiMajorAxis": 13550.0,
+        "focalDistance": 10550.0,
+        "eccentricity": 0.779,
+        "period_seconds_game_datamine": 478.85,
+        "period_seconds_wallpaper_ref": 528.0,
+        "orbits_per_22min": 2.5,
+        "notes": "In-game it gets swallowed before/around loop end; wallpaper keeps it orbiting forever at this mean period. Wallpaper perihelion raised above solid sun (~3000); Unity peri was ~2400. Aphelion kept ~24100."
+      },
+      "mesh_gltf": "assets/gltf/Comet_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_CO.fbx"
+    },
+    "quantum_moon": {
+      "id": "QUANTUM_MOON",
+      "display": "Quantum Moon",
+      "primary": "DYNAMIC",
+      "orbit": {
+        "type": "circular_around_host",
+        "hosts": {
+          "ember_twin": 1100.0,
+          "ash_twin": 1100.0,
+          "hourglass_twins": 1100.0,
+          "timber_hearth": 1100.0,
+          "brittle_hollow": 1400.0,
+          "giants_deep": 1500.0,
+          "dark_bramble": 1500.0
+        },
+        "notes": "Reparent to current host; radius from table. Wallpaper: drive host from Solanum/desktop planet state via IPC."
+      },
+      "mesh_gltf": "assets/gltf/QuantumMoon_DistantProxy.glb",
+      "proxy_fbx_deprecated": "proxies/Proxy_QM.fbx"
+    }
+  },
+  "ship_map_relative_au": {
+    "description": "Unitless ratios from ship-map screenshot (sun\u2192HGT \u2248 1). Use only if you prefer map look over game meters; game meters above are preferred.",
+    "sun_to_hourglass_twins": 1.0,
+    "sun_to_timber_hearth": 1.72,
+    "sun_to_brittle_hollow": 2.34,
+    "sun_to_giants_deep": 3.29,
+    "sun_to_dark_bramble": 4.0,
+    "check_against_game_meters": {
+      "HGT": "5000/5000=1.00",
+      "TH": "8593/5000=1.72",
+      "BH": "11691/5000=2.34",
+      "GD": "16458/5000=3.29",
+      "DB": "20000/5000=4.00"
+    }
+  },
+  "excluded": [
+    "RINGWORLD (The Stranger)",
+    "MapSatellite",
+    "Hearthian Satellite",
+    "Deep Space Satellite"
+  ],
+  "optional_flavor": {
+    "sun_station": {
+      "semiMajorAxis": 3400.0,
+      "period_seconds_game": 51.2,
+      "unity_semiMajorAxis": 2296.0,
+      "notes": "Wallpaper SMA outside solid sun corona (~3000); Unity map SMA was 2296 inside transparent atmo.",
+      "proxy_fbx": "proxies/Proxy_SS.fbx"
+    },
+    "orbital_probe_cannon": {
+      "primary": "GIANTS_DEEP",
+      "period_seconds_game": 51.09,
+      "wallpaper_period_scale": 3.5,
+      "proxy_fbx": "proxies/Proxy_OPC.fbx"
+    },
+    "white_hole": {
+      "position": [-23000.0, 0.0, 0.0],
+      "notes": "Singularity only for wallpaper; station omitted."
+    }
+  },
+  "mesh_source": {
+    "kind": "unity_distant_proxy_gltf",
+    "path": "assets/gltf/",
+    "scale_note": "Most DistantProxy/SunProxy glTFs are 100\u00d7 game metres; MeshLoader uses 0.01. QuantumMoon_DistantProxy stays ~1.0. Attlerock is embedded in TimberHearth_DistantProxy \u2014 do not use empty TheAttlerock.glb.",
+    "bodies": {
+      "sun": "SunProxy.glb",
+      "timber_hearth": "TimberHearth_DistantProxy.glb (includes Attlerock)",
+      "ash_twin": "AshTwin_DistantProxy.glb",
+      "ember_twin": "EmberTwin_DistantProxy.glb",
+      "brittle_hollow": "BrittleHollow_DistantProxy.glb (includes Hollow's Lantern)",
+      "giants_deep": "GiantsDeep_DistantProxy.glb",
+      "dark_bramble": "DarkBramble_DistantProxy.glb",
+      "interloper": "Comet_DistantProxy.glb",
+      "quantum_moon": "QuantumMoon_DistantProxy.glb"
+    }
+  }
+}

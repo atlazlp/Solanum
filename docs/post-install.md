@@ -41,25 +41,35 @@ Personal overrides go in `hypr/local.lua` (gitignored): keyboard layout, `follow
 
 `hypr/monitors.lua` declares the three outputs. `features/hotplug.lua` handles DP-2 going away: the remaining monitors are packed left to right, the rightmost becomes the shell's main screen (bar, notifications, Quantum Moon panel, full lock UI) and the wallpapers are re-placed. Plugging DP-2 back restores the defaults.
 
-The shell's per-screen module matrix lives in `~/.config/quantum-moon/shell.json` under `screens.roles` and `modules` (see `config/quantum-moon/shell.json.schema.md`). With one or two monitors set `roles.main` to the output you have; the engine assigns wallpaper slots by x position (`slot-0`, `slot-1`, `slot-2`), the centre slot gets the video when there are at least two outputs.
+The shell's per-screen module matrix lives in `~/.config/solanum/shell.json` under `screens.roles` and `modules` (see `config/solanum/shell.json.schema.md`). With one or two monitors set `roles.main` to the output you have; the engine assigns wallpaper slots by x position (`slot-0`, `slot-1`, `slot-2`), the centre slot gets the video when there are at least two outputs.
 
 ## Planets
 
-`qm-apply <slug>` (brittle-hollow, dark-bramble, giants-deep, hourglass-twins, timber-hearth, eye-of-the-universe), `qm-random`, or the panel. Each mode has `palette.json`, `meta.json` (display name, `nightTemperature`), `logo.png`, `wallpapers/slot-{0,1,2}.png` and an optional `center.mp4`. The engine writes `~/.local/state/quantum-moon/scheme.json` (the shell theme), `scheme.lua` (Hyprland colours and night light, applied through `hyprctl reload`), kitty colours (live), GTK3/4 and libadwaita CSS, a KDE colour scheme and a qt6ct palette.
+`qm-apply <slug>` (brittle-hollow, dark-bramble, giants-deep, hourglass-twins, timber-hearth, eye-of-the-universe), `qm-random`, or the panel. Each mode has `palette.json`, `meta.json` (display name, `nightTemperature`), `logo.png`, `wallpapers/slot-{0,1,2}.png` and an optional `center.mp4`. The engine writes `~/.local/state/solanum/scheme.json` (the shell theme), `scheme.lua` (Hyprland colours and night light, applied through `hyprctl reload`), kitty colours (live), GTK3/4 and libadwaita CSS, a KDE colour scheme, a qt6ct palette, and a pywal-shaped `~/.cache/wal/colors.json` for Firefox.
+
+### Firefox (Pywalfox)
+
+Firefox cannot be re-themed from outside without an add-on. One-time setup:
+
+1. Install [Pywalfox](https://addons.mozilla.org/firefox/addon/pywalfox/) in Firefox.
+2. Restart Firefox (Solanum installs a native-messaging host on the next `qm-apply`, or run `solanum/scripts/qm-pywalfox-host install` once).
+3. Open the Pywalfox toolbar icon and click **Fetch Pywal colors** once.
+
+After that, every planet change rewrites `~/.cache/wal/colors.json` and tells Pywalfox to refresh (Firefox must be running). If you already use the upstream `pywalfox` package host, Solanum leaves that manifest alone and still writes the wal palette + `pywalfox update`.
 
 The scout lock (top-right of the panel) pins the planet: idle shuffles, pre-lock and pre-sleep shuffles are skipped while locked.
 
 ## Night light
 
-`hyprsunset` runs as a user unit; `features/night.lua` applies the planet's temperature from 19:00 to 07:00 and identity otherwise. The utilities card has a slider and toggle (`qm-shell nightlight toggle|set <K>`), which writes `~/.local/state/quantum-moon/nightlight.json` as an override.
+`hyprsunset` runs as a user unit; `features/night.lua` applies the planet's temperature from 19:00 to 07:00 and identity otherwise. The utilities card has a slider and toggle (`qm-shell nightlight toggle|set <K>`), which writes `~/.local/state/solanum/nightlight.json` as an override.
 
 ## VPN
 
-`~/.config/quantum-moon/vpn.json`: `{ "enabled": true, "connectionName": "<nmcli name>", "displayName": "..." }`. The bar glyph shows the state, click toggles `nmcli connection up|down`. Game mode disconnects it when `gameMode.autoVpnOff` is true.
+`~/.config/solanum/vpn.json`: `{ "enabled": true, "connectionName": "<nmcli name>", "displayName": "..." }`. The bar glyph shows the state, click toggles `nmcli connection up|down`. Game mode disconnects it when `gameMode.autoVpnOff` is true.
 
 ## PR watcher (Azure DevOps)
 
-`~/.config/quantum-moon/git-watcher.json` (mode 600, holds the PAT). The `quantum-moon-git-watcher` unit runs the daemon; the bar glyph turns ember when a PR is overdue or you are mentioned, the popout lists the feed and the archive, and the config modal edits the file and reloads the daemon (SIGHUP). Discord-first mode holds new-PR alerts until the link is posted in a watched channel.
+`~/.config/solanum/git-watcher.json` (mode 600, holds the PAT). The `solanum-git-watcher` unit runs the daemon; the bar glyph turns ember when a PR is overdue or you are mentioned, the popout lists the feed and the archive, and the config modal edits the file and reloads the daemon (SIGHUP). Discord-first mode holds new-PR alerts until the link is posted in a watched channel.
 
 ## Updates
 
@@ -67,16 +77,16 @@ The bar shows a glyph with the count from `checkupdates` + `yay -Qua` (every 30 
 
 ## Backups
 
-`qm-backup init` once, then the `quantum-moon-backup.timer` runs `qm-backup run` daily at 03:30 (only when `/mnt/Backup` is mounted). Excludes are in `~/.config/quantum-moon/backup-patterns.txt`. `qm-backup list|mount <dir>|check|prune`. After every pacman transaction the hook writes package lists to `/var/lib/quantum-moon/`, which the backup includes.
+`qm-backup init` once, then the `solanum-backup.timer` runs `qm-backup run` daily at 03:30 (only when `/mnt/Backup` is mounted). Excludes are in `~/.config/solanum/backup-patterns.txt`. `qm-backup list|mount <dir>|check|prune`. After every pacman transaction the hook writes package lists to `/var/lib/solanum/`, which the backup includes.
 
 ## Services and KVM panels
 
-`~/.config/quantum-moon/services.json` points the Docker/Ollama/Open WebUI panel at your control script and URLs, and the KVM panel at the lan-mouse launch and clipboard-sync scripts. Both panels replace the earlier Python tray icons; the `lan-mouse` and `llm-tray` units still start the daemons.
+`~/.config/solanum/services.json` points the Docker/Ollama/Open WebUI panel at your control script and URLs, and the KVM panel at the lan-mouse launch and clipboard-sync scripts. Both panels replace the earlier Python tray icons; the `lan-mouse` and `llm-tray` units still start the daemons.
 
 ## Game mode
 
-Hyprland Lua detects a visible or fullscreen `steam_app_*` / gamescope / `content_type = game` window: it writes `$XDG_RUNTIME_DIR/quantum-moon-game-mode.active`, pauses the wallpaper video over mpv IPC and tells the shell, which hides hover drawers and shows a glyph with an exit button. Leaving the game reverses it.
+Hyprland Lua detects a visible or fullscreen `steam_app_*` / gamescope / `content_type = game` window: it writes `$XDG_RUNTIME_DIR/solanum-game-mode.active`, pauses the wallpaper video over mpv IPC and tells the shell, which hides hover drawers and shows a glyph with an exit button. Leaving the game reverses it.
 
 ## Lock and idle
 
-The shell locks after 30 minutes idle and suspends after 35 (`general.idle` in `shell.json`), never while audio plays (`quantum-moon-audio-inhibit`). Unlocked and idle, the planet shuffles before the lock. `locked-sleep-after.sh` suspends N seconds after a manual lock. Emergency: `Super+Ctrl+Alt+L` restarts the shell and re-locks; `hl.clear_crashed_lockscreen` is bound in the Lua config.
+The shell locks after 30 minutes idle and suspends after 35 (`general.idle` in `shell.json`), never while audio plays (`solanum-audio-inhibit`). Unlocked and idle, the planet shuffles before the lock. `locked-sleep-after.sh` suspends N seconds after a manual lock. Emergency: `Super+Ctrl+Alt+L` restarts the shell and re-locks; `hl.clear_crashed_lockscreen` is bound in the Lua config.

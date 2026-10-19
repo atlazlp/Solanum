@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Copy (never move) Caelestia-era state and config into the quantum-moon paths.
+# Copy (never move) Caelestia-era state and config into the solanum paths.
 #
 #   scripts/migrate-caelestia-state.sh [--dry-run] [--verify] [--force]
 #
 #   default    copy state files, launcher icons, secrets (mode 600), transform shell.json + monitors
-#              into ~/.config/quantum-moon/shell.json (or shell.json.migrated when one exists),
+#              into ~/.config/solanum/shell.json (or shell.json.migrated when one exists),
 #              rewrite the gtk.css import, rename the kitty colour file, write a marker file
 #   --verify   only check that every expected destination exists (exit 1 when something is missing)
 #   --force    overwrite destinations that already exist (default: keep them)
@@ -42,7 +42,7 @@ add "$C_CFG/bar-vpn.json"                     "$QM_CFG/vpn.json" 600
 add "$C_CFG/nautilus-sidebar-extra"           "$QM_CFG/nautilus-sidebar-extra"
 add "$C_CFG/nautilus-drive-icons"             "$QM_CFG/nautilus-drive-icons"
 for f in "$C_CFG"/generated/*.css; do [[ -e "$f" ]] && add "$f" "$QM_CFG/generated/$(basename "$f")"; done
-add "$CFG/kitty/colors-caelestia-qm.conf"     "$CFG/kitty/colors-quantum-moon.conf"
+add "$CFG/kitty/colors-caelestia-qm.conf"     "$CFG/kitty/colors-solanum.conf"
 add "$CFG/qt6ct/colors/CaelestiaQM.conf"      "$CFG/qt6ct/colors/QuantumMoon.conf"
 add "$SHARE/color-schemes/CaelestiaQM.colors" "$SHARE/color-schemes/QuantumMoon.colors"
 
@@ -98,10 +98,10 @@ if [[ -f "$C_CFG/shell.json" ]]; then
   if [[ -f "$dst" && "$FORCE" == "0" ]]; then dst="$QM_CFG/shell.json.migrated"; info "shell.json exists; writing $dst"; fi
   mon_json() { local f="$C_CFG/monitors/$1/shell.json"; if [[ -f "$f" ]]; then cat "$f"; else echo '{}'; fi; }
   out="$(jq -n \
-    --slurpfile tpl "$REPO/config/quantum-moon/shell.json.example" \
+    --slurpfile tpl "$REPO/config/solanum/shell.json.example" \
     --slurpfile old "$C_CFG/shell.json" \
     --argjson mon_main "$(mon_json "$QM_MAIN")" --argjson mon_left "$(mon_json "$QM_LEFT")" --argjson mon_right "$(mon_json "$QM_RIGHT")" \
-    --arg main "$QM_MAIN" --arg left "$QM_LEFT" --arg right "$QM_RIGHT" --arg root "$REPO/quantum-moon" '
+    --arg main "$QM_MAIN" --arg left "$QM_LEFT" --arg right "$QM_RIGHT" --arg root "$REPO/solanum" '
     def deepmerge(a; b): a as $a | b as $b |
       if ($a|type) == "object" and ($b|type) == "object" then
         reduce ($b|keys_unsorted[]) as $k ($a; .[$k] = deepmerge($a[$k]; $b[$k]))
@@ -159,13 +159,13 @@ g3="$CFG/gtk-3.0/gtk.css"
 if [[ -f "$g3" ]] && grep -q '\.\./caelestia/generated/' "$g3"; then
   log "rewriting gtk-3.0/gtk.css import"
   run cp -a "$g3" "$g3.bak.$STAMP"
-  run sed -i 's#\.\./caelestia/generated/#../quantum-moon/generated/#g' "$g3"
+  run sed -i 's#\.\./caelestia/generated/#../solanum/generated/#g' "$g3"
 fi
 g4="$CFG/gtk-4.0/gtk.css"
 if [[ -f "$g4" ]] && grep -q 'caelestia-nautilus-sidebar' "$g4"; then
   log "renaming the nautilus sidebar marker in gtk-4.0/gtk.css"
   run cp -a "$g4" "$g4.bak.$STAMP"
-  run sed -i 's/caelestia-nautilus-sidebar/quantum-moon-nautilus-sidebar/g' "$g4"
+  run sed -i 's/caelestia-nautilus-sidebar/solanum-nautilus-sidebar/g' "$g4"
 fi
 
 # ---------------------------------------------------------------- kitty
@@ -173,7 +173,7 @@ kc="$CFG/kitty/kitty.conf"
 if [[ -f "$kc" ]] && grep -q 'kitty-caelestia-qm.sock\|colors-caelestia-qm.conf' "$kc"; then
   log "rewriting kitty.conf socket/include names"
   run cp -a "$kc" "$kc.bak.$STAMP"
-  run sed -i -e 's#kitty-caelestia-qm.sock#kitty-quantum-moon.sock#g' -e 's#colors-caelestia-qm.conf#colors-quantum-moon.conf#g' "$kc"
+  run sed -i -e 's#kitty-caelestia-qm.sock#kitty-solanum.sock#g' -e 's#colors-caelestia-qm.conf#colors-solanum.conf#g' "$kc"
 fi
 
 # ---------------------------------------------------------------- marker

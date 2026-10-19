@@ -6,9 +6,8 @@ import qs.theme
 import qs.utils
 
 // Pannable ship-log map. App groups sit on two rings around the hub (inner ring = most recent);
-// selecting a group fans its entries out on an arc facing away from the hub. Edges: hub spokes,
-// aggregated cross-app links between groups, and (for the selected group) the chronological
-// chain through its fanned entries plus links from those entries to other groups.
+// selecting a group fans its entries out on an arc facing away from the hub. Edges: hub spokes
+// and (for the selected group) each fanned entry linked only to its parent group.
 Flickable {
     id: root
 
@@ -85,55 +84,20 @@ Flickable {
         const gp = layout.groupPos;
         const ep = layout.entryPos;
         const sel = selectedGroup;
-        const fannedIds = new Set(fanned.map(e => e.id));
-        // hub spokes
         for (const g of groups) {
             const p = gp[g.app];
             if (p)
                 out.push({ key: `spoke:${g.app}`, from: Qt.point(hubX, hubY), to: Qt.point(p.x, p.y), rumor: g.rumors === g.count, highlighted: g.app === sel, dimmed: !groupMatches(g) });
         }
-        // aggregated cross links between groups
-        const pairs = new Map();
-        for (const e of edges) {
-            if (e.kind !== "link")
-                continue;
-            const key = e.fromApp < e.toApp ? `${e.fromApp}|${e.toApp}` : `${e.toApp}|${e.fromApp}`;
-            const cur = pairs.get(key) ?? { a: e.fromApp, b: e.toApp, rumor: false };
-            cur.rumor = cur.rumor || e.rumor;
-            pairs.set(key, cur);
-        }
-        for (const [key, p] of pairs) {
-            const a = gp[p.a], b = gp[p.b];
-            if (!a || !b)
-                continue;
-            const ga = groups.find(g => g.app === p.a), gb = groups.find(g => g.app === p.b);
-            out.push({ key: `link:${key}`, from: Qt.point(a.x, a.y), to: Qt.point(b.x, b.y), rumor: p.rumor, highlighted: p.a === sel || p.b === sel, dimmed: !(ga && groupMatches(ga)) || !(gb && groupMatches(gb)) });
-        }
-        // chain through the fanned entries + entry-level links to other groups
         if (sel && fanned.length > 0) {
-            const asc = fanned.slice().sort((x, y) => x.ts - y.ts);
             const g = gp[sel];
-            let prev = g ? Qt.point(g.x, g.y) : null;
-            let prevE = null;
-            for (const e of asc) {
-                const p = ep[e.id];
-                if (!p)
-                    continue;
-                if (prev)
-                    out.push({ key: `chain:${e.id}`, from: prev, to: Qt.point(p.x, p.y), rumor: !!(e.rumor || prevE?.rumor), highlighted: true, dimmed: !matches(e) });
-                prev = Qt.point(p.x, p.y);
-                prevE = e;
-            }
-            for (const e of edges) {
-                if (e.kind !== "link")
-                    continue;
-                const mine = fannedIds.has(e.from) ? e.from : (fannedIds.has(e.to) ? e.to : "");
-                if (!mine)
-                    continue;
-                const otherApp = e.fromApp === sel ? e.toApp : e.fromApp;
-                const p = ep[mine], q = gp[otherApp];
-                if (p && q)
-                    out.push({ key: `elink:${e.from}:${e.to}`, from: Qt.point(p.x, p.y), to: Qt.point(q.x, q.y), rumor: e.rumor, highlighted: true, dimmed: false });
+            if (g) {
+                for (const e of fanned) {
+                    const p = ep[e.id];
+                    if (!p)
+                        continue;
+                    out.push({ key: `parent:${e.id}`, from: Qt.point(g.x, g.y), to: Qt.point(p.x, p.y), rumor: !!e.rumor, highlighted: true, dimmed: !matches(e) });
+                }
             }
         }
         return out;

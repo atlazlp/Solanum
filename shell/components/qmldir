@@ -26,3 +26,4 @@ ShipLogCanvas 1.0 ShipLogCanvas.qml
 NomaiTabs 1.0 NomaiTabs.qml
 NomaiCombo 1.0 NomaiCombo.qml
 NomaiNumber 1.0 NomaiNumber.qml
+NomaiColorWell 1.0 NomaiColorWell.qml

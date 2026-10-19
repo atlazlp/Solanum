@@ -4,7 +4,7 @@ Hyprland 0.55+ reads `~/.config/hypr/hyprland.lua` (a symlink to `hypr/` in this
 
 ## Structure
 
-`hyprland.lua` requires, in order: `lib/util` (the `QM` global: paths, helpers), `lib/shell` (how binds talk to the shell), `lib/scheme` (colours from `~/.local/state/quantum-moon/scheme.lua`), then `env`, `monitors`, `general`, `decoration`, `animations`, `input`, `group`, `workspaces`, `rules`, `binds/init`, every `features/*` module inside `pcall` (a broken feature only produces a notification), `autostart`, and finally `local.lua` if present. See `hypr/README.md` for the file-by-file map.
+`hyprland.lua` requires, in order: `lib/util` (the `QM` global: paths, helpers), `lib/shell` (how binds talk to the shell), `lib/scheme` (colours from `~/.local/state/solanum/scheme.lua`), then `env`, `monitors`, `general`, `decoration`, `animations`, `input`, `group`, `workspaces`, `rules`, `binds/init`, every `features/*` module inside `pcall` (a broken feature only produces a notification), `autostart`, and finally `local.lua` if present. See `hypr/README.md` for the file-by-file map.
 
 ## Rules that keep it working
 
