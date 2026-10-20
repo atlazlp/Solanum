@@ -1,6 +1,6 @@
 [Unit]
 Description=Quantum Moon Quickshell shell (qs -c solanum)
-Documentation=https://github.com/atlazlp/Quantum-Moon
+Documentation=https://github.com/atlazlp/Solanum
 PartOf=graphical-session.target
 After=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY

@@ -1,6 +1,6 @@
 # Solanum
 
-**[Solanum](https://github.com/atlazlp/Quantum-Moon)** (formerly Quantum Moon) is a standalone **Hyprland** desktop by **[atlazlp](https://github.com/atlazlp)**: an *Outer Wilds* homage with its own **Quickshell** shell (`solanum`), a native **Lua** Hyprland config, and a planet engine that re-themes the whole desktop (wallpapers, the centre-monitor video, Hyprland colours, GTK, Qt, kitty, Firefox via Pywalfox) every time Solanum moves.
+**[Solanum](https://github.com/atlazlp/Solanum)** (formerly Quantum Moon) is a standalone **Hyprland** desktop by **[atlazlp](https://github.com/atlazlp)**: an *Outer Wilds* homage with its own **Quickshell** shell (`solanum`), a native **Lua** Hyprland config, and a planet engine that re-themes the whole desktop (wallpapers, the centre-monitor video, Hyprland colours, GTK, Qt, kitty, Firefox via Pywalfox) every time Solanum moves.
 
 The visual language is Nomai: angular hexagons and chamfered frames, thin glowing lines in the planet's colour, ship-log node-and-edge layouts, quick glyph "write-in" reveals. No rounded pills, no jelly.
 
@@ -49,7 +49,7 @@ Use your **scout** to take a picture and **lock** the planet you are on. While l
 See **[docs/install.md](docs/install.md)**. Short version, on Arch / CachyOS:
 
 ```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/atlazlp/Quantum-Moon.git ~/Projects/Quantum-Moon
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/atlazlp/Solanum.git ~/Projects/Quantum-Moon
 cd ~/Projects/Quantum-Moon
 ./scripts/install.sh --dry-run --full      # read the plan
 ./scripts/install.sh --full                # user-level parts

@@ -11,7 +11,7 @@ Target: Arch Linux / CachyOS with Hyprland 0.56 or newer (the config is Lua; hyp
 ## 2. Clone
 
 ```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/atlazlp/Quantum-Moon.git ~/Projects/Quantum-Moon
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/atlazlp/Solanum.git ~/Projects/Quantum-Moon
 ```
 
 `GIT_LFS_SKIP_SMUDGE=1` skips the six centre-monitor videos (about 110 MB each). GitHub's free LFS bandwidth is 1 GB per month, so two fresh clones with videos exhaust it. Fetch them later with `qm-fetch-videos`; without them the centre monitor shows the static `slot-1.png`.
